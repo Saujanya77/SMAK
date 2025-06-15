@@ -97,18 +97,18 @@ const Index = () => {
 
   const galleryImages = [
     {
-      src: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop&crop=center",
-      title: "Medical Conference 2024",
+      src: "public/Images/IMG-20250613-WA0032.jpg",
+      title: "World Asthma Day",
       description: "Annual medical conference with leading experts"
     },
     {
-      src: "https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&h=400&fit=crop&crop=center",
-      title: "Research Presentation",
+      src: "public/Images/IMG-20250613-WA0033.jpg",
+      title: "World Asthma Day",
       description: "Students presenting their groundbreaking research"
     },
     {
-      src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&h=400&fit=crop&crop=center",
-      title: "Clinical Skills Workshop",
+      src: "public/Images/IMG-20250613-WA0034.jpg",
+      title: "World Asthma Day",
       description: "Hands-on training in advanced medical procedures"
     },
     {
