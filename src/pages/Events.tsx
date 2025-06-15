@@ -47,22 +47,22 @@ const Events = () => {
 
   const pastEvents = [
     {
-      title: "Global Health Symposium 2024",
+      title: "World Asthma Day",
       date: "November 15, 2024",
       attendees: "2,500+",
-      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=250&fit=crop&crop=center"
+      image: "public/Images/IMG-20250613-WA0032.jpg"
     },
     {
-      title: "AI in Healthcare Conference",
+      title: "World Asthma Day",
       date: "October 28, 2024",
       attendees: "1,800+",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=250&fit=crop&crop=center"
+      image: "public/Images/IMG-20250613-WA0033.jpg"
     },
     {
-      title: "Mental Health Awareness Week",
+      title: "World Asthma Day",
       date: "October 10-16, 2024",
       attendees: "3,200+",
-      image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&h=250&fit=crop&crop=center"
+      image: "public/Images/IMG-20250613-WA0034.jpg"
     }
   ];
 
