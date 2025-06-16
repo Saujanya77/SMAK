@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import { 
   ArrowLeft, 
   Plus, 
@@ -19,108 +20,258 @@ import {
   ChevronDown,
   Eye,
   Heart,
-  Download,
-  ExternalLink,
+  MessageCircle,
+  Share2,
+  Calendar,
+  Clock,
   Sun,
   Moon,
   X,
-  ZoomIn,
-  ZoomOut,
-  RotateCw,
-  ChevronLeft,
-  ChevronRight
+  Bookmark,
+  TrendingUp,
+  Send
 } from 'lucide-react';
 
-interface JournalsProps {
+interface BlogProps {
   onBack: () => void;
 }
-const Journals: React.FC<JournalsProps> = ({ onBack }) => {
+
+interface Blog {
+  id: number;
+  title: string;
+  author: string;
+  category: string;
+  content: string;
+  excerpt: string;
+  publishedDate: string;
+  readTime: string;
+  likes: number;
+  views: number;
+  comments: number;
+  status: string;
+  image: string;
+  tags: string[];
+  featured?: boolean;
+}
+
+const Blog: React.FC<BlogProps> = ({ onBack }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [showAddForm, setShowAddForm] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  interface Journal {
-    id: number;
-    title: string;
-    authors: string;
-    journal: string;
-    abstract: string;
-    publishedDate: string;
-    citationCount: number;
-    downloadCount: number;
-    category: string;
-    impact: string;
-    image: string;
-    pdfUrl?: string | null;
-    pdfFile?: File | null;
-    externalUrl: string;
-  }
-  
-    const [selectedJournal, setSelectedJournal] = useState<Journal | null>(null);
-  const [showPDFViewer, setShowPDFViewer] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  
-  // PDF Viewer states
-  const [zoom, setZoom] = useState(100);
-  const [rotation, setRotation] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 15; // Mock total pages
-  
-  const [journals, setJournals] = useState([
+  const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [likedBlogs, setLikedBlogs] = useState<Set<number>>(new Set());
+  const [bookmarkedBlogs, setBookmarkedBlogs] = useState<Set<number>>(new Set());
+  const [comments, setComments] = useState<{[key: number]: Array<{id: number, author: string, text: string, date: string}>}>({});
+  const [newComment, setNewComment] = useState('');
+  const [showComments, setShowComments] = useState(false);
+  const [commentBlogId, setCommentBlogId] = useState<number | null>(null);
+
+  const [blogs, setBlogs] = useState<Blog[]>([
     {
       id: 1,
-      title: "Advances in Cardiovascular Medicine: New Treatment Approaches",
-      authors: "Dr. Sarah Wilson, Dr. Michael Chen",
-      journal: "American Journal of Cardiology",
-      abstract: "This comprehensive study examines novel therapeutic approaches in cardiovascular medicine, focusing on minimally invasive procedures and their impact on patient outcomes. The research demonstrates significant improvements in patient recovery times and reduced complications through innovative surgical techniques.",
-      publishedDate: "January 2024",
-      citationCount: 45,
-      downloadCount: 234,
-      category: "Cardiology",
-      impact: "High Impact",
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop",
-      pdfUrl: "https://example.com/sample-cardiology.pdf",
-      externalUrl: "https://doi.org/10.1016/j.amjcard.2024.01.001"
+      title: "The Future of Telemedicine: Revolutionizing Healthcare Access",
+      author: "Dr. Sarah Johnson",
+      category: "Healthcare Technology",
+      content: `
+        <div class="blog-content">
+          <h2>Introduction</h2>
+          <p>Telemedicine has emerged as one of the most significant innovations in healthcare delivery, especially in the wake of the global pandemic. This revolutionary approach to medical care is transforming how patients access healthcare services and how providers deliver care.</p>
+          
+          <h2>Key Benefits of Telemedicine</h2>
+          <p>The adoption of telemedicine brings numerous advantages:</p>
+          <ul>
+            <li><strong>Increased Access:</strong> Patients in remote areas can now access specialized care without traveling long distances.</li>
+            <li><strong>Cost-Effective:</strong> Reduced overhead costs for both patients and healthcare providers.</li>
+            <li><strong>Convenience:</strong> Appointments can be scheduled more flexibly, reducing waiting times.</li>
+            <li><strong>Continuity of Care:</strong> Chronic disease management becomes more efficient with regular virtual check-ups.</li>
+          </ul>
+          
+          <h2>Challenges and Solutions</h2>
+          <p>Despite its benefits, telemedicine faces several challenges including technology barriers, regulatory issues, and the need for digital literacy among patients. Healthcare institutions are addressing these challenges through comprehensive training programs and user-friendly platforms.</p>
+          
+          <h2>The Road Ahead</h2>
+          <p>As technology continues to advance, we can expect to see even more sophisticated telemedicine solutions, including AI-powered diagnostics, virtual reality consultations, and integrated health monitoring systems.</p>
+        </div>
+      `,
+      excerpt: "Exploring how telemedicine is transforming healthcare delivery and making medical care more accessible to patients worldwide through innovative technology solutions.",
+      publishedDate: "March 15, 2024",
+      readTime: "8 min read",
+      likes: 142,
+      views: 3246,
+      comments: 28,
+      status: "Published",
+      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=400&fit=crop",
+      tags: ["Telemedicine", "Healthcare", "Technology", "Digital Health"],
+      featured: true
     },
     {
       id: 2,
-      title: "Emerging Trends in Infectious Disease Management",
-      authors: "Dr. Emily Rodriguez, Dr. James Patterson",
-      journal: "The Lancet Infectious Diseases",
-      abstract: "A systematic review of current infectious disease management protocols and emerging antimicrobial resistance patterns in clinical practice. This study provides evidence-based recommendations for healthcare providers dealing with complex infectious disease cases in modern medical settings.",
-      publishedDate: "February 2024",
-      citationCount: 67,
-      downloadCount: 456,
-      category: "Infectious Disease",
-      impact: "Very High Impact",
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop",
-      pdfUrl: "https://example.com/sample-infectious.pdf",
-      externalUrl: "https://doi.org/10.1016/S1473-3099(24)00123-4"
+      title: "Mental Health in Medical School: Breaking the Silence",
+      author: "Alex Chen",
+      category: "Medical Education",
+      content: `
+        <div class="blog-content">
+          <h2>The Hidden Struggle</h2>
+          <p>Medical school is often portrayed as a challenging but rewarding journey. However, the mental health challenges faced by medical students are often overlooked or stigmatized within the medical community.</p>
+          
+          <h2>Common Mental Health Issues</h2>
+          <p>Medical students face unique stressors that can impact their mental well-being:</p>
+          <ul>
+            <li><strong>Academic Pressure:</strong> The demanding curriculum and high expectations can lead to chronic stress and anxiety.</li>
+            <li><strong>Financial Stress:</strong> The cost of medical education creates additional pressure and worry.</li>
+            <li><strong>Work-Life Balance:</strong> Long study hours and clinical rotations leave little time for personal relationships and self-care.</li>
+            <li><strong>Imposter Syndrome:</strong> Many students struggle with feelings of inadequacy despite their achievements.</li>
+          </ul>
+          
+          <h2>Breaking the Stigma</h2>
+          <p>It's crucial to normalize conversations about mental health in medical education. Seeking help should be viewed as a sign of strength, not weakness.</p>
+          
+          <h2>Resources and Support</h2>
+          <p>Medical schools are increasingly recognizing the importance of student mental health and implementing support systems including counseling services, peer support groups, and wellness programs.</p>
+        </div>
+      `,
+      excerpt: "An honest discussion about mental health challenges in medical school and the importance of seeking support in a demanding academic environment.",
+      publishedDate: "March 12, 2024",
+      readTime: "6 min read",
+      likes: 89,
+      views: 1854,
+      comments: 15,
+      status: "Published",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=400&fit=crop",
+      tags: ["Mental Health", "Medical School", "Student Life", "Wellness"]
     },
     {
       id: 3,
-      title: "Pediatric Emergency Medicine: Best Practices and Guidelines",
-      authors: "Dr. Lisa Chen, Dr. Robert Kim",
-      journal: "Pediatric Emergency Care",
-      abstract: "Evidence-based guidelines for pediatric emergency management, including updated protocols for common pediatric emergencies and trauma care. The guidelines incorporate latest research findings and expert consensus to improve outcomes in pediatric emergency settings.",
-      publishedDate: "March 2024",
-      citationCount: 23,
-      downloadCount: 189,
+      title: "Breaking Into Medical Research: A Complete Guide",
+      author: "Dr. Michael Rodriguez",
+      category: "Research",
+      content: `
+        <div class="blog-content">
+          <h2>Why Medical Research Matters</h2>
+          <p>Medical research is the cornerstone of advancing healthcare and improving patient outcomes. For medical students and early-career professionals, getting involved in research can be both rewarding and career-defining.</p>
+          
+          <h2>Getting Started</h2>
+          <p>Here are essential steps for beginners interested in medical research:</p>
+          <ol>
+            <li><strong>Identify Your Interests:</strong> Choose a field that genuinely excites you, whether it's clinical research, basic science, or public health.</li>
+            <li><strong>Find a Mentor:</strong> Connect with experienced researchers who can guide your journey and provide valuable insights.</li>
+            <li><strong>Start Small:</strong> Begin with literature reviews or assist in ongoing projects before leading your own research.</li>
+            <li><strong>Learn the Basics:</strong> Understand research methodology, statistics, and ethical considerations.</li>
+          </ol>
+          
+          <h2>Types of Medical Research</h2>
+          <p>Medical research encompasses various approaches including clinical trials, observational studies, systematic reviews, and laboratory research. Each type has its own methodology and applications.</p>
+          
+          <h2>Building Your Research Portfolio</h2>
+          <p>Consistency is key in research. Regular participation in research activities, publishing papers, and presenting at conferences will help build a strong research portfolio.</p>
+        </div>
+      `,
+      excerpt: "Essential tips and guidance for medical students and professionals looking to start their research journey and build a successful academic career.",
+      publishedDate: "March 10, 2024",
+      readTime: "10 min read",
+      likes: 176,
+      views: 2567,
+      comments: 34,
+      status: "Published",
+      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=400&fit=crop",
+      tags: ["Research", "Medical Research", "Career Development", "Academic Medicine"]
+    },
+    {
+      id: 4,
+      title: "Nutrition and Prevention: The Power of Food as Medicine",
+      author: "Dr. Emma Thompson",
+      category: "Preventive Medicine",
+      content: `
+        <div class="blog-content">
+          <h2>Food as Medicine</h2>
+          <p>The concept of food as medicine is not new, but it's gaining renewed attention in modern healthcare. Proper nutrition plays a crucial role in preventing chronic diseases and promoting overall health.</p>
+          
+          <h2>The Science Behind Nutritional Medicine</h2>
+          <p>Recent research has shown that specific nutrients can have powerful effects on our health, from reducing inflammation to supporting immune function and preventing disease.</p>
+          
+          <h2>Practical Applications</h2>
+          <p>Healthcare providers are increasingly incorporating nutritional counseling into their practice, recognizing that dietary interventions can be as effective as medications for certain conditions.</p>
+        </div>
+      `,
+      excerpt: "Discover how proper nutrition can serve as powerful medicine in preventing chronic diseases and promoting optimal health outcomes.",
+      publishedDate: "March 8, 2024",
+      readTime: "7 min read",
+      likes: 98,
+      views: 1432,
+      comments: 19,
+      status: "Published",
+      image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=400&fit=crop",
+      tags: ["Nutrition", "Preventive Medicine", "Wellness", "Lifestyle Medicine"]
+    },
+    {
+      id: 5,
+      title: "The Rise of Artificial Intelligence in Medical Diagnosis",
+      author: "Dr. James Kim",
+      category: "Medical Technology",
+      content: `
+        <div class="blog-content">
+          <h2>AI Revolution in Healthcare</h2>
+          <p>Artificial Intelligence is transforming medical diagnosis, offering unprecedented accuracy and speed in detecting diseases that were previously difficult to diagnose early.</p>
+          
+          <h2>Current Applications</h2>
+          <p>From radiology to pathology, AI systems are now assisting doctors in making more accurate diagnoses and treatment decisions.</p>
+          
+          <h2>Future Implications</h2>
+          <p>As AI technology continues to evolve, we can expect even more sophisticated diagnostic tools that will revolutionize patient care.</p>
+        </div>
+      `,
+      excerpt: "Exploring how artificial intelligence is revolutionizing medical diagnosis and what the future holds for AI-powered healthcare solutions.",
+      publishedDate: "March 5, 2024",
+      readTime: "9 min read",
+      likes: 203,
+      views: 4321,
+      comments: 45,
+      status: "Published",
+      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop",
+      tags: ["Artificial Intelligence", "Medical Technology", "Diagnosis", "Innovation"],
+      featured: true
+    },
+    {
+      id: 6,
+      title: "Pediatric Care During Pandemic: Lessons Learned",
+      author: "Dr. Maria Garcia",
       category: "Pediatrics",
-      impact: "Moderate Impact",
-      image: "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=400&h=250&fit=crop",
-      pdfUrl: "https://example.com/sample-pediatrics.pdf",
-      externalUrl: "https://doi.org/10.1097/PEC.0000000000003001"
+      content: `
+        <div class="blog-content">
+          <h2>Adapting Pediatric Care</h2>
+          <p>The pandemic has significantly changed how we approach pediatric care, from telemedicine adoption to new safety protocols in clinical settings.</p>
+          
+          <h2>Key Challenges</h2>
+          <p>Healthcare providers had to quickly adapt to new challenges while maintaining quality care for children and their families.</p>
+          
+          <h2>Moving Forward</h2>
+          <p>The lessons learned during this period will continue to shape pediatric care practices for years to come.</p>
+        </div>
+      `,
+      excerpt: "Insights into how pediatric care has evolved during the pandemic and the lasting changes that will benefit children's healthcare.",
+      publishedDate: "March 3, 2024",
+      readTime: "6 min read",
+      likes: 67,
+      views: 1234,
+      comments: 12,
+      status: "Published",
+      image: "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=800&h=400&fit=crop",
+      tags: ["Pediatrics", "Pandemic", "Healthcare", "Telemedicine"]
     }
   ]);
 
-  const [newJournal, setNewJournal] = useState({
+  const [newBlog, setNewBlog] = useState({
     title: '',
-    authors: '',
-    journal: '',
-    abstract: '',
+    author: '',
     category: '',
-    pdfFile: null as File | null,
+    content: '',
+    excerpt: '',
+    tags: '',
     coverImage: null as File | null
   });
 
@@ -131,6 +282,8 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
     avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face"
   };
 
+  const categories = ['All', 'Healthcare Technology', 'Medical Education', 'Research', 'Preventive Medicine', 'Medical Technology', 'Pediatrics'];
+
   const toggleTheme = () => {
     setDarkMode(!darkMode);
     if (darkMode) {
@@ -140,118 +293,197 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
     }
   };
 
-    const handleLogout = () => {
-  console.log('Logging out...');
-  setProfileDropdownOpen(false);
-  navigate('/login'); // Add this line to redirect
-};
+  const handleLogout = () => {
+    console.log('Logging out...');
+    setProfileDropdownOpen(false);
+    navigate('/login');
+  };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'pdf' | 'image') => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (type === 'pdf') {
-        setNewJournal(prev => ({ ...prev, pdfFile: file }));
-        setUploadedFile(file);
-        console.log('PDF file uploaded:', file.name);
-      } else {
-        setNewJournal(prev => ({ ...prev, coverImage: file }));
-        console.log('Cover image uploaded:', file.name);
-      }
+      setNewBlog(prev => ({ ...prev, coverImage: file }));
+      setUploadedImage(file);
+      console.log('Cover image uploaded:', file.name);
     }
   };
 
-  const handleAddJournal = () => {
-    if (newJournal.title && newJournal.authors && newJournal.journal && newJournal.abstract) {
-      // Create object URL for the uploaded PDF file
-      const pdfUrl = newJournal.pdfFile ? URL.createObjectURL(newJournal.pdfFile) : null;
-      
-      const journal = {
+  const handleAddBlog = () => {
+    if (newBlog.title && newBlog.author && newBlog.content && newBlog.excerpt) {
+      const blog: Blog = {
         id: Date.now(),
-        title: newJournal.title,
-        authors: newJournal.authors,
-        journal: newJournal.journal,
-        abstract: newJournal.abstract,
-        publishedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-        citationCount: 0,
-        downloadCount: 0,
-        category: newJournal.category || 'General',
-        impact: 'New Publication',
-        image: newJournal.coverImage ? URL.createObjectURL(newJournal.coverImage) : "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&h=250&fit=crop",
-        pdfUrl: pdfUrl,
-        pdfFile: newJournal.pdfFile, // Store the actual file object for download
-        externalUrl: `https://doi.org/10.placeholder/${Date.now()}`
+        title: newBlog.title,
+        author: newBlog.author,
+        category: newBlog.category || 'General',
+        content: `<div class="blog-content">${newBlog.content.replace(/\n/g, '<br>')}</div>`,
+        excerpt: newBlog.excerpt,
+        publishedDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        readTime: Math.max(1, Math.ceil(newBlog.content.split(' ').length / 200)) + ' min read',
+        likes: 0,
+        views: 0,
+        comments: 0,
+        status: 'Published',
+        image: newBlog.coverImage ? URL.createObjectURL(newBlog.coverImage) : "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop",
+        tags: newBlog.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
       };
 
-      setJournals(prev => [journal, ...prev]);
-      setNewJournal({
+      setBlogs(prev => [blog, ...prev]);
+      setNewBlog({
         title: '',
-        authors: '',
-        journal: '',
-        abstract: '',
+        author: '',
         category: '',
-        pdfFile: null,
+        content: '',
+        excerpt: '',
+        tags: '',
         coverImage: null
       });
-      setUploadedFile(null);
+      setUploadedImage(null);
       setShowAddForm(false);
       
-      console.log('Journal added with PDF:', journal);
+      console.log('Blog added:', blog);
     }
   };
 
-  const handleViewJournal = (journal: Journal) => {
-    setSelectedJournal(journal);
+  const handleViewBlog = (blog: Blog) => {
+    setSelectedBlog(blog);
+    setShowPreview(true);
+    // Increment views
+    setBlogs(prev => prev.map(b => 
+      b.id === blog.id ? { ...b, views: b.views + 1 } : b
+    ));
   };
 
-  const handleViewPDF = (journal: Journal) => {
-    console.log('Opening PDF viewer for:', journal.title, 'PDF URL:', journal.pdfUrl);
-    setSelectedJournal(journal);
-    setShowPDFViewer(true);
-    // Reset PDF viewer states
-    setZoom(100);
-    setRotation(0);
-    setCurrentPage(1);
+  const handleLikeBlog = (blogId: number) => {
+    const isLiked = likedBlogs.has(blogId);
+    
+    if (isLiked) {
+      setLikedBlogs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(blogId);
+        return newSet;
+      });
+      setBlogs(prev => prev.map(blog => 
+        blog.id === blogId 
+          ? { ...blog, likes: blog.likes - 1 }
+          : blog
+      ));
+      toast({
+        title: "Like removed",
+        description: "You unliked this blog post.",
+      });
+    } else {
+      setLikedBlogs(prev => new Set(prev).add(blogId));
+      setBlogs(prev => prev.map(blog => 
+        blog.id === blogId 
+          ? { ...blog, likes: blog.likes + 1 }
+          : blog
+      ));
+      toast({
+        title: "Blog liked!",
+        description: "You liked this blog post.",
+      });
+    }
+  };
+
+  const handleBookmarkBlog = (blogId: number) => {
+    const isBookmarked = bookmarkedBlogs.has(blogId);
+    
+    if (isBookmarked) {
+      setBookmarkedBlogs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(blogId);
+        return newSet;
+      });
+      toast({
+        title: "Bookmark removed",
+        description: "Blog removed from your bookmarks.",
+      });
+    } else {
+      setBookmarkedBlogs(prev => new Set(prev).add(blogId));
+      toast({
+        title: "Blog bookmarked!",
+        description: "Blog saved to your bookmarks.",
+      });
+    }
+  };
+
+  const handleShareBlog = (blog: Blog) => {
+    if (navigator.share) {
+      navigator.share({
+        title: blog.title,
+        text: blog.excerpt,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        toast({
+          title: "Link copied!",
+          description: "Blog link copied to clipboard.",
+        });
+      });
+    }
+  };
+
+  const handleAddComment = (blogId: number) => {
+    if (!newComment.trim()) return;
+    
+    const comment = {
+      id: Date.now(),
+      author: user.name,
+      text: newComment,
+      date: new Date().toLocaleDateString()
+    };
+    
+    setComments(prev => ({
+      ...prev,
+      [blogId]: [...(prev[blogId] || []), comment]
+    }));
+    
+    setBlogs(prev => prev.map(blog => 
+      blog.id === blogId 
+        ? { ...blog, comments: blog.comments + 1 }
+        : blog
+    ));
+    
+    setNewComment('');
+    toast({
+      title: "Comment added!",
+      description: "Your comment has been posted.",
+    });
+  };
+
+  const handleShowComments = (blogId: number) => {
+    setCommentBlogId(blogId);
+    setShowComments(true);
+    // Initialize comments for blog if not exists
+    if (!comments[blogId]) {
+      setComments(prev => ({
+        ...prev,
+        [blogId]: []
+      }));
+    }
   };
 
   const handleExternalLink = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  // PDF Viewer functions
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 25, 200));
+  const closePreview = () => {
+    setShowPreview(false);
+    setSelectedBlog(null);
   };
 
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 25, 50));
+  const closeComments = () => {
+    setShowComments(false);
+    setCommentBlogId(null);
+    setNewComment('');
   };
 
-  const handleRotate = () => {
-    setRotation(prev => (prev + 90) % 360);
-  };
+  const filteredBlogs = selectedCategory === 'All' 
+    ? blogs 
+    : blogs.filter(blog => blog.category === selectedCategory);
 
-  const handleDownload = () => {
-    console.log('Downloading PDF:', selectedJournal?.title);
-    if (selectedJournal?.pdfUrl) {
-      const link = document.createElement('a');
-      link.href = selectedJournal.pdfUrl;
-      link.download = `${selectedJournal.title}.pdf`;
-      link.click();
-    }
-  };
-
-  const nextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  };
-
-  const prevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-  };
-
-  const closePDFViewer = () => {
-    setShowPDFViewer(false);
-    setSelectedJournal(null);
-  };
+  const featuredBlogs = blogs.filter(blog => blog.featured);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
@@ -269,7 +501,7 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
               Back to Dashboard
             </Button>
             <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
-            <h1 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Medical Journals</h1>
+            <h1 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Medical Blogs</h1>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -277,7 +509,7 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
-                placeholder="Search journals..."
+                placeholder="Search blogs..."
                 className="w-64 pl-10 bg-white/50 dark:bg-gray-800/50 border-gray-300/50 focus:border-blue-500 focus:ring-blue-500/20"
               />
             </div>
@@ -334,118 +566,218 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
       {/* Main Content */}
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Medical Journals</h2>
-              <p className="text-gray-600 dark:text-gray-400">Latest research papers and medical publications</p>
+          {/* Hero Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Medical Blog Community
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
+              Discover insights, share experiences, and connect with the medical community through our comprehensive blog platform
+            </p>
+            <div className="flex items-center justify-center space-x-4">
+              <Button 
+                onClick={() => setShowAddForm(true)}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg px-8 py-3"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Write Your Story
+              </Button>
+              <Button variant="outline" className="px-8 py-3">
+                <TrendingUp className="h-5 w-5 mr-2" />
+                Trending Topics
+              </Button>
             </div>
-            <Button 
-              onClick={() => setShowAddForm(true)}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Journal
-            </Button>
           </div>
 
-          {/* Add New Journal Form */}
+          {/* Featured Blogs Section */}
+          {featuredBlogs.length > 0 && (
+            <div className="mb-12">
+              <div className="flex items-center space-x-2 mb-6">
+                <TrendingUp className="h-6 w-6 text-blue-600" />
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Featured Stories</h2>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {featuredBlogs.slice(0, 2).map((blog) => (
+                  <Card key={blog.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl hover:shadow-2xl transition-all border-gradient-to-r from-blue-200 to-indigo-200 hover:border-blue-400/50 group cursor-pointer overflow-hidden">
+                    <div className="relative">
+                      <img 
+                        src={blog.image} 
+                        alt={blog.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0">
+                          Featured
+                        </Badge>
+                      </div>
+                    </div>
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+                          {blog.category}
+                        </Badge>
+                        <span className="text-sm text-gray-500 flex items-center">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {blog.publishedDate}
+                        </span>
+                      </div>
+                      
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        {blog.title}
+                      </h3>
+                      
+                      <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                        {blog.excerpt}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span className="flex items-center">
+                            <Heart className="h-4 w-4 mr-1" />
+                            {blog.likes}
+                          </span>
+                          <span className="flex items-center">
+                            <Eye className="h-4 w-4 mr-1" />
+                            {blog.views}
+                          </span>
+                          <span className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {blog.readTime}
+                          </span>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                          onClick={() => handleViewBlog(blog)}
+                        >
+                          Read More
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Category Filter */}
+          <div className="flex items-center space-x-4 mb-8 overflow-x-auto pb-2">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+                className={`whitespace-nowrap ${
+                  selectedCategory === category 
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white' 
+                    : 'hover:bg-blue-50'
+                }`}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+
+          {/* Add New Blog Form */}
           {showAddForm && (
             <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl">
               <CardHeader>
-                <CardTitle className="text-blue-800 dark:text-blue-300">Add New Journal Article</CardTitle>
+                <CardTitle className="text-blue-800 dark:text-blue-300 flex items-center">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Share Your Medical Story
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Article Title</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Blog Title</label>
                   <Input 
-                    placeholder="Enter article title" 
-                    value={newJournal.title}
-                    onChange={(e) => setNewJournal(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="What's your story about?" 
+                    value={newBlog.title}
+                    onChange={(e) => setNewBlog(prev => ({ ...prev, title: e.target.value }))}
+                    className="text-lg"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Authors</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Author</label>
                     <Input 
-                      placeholder="Authors names" 
-                      value={newJournal.authors}
-                      onChange={(e) => setNewJournal(prev => ({ ...prev, authors: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Journal Name</label>
-                    <Input 
-                      placeholder="Journal publication name" 
-                      value={newJournal.journal}
-                      onChange={(e) => setNewJournal(prev => ({ ...prev, journal: e.target.value }))}
+                      placeholder="Your name" 
+                      value={newBlog.author}
+                      onChange={(e) => setNewBlog(prev => ({ ...prev, author: e.target.value }))}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
                     <Input 
-                      placeholder="e.g., Cardiology, Neurology" 
-                      value={newJournal.category}
-                      onChange={(e) => setNewJournal(prev => ({ ...prev, category: e.target.value }))}
+                      placeholder="e.g., Healthcare Technology, Medical Education" 
+                      value={newBlog.category}
+                      onChange={(e) => setNewBlog(prev => ({ ...prev, category: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+                    <Input 
+                      placeholder="Add tags separated by commas" 
+                      value={newBlog.tags}
+                      onChange={(e) => setNewBlog(prev => ({ ...prev, tags: e.target.value }))}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Abstract</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brief Summary</label>
                   <Textarea 
-                    placeholder="Article abstract..." 
-                    rows={4} 
-                    value={newJournal.abstract}
-                    onChange={(e) => setNewJournal(prev => ({ ...prev, abstract: e.target.value }))}
+                    placeholder="Give readers a preview of what they'll learn..." 
+                    rows={3} 
+                    value={newBlog.excerpt}
+                    onChange={(e) => setNewBlog(prev => ({ ...prev, excerpt: e.target.value }))}
                   />
                 </div>
-                <div className="flex space-x-4">
-                  <div>
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      onChange={(e) => handleFileUpload(e, 'pdf')}
-                      className="hidden"
-                      id="pdf-upload"
-                    />
-                    <Button 
-                      variant="outline" 
-                      className={`flex items-center ${newJournal.pdfFile ? 'bg-green-50 border-green-300 text-green-700' : ''}`} 
-                      asChild
-                    >
-                      <label htmlFor="pdf-upload" className="cursor-pointer">
-                        <FileText className="h-4 w-4 mr-2" />
-                        {newJournal.pdfFile ? `PDF: ${newJournal.pdfFile.name}` : 'Upload PDF'}
-                      </label>
-                    </Button>
-                  </div>
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileUpload(e, 'image')}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <Button 
-                      variant="outline" 
-                      className={`flex items-center ${newJournal.coverImage ? 'bg-green-50 border-green-300 text-green-700' : ''}`} 
-                      asChild
-                    >
-                      <label htmlFor="image-upload" className="cursor-pointer">
-                        <Upload className="h-4 w-4 mr-2" />
-                        {newJournal.coverImage ? `Image: ${newJournal.coverImage.name}` : 'Upload Cover Image'}
-                      </label>
-                    </Button>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Your Story</label>
+                  <Textarea 
+                    placeholder="Share your insights, experiences, and knowledge with the community..." 
+                    rows={12} 
+                    value={newBlog.content}
+                    onChange={(e) => setNewBlog(prev => ({ ...prev, content: e.target.value }))}
+                    className="min-h-[200px]"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <Button 
+                    variant="outline" 
+                    className={`flex items-center ${newBlog.coverImage ? 'bg-green-50 border-green-300 text-green-700' : ''}`} 
+                    asChild
+                  >
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <Upload className="h-4 w-4 mr-2" />
+                      {newBlog.coverImage ? `Image: ${newBlog.coverImage.name}` : 'Add Cover Image'}
+                    </label>
+                  </Button>
+                  {newBlog.coverImage && (
+                    <div className="mt-4">
+                      <img 
+                        src={URL.createObjectURL(newBlog.coverImage)} 
+                        alt="Cover preview" 
+                        className="w-full max-w-md h-32 object-cover rounded-lg border shadow-md"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="flex space-x-4">
                   <Button 
-                    onClick={handleAddJournal}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                    disabled={!newJournal.title || !newJournal.authors || !newJournal.journal || !newJournal.abstract}
+                    onClick={handleAddBlog}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-8"
+                    disabled={!newBlog.title || !newBlog.author || !newBlog.content || !newBlog.excerpt}
                   >
-                    Save Article
+                    Publish Story
                   </Button>
                   <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
                 </div>
@@ -453,378 +785,356 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
             </Card>
           )}
 
-          {/* Journals List */}
-          <div className="space-y-6">
-            {journals.map((journal) => (
-              <Card key={journal.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl hover:shadow-xl transition-all border-gray-200/50 hover:border-blue-300/50 group">
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row gap-6">
-                    <div className="lg:w-48 flex-shrink-0">
-                      <img 
-                        src={journal.image} 
-                        alt={journal.title}
-                        className="w-full h-32 lg:h-40 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
-                            {journal.category}
-                          </Badge>
-                          <Badge className={`${
-                            journal.impact === 'Very High Impact' ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                            journal.impact === 'High Impact' ? 'bg-gradient-to-r from-blue-500 to-indigo-500' : 
-                            journal.impact === 'Moderate Impact' ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
-                            'bg-gradient-to-r from-gray-500 to-slate-500'
-                          } text-white border-0`}>
-                            {journal.impact}
-                          </Badge>
-                        </div>
-                        <span className="text-sm text-gray-500">{journal.publishedDate}</span>
+          {/* All Blogs Section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              {selectedCategory === 'All' ? 'Latest Stories' : `${selectedCategory} Stories`}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBlogs.map((blog) => (
+                <Card key={blog.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl hover:shadow-xl transition-all border-gray-200/50 hover:border-blue-300/50 group cursor-pointer overflow-hidden">
+                  <div className="relative">
+                    <img 
+                      src={blog.image} 
+                      alt={blog.title}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {blog.featured && (
+                      <div className="absolute top-3 right-3">
+                        <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0">
+                          Featured
+                        </Badge>
                       </div>
-                      
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                        {journal.title}
-                      </h3>
-                      
-                      <p className="text-sm text-blue-600 dark:text-blue-400 mb-2 font-medium">
-                        {journal.journal}
-                      </p>
-                      
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                        By {journal.authors}
-                      </p>
-                      
-                      <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-                        {journal.abstract}
-                      </p>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-6 text-sm text-gray-500">
-                          <span className="flex items-center">
-                            <Eye className="h-4 w-4 mr-1" />
-                            {journal.citationCount} citations
-                          </span>
-                          <span className="flex items-center">
-                            <Download className="h-4 w-4 mr-1" />
-                            {journal.downloadCount} downloads
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleViewJournal(journal)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          {journal.pdfUrl && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleViewPDF(journal)}
-                              className="text-green-600 border-green-300 hover:bg-green-50"
-                            >
-                              <FileText className="h-4 w-4 mr-2" />
-                              PDF Preview
-                            </Button>
-                          )}
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleExternalLink(journal.externalUrl)}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            External Link
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-                            onClick={() => handleViewJournal(journal)}
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Read Article
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50 text-xs">
+                        {blog.category}
+                      </Badge>
+                      <span className="text-xs text-gray-500 flex items-center">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {blog.publishedDate}
+                      </span>
+                    </div>
+                    
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      {blog.title}
+                    </h3>
+                    
+                    <p className="text-sm text-blue-600 dark:text-blue-400 mb-2 font-medium">
+                      By {blog.author}
+                    </p>
+                    
+                    <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 text-sm">
+                      {blog.excerpt}
+                    </p>
+
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {blog.tags.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3 text-xs text-gray-500">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLikeBlog(blog.id);
+                          }}
+                          className={`flex items-center hover:text-red-500 transition-colors ${
+                            likedBlogs.has(blog.id) ? 'text-red-500' : ''
+                          }`}
+                        >
+                          <Heart className={`h-3 w-3 mr-1 ${likedBlogs.has(blog.id) ? 'fill-current' : ''}`} />
+                          {blog.likes}
+                        </button>
+                        <span className="flex items-center">
+                          <Eye className="h-3 w-3 mr-1" />
+                          {blog.views}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShowComments(blog.id);
+                          }}
+                          className="flex items-center hover:text-blue-500 transition-colors"
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          {blog.comments}
+                        </button>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`h-8 w-8 p-0 hover:bg-blue-50 ${
+                            bookmarkedBlogs.has(blog.id) ? 'text-blue-500' : ''
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBookmarkBlog(blog.id);
+                          }}
+                        >
+                          <Bookmark className={`h-3 w-3 ${bookmarkedBlogs.has(blog.id) ? 'fill-current' : ''}`} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-blue-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShareBlog(blog);
+                          }}
+                        >
+                          <Share2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      size="sm" 
+                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                      onClick={() => handleViewBlog(blog)}
+                    >
+                      Read Full Story
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Journal Detail Modal */}
-      <Dialog open={!!selectedJournal && !showPDFViewer} onOpenChange={() => setSelectedJournal(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          {selectedJournal && (
-            <div>
-              <DialogHeader>
-                <DialogTitle className="text-xl font-bold">{selectedJournal.title}</DialogTitle>
-              </DialogHeader>
-              <div className="mt-4 space-y-4">
-                <img 
-                  src={selectedJournal.image} 
-                  alt={selectedJournal.title}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-                <div className="flex items-center space-x-2">
-                  <Badge variant="outline">{selectedJournal.category}</Badge>
-                  <Badge className="bg-blue-600">{selectedJournal.impact}</Badge>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-blue-600">{selectedJournal.journal}</h4>
-                  <p className="text-sm text-gray-500">By {selectedJournal.authors}</p>
-                  <p className="text-sm text-gray-500">{selectedJournal.publishedDate}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Abstract</h4>
-                  <p className="text-gray-600">{selectedJournal.abstract}</p>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-500 flex items-center">
-                    <Eye className="h-4 w-4 mr-1" />
-                    {selectedJournal.citationCount} citations
-                  </span>
-                  <span className="text-sm text-gray-500 flex items-center">
-                    <Download className="h-4 w-4 mr-1" />
-                    {selectedJournal.downloadCount} downloads
-                  </span>
-                </div>
-                <div className="flex space-x-2 pt-4">
-                  {selectedJournal.pdfUrl && (
-                    <Button 
-                      onClick={() => setShowPDFViewer(true)}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      View PDF
-                    </Button>
-                  )}
-                  <Button 
-                    variant="outline"
-                    onClick={() => handleExternalLink(selectedJournal.externalUrl)}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    External Link
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* PDF Viewer Modal */}
-      <Dialog open={showPDFViewer} onOpenChange={() => setShowPDFViewer(false)}>
+      {/* Blog Preview Modal */}
+      <Dialog open={showPreview} onOpenChange={() => setShowPreview(false)}>
         <DialogContent className="max-w-6xl max-h-[90vh] p-0">
-          {selectedJournal && (
+          {selectedBlog && (
             <div className="h-[90vh] flex flex-col bg-gray-50 dark:bg-gray-900">
-              {/* PDF Viewer Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              {/* Blog Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <div className="flex items-center space-x-4">
-                  <Button variant="ghost" size="sm" onClick={closePDFViewer}>
+                  <Button variant="ghost" size="sm" onClick={closePreview}>
                     <X className="h-4 w-4" />
                   </Button>
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1">
-                      {selectedJournal.title}
+                      {selectedBlog.title}
                     </h3>
                     <div className="flex items-center space-x-2 mt-1">
                       <Badge variant="outline" className="text-xs">
-                        {selectedJournal.category}
+                        {selectedBlog.category}
                       </Badge>
                       <span className="text-xs text-gray-500">
-                        By {selectedJournal.authors}
+                        By {selectedBlog.author}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {selectedBlog.readTime}
                       </span>
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={handleDownload}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleLikeBlog(selectedBlog.id)}
+                    className={`${
+                      likedBlogs.has(selectedBlog.id) 
+                        ? 'text-red-600 border-red-300 bg-red-50' 
+                        : 'text-red-600 border-red-300 hover:bg-red-50'
+                    }`}
+                  >
+                    <Heart className={`h-4 w-4 mr-2 ${likedBlogs.has(selectedBlog.id) ? 'fill-current' : ''}`} />
+                    Like ({selectedBlog.likes})
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleExternalLink(selectedJournal.externalUrl)}>
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    External Link
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleShareBlog(selectedBlog)}
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleBookmarkBlog(selectedBlog.id)}
+                    className={bookmarkedBlogs.has(selectedBlog.id) ? 'bg-blue-50 border-blue-300 text-blue-700' : ''}
+                  >
+                    <Bookmark className={`h-4 w-4 mr-2 ${bookmarkedBlogs.has(selectedBlog.id) ? 'fill-current' : ''}`} />
+                    {bookmarkedBlogs.has(selectedBlog.id) ? 'Saved' : 'Save'}
                   </Button>
                 </div>
               </div>
 
-              {/* PDF Viewer Toolbar */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={prevPage} disabled={currentPage === 1}>
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[100px] text-center">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <Button variant="outline" size="sm" onClick={nextPage} disabled={currentPage === totalPages}>
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 50}>
-                    <ZoomOut className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[60px] text-center">
-                    {zoom}%
-                  </span>
-                  <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 200}>
-                    <ZoomIn className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleRotate}>
-                    <RotateCw className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  <span className="flex items-center">
-                    <Eye className="h-4 w-4 mr-1" />
-                    {selectedJournal.citationCount} citations
-                  </span>
-                  <span className="flex items-center">
-                    <Download className="h-4 w-4 mr-1" />
-                    {selectedJournal.downloadCount} downloads
-                  </span>
-                </div>
-              </div>
-
-              {/* PDF Content Area */}
-              <div className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-800 p-4">
+              {/* Blog Content */}
+              <div className="flex-1 overflow-auto bg-white dark:bg-gray-800 p-6">
                 <div className="max-w-4xl mx-auto">
-                  {selectedJournal.pdfUrl && selectedJournal.pdfUrl.startsWith('blob:') ? (
-                    /* Uploaded PDF Viewer */
-                    <div 
-                      className="bg-white shadow-lg mx-auto transition-all duration-300 border"
-                      style={{ 
-                        transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-                        width: '210mm',
-                        minHeight: '297mm'
-                      }}
-                    >
-                      <iframe
-                        src={selectedJournal.pdfUrl}
-                        width="100%"
-                        height="800px"
-                        className="border-0"
-                        title="PDF Preview"
-                      />
+                  <img 
+                    src={selectedBlog.image} 
+                    alt={selectedBlog.title}
+                    className="w-full h-64 object-cover rounded-xl shadow-lg mb-8"
+                  />
+                  
+                  <div className="prose prose-lg max-w-none dark:prose-invert">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                      {selectedBlog.title}
+                    </h1>
+                    
+                    <div className="flex items-center space-x-4 text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-2">
+                        <img src={user.avatar} alt="Author" className="w-10 h-10 rounded-full" />
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{selectedBlog.author}</p>
+                          <p className="text-sm">{selectedBlog.publishedDate}</p>
+                        </div>
+                      </div>
+                      <span>•</span>
+                      <span>{selectedBlog.readTime}</span>
+                      <span>•</span>
+                      <span className="flex items-center">
+                        <Eye className="h-4 w-4 mr-1" />
+                        {selectedBlog.views} views
+                      </span>
                     </div>
-                  ) : (
-                    /* Mock PDF Pages for journals without uploaded PDFs */
+
+                    <div className="flex flex-wrap gap-2 mb-8">
+                      {selectedBlog.tags.map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-sm px-3 py-1">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    
                     <div 
-                      className="bg-white shadow-lg mx-auto transition-all duration-300"
-                      style={{ 
-                        transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-                        width: '210mm',
-                        minHeight: '297mm'
+                      className="text-gray-700 dark:text-gray-300 leading-relaxed blog-content"
+                      dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
+                      style={{
+                        fontSize: '16px',
+                        lineHeight: '1.8'
                       }}
-                    >
-                      {/* Mock PDF Page Content */}
-                      <div className="p-8 space-y-6">
-                        <div className="text-center border-b border-gray-200 pb-6">
-                          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                            {selectedJournal.title}
-                          </h1>
-                          <p className="text-lg text-gray-600 mb-2">
-                            {selectedJournal.authors}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {selectedJournal.journal} • {selectedJournal.publishedDate}
-                          </p>
+                    />
+                    
+                    <div className="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-6">
+                          <Button 
+                            variant="outline"
+                            onClick={() => handleLikeBlog(selectedBlog.id)}
+                            className={`flex items-center space-x-2 ${
+                              likedBlogs.has(selectedBlog.id) 
+                                ? 'text-red-600 border-red-300 bg-red-50' 
+                                : 'text-red-600 border-red-300 hover:bg-red-50'
+                            }`}
+                          >
+                            <Heart className={`h-4 w-4 ${likedBlogs.has(selectedBlog.id) ? 'fill-current' : ''}`} />
+                            <span>{selectedBlog.likes} Likes</span>
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => handleShowComments(selectedBlog.id)}
+                            className="flex items-center space-x-2"
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                            <span>{selectedBlog.comments} Comments</span>
+                          </Button>
                         </div>
-
-                        <div className="space-y-4">
-                          <div>
-                            <h2 className="text-lg font-semibold text-gray-900 mb-2">Abstract</h2>
-                            <p className="text-gray-700 leading-relaxed">
-                              {selectedJournal.abstract}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h2 className="text-lg font-semibold text-gray-900 mb-2">1. Introduction</h2>
-                            <p className="text-gray-700 leading-relaxed mb-4">
-                              The field of medicine continues to evolve rapidly with new discoveries and innovations 
-                              emerging at an unprecedented pace. This research paper examines the latest developments 
-                              in {selectedJournal.category.toLowerCase()} and their potential impact on clinical practice.
-                            </p>
-                            <p className="text-gray-700 leading-relaxed">
-                              Recent studies have highlighted the importance of evidence-based approaches to medical 
-                              treatment, particularly in the context of patient safety and treatment efficacy. Our 
-                              research builds upon these foundational principles to explore new therapeutic modalities.
-                            </p>
-                          </div>
-
-                          <div>
-                            <h2 className="text-lg font-semibold text-gray-900 mb-2">2. Methodology</h2>
-                            <p className="text-gray-700 leading-relaxed mb-4">
-                              This study employed a comprehensive systematic review approach, analyzing data from 
-                              multiple clinical trials and observational studies conducted between 2020 and 2024. 
-                              The research methodology was designed to ensure statistical rigor and clinical relevance.
-                            </p>
-                            <ul className="list-disc list-inside text-gray-700 space-y-2">
-                              <li>Systematic literature review of peer-reviewed publications</li>
-                              <li>Meta-analysis of clinical trial data</li>
-                              <li>Statistical analysis using advanced computational methods</li>
-                              <li>Peer review and validation by expert clinicians</li>
-                            </ul>
-                          </div>
-
-                          <div>
-                            <h2 className="text-lg font-semibold text-gray-900 mb-2">3. Results</h2>
-                            <p className="text-gray-700 leading-relaxed">
-                              Our findings demonstrate significant improvements in patient outcomes when utilizing 
-                              the proposed treatment protocols. The data suggests a marked reduction in adverse 
-                              events and improved quality of life metrics across all patient cohorts studied.
-                            </p>
-                          </div>
-
-                          {currentPage > 1 && (
-                            <div className="mt-8">
-                              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                                {currentPage === 2 ? '4. Discussion' : 
-                                 currentPage === 3 ? '5. Clinical Implications' :
-                                 currentPage === 4 ? '6. Limitations' :
-                                 '7. Conclusion'}
-                              </h2>
-                              <p className="text-gray-700 leading-relaxed">
-                                {currentPage === 2 ? 
-                                  'The results of this study have important implications for clinical practice. The evidence suggests that implementing these new protocols could significantly improve patient outcomes while reducing healthcare costs.' :
-                                  currentPage === 3 ?
-                                  'Healthcare providers should consider integrating these findings into their clinical decision-making processes. The protocols outlined in this study provide a framework for evidence-based treatment approaches.' :
-                                  currentPage === 4 ?
-                                  'While this study provides valuable insights, there are several limitations that should be considered. The sample size was limited to specific geographic regions, and long-term follow-up data is still being collected.' :
-                                  'In conclusion, this research contributes significant new knowledge to the field of ' + selectedJournal.category.toLowerCase() + '. The findings support the adoption of new treatment protocols and provide a foundation for future research in this area.'
-                                }
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
-                          Page {currentPage} of {totalPages}
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleShareBlog(selectedBlog)}
+                          >
+                            <Share2 className="h-4 w-4 mr-2" />
+                            Share Story
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleBookmarkBlog(selectedBlog.id)}
+                            className={bookmarkedBlogs.has(selectedBlog.id) ? 'bg-blue-50 border-blue-300 text-blue-700' : ''}
+                          >
+                            <Bookmark className={`h-4 w-4 mr-2 ${bookmarkedBlogs.has(selectedBlog.id) ? 'fill-current' : ''}`} />
+                            {bookmarkedBlogs.has(selectedBlog.id) ? 'Saved' : 'Save for Later'}
+                          </Button>
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Comments Modal */}
+      <Dialog open={showComments} onOpenChange={closeComments}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Comments</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col h-[60vh]">
+            {/* Comments List */}
+            <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+              {commentBlogId && comments[commentBlogId] && comments[commentBlogId].length > 0 ? (
+                comments[commentBlogId].map((comment) => (
+                  <div key={comment.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <img src={user.avatar} alt={comment.author} className="w-8 h-8 rounded-full" />
+                      <div>
+                        <p className="font-medium text-sm text-gray-900 dark:text-white">{comment.author}</p>
+                        <p className="text-xs text-gray-500">{comment.date}</p>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300">{comment.text}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No comments yet. Be the first to comment!</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Add Comment Form */}
+            <div className="border-t pt-4">
+              <div className="flex space-x-3">
+                <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full flex-shrink-0" />
+                <div className="flex-1">
+                  <Textarea
+                    placeholder="Write your comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="resize-none"
+                    rows={3}
+                  />
+                  <div className="flex justify-end mt-2">
+                    <Button
+                      onClick={() => commentBlogId && handleAddComment(commentBlogId)}
+                      disabled={!newComment.trim()}
+                      size="sm"
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Post Comment
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default Journals;
+export default Blog;
