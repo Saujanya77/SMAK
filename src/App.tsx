@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,57 +29,92 @@ import MCQBank from "./pages/MCQBank";
 import Journals from "./pages/Journals";
 import SubjectNotes from "./pages/SubjectNotes";
 
-
-
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="smak-ui-theme">
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/journal" element={<Journal />} />
-              <Route path="/research-hub" element={<ResearchHub />} />
-              <Route path="/members" element={<Members />} />
-              <Route path="/collaborate" element={<Collaborate />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/clinical-cases" element={<ClinicalCases />} />
-          <Route path="/examination-skills" element={<ExaminationSkills />} />
-          <Route path="/video-lectures" element={<VideoLectures />} />
-          <Route path="/mcq-bank" element={<MCQBank />} />
-          <Route path="/journals" element={<Journals onBack={() => window.history.back()} />} />
-          <Route path="/blogs" element={<Blogs onBack={() => window.history.back()} />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/blogs" element={<Blogs onBack={() => window.history.back()} />} />
-          <Route path="/journals" element={<Journals onBack={() => window.history.back()} />} />
-          <Route path="/videos" element={<Videos />} />
-          <Route path="/SubjectNotes" element={<SubjectNotes />} />
-          <Route path="/notes" element={<Notes />} />
-          <Route path="/TestimonialsSlider" element={<TestimonialsSlider />} />
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="smak-ui-theme">
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/journal" element={<Journal />} />
+                <Route path="/research-hub" element={<ResearchHub />} />
+                <Route path="/members" element={<Members />} />
+                <Route path="/collaborate" element={<Collaborate />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/examination-skills" element={<ExaminationSkills />} />
+                <Route path="/videos" element={<Videos />} />
+                <Route path="/SubjectNotes" element={<SubjectNotes />} />
+                <Route path="/notes" element={<Notes />} />
+                <Route path="/TestimonialsSlider" element={<TestimonialsSlider />} />
+
+                {/* Protected Routes */}
+                <Route
+                    path="/video-lectures"
+                    element={
+                      <ProtectedRoute>
+                        <VideoLectures />
+                      </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/mcq-bank"
+                    element={
+                      <ProtectedRoute>
+                        <MCQBank />
+                      </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/journals"
+                    element={
+                      <ProtectedRoute>
+                        <Journals onBack={() => window.history.back()} />
+                      </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/blogs"
+                    element={
+                      <ProtectedRoute>
+                        <Blogs onBack={() => window.history.back()} />
+                      </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/clinical-cases"
+                    element={
+                      <ProtectedRoute>
+                        <ClinicalCases />
+                      </ProtectedRoute>
+                    }
+                />
+
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
 );
 
 export default App;

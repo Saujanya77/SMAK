@@ -74,6 +74,7 @@ import {
   Palette
 } from 'lucide-react';
 import Login from './Login';
+import { useAuth } from '../contexts/AuthContext'; // adjust path as needed
 
 const MedicalDashboard = () => {
   const navigate = useNavigate();
@@ -81,6 +82,7 @@ const MedicalDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const { user, loading } = useAuth();
 
   // Initialize theme from state (not localStorage)
   useEffect(() => {
@@ -97,12 +99,13 @@ const MedicalDashboard = () => {
   }, [darkMode]);
 
   // Mock user data
-  const user = {
-    name: "Dr. John Doe",
-    year: "3rd Year MBBS",
-    college: "SMAK Medical College",
-    avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face"
+  const userData = {
+    name: user.name,
+    year: user.year,
+    college: user.college,
+    avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face" // You can add avatar to your user profile later
   };
+
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -141,12 +144,24 @@ const MedicalDashboard = () => {
       setSidebarOpen(false);
     }
   };
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-  console.log('Logging out...');
-  setProfileDropdownOpen(false);
-  navigate('/login'); // Add this line to redirect
-};
+  const handleLogout = async () => {
+    try {
+      console.log('Logging out...');
+      setProfileDropdownOpen(false);
+
+      // Call Firebase logout
+      await logout();
+
+      // Navigate to login page
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still navigate even if logout fails
+      navigate('/login');
+    }
+  };
 
   const toggleTheme = () => {
     setDarkMode(!darkMode);
@@ -230,14 +245,12 @@ const MedicalDashboard = () => {
               onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
             >
-              <div className="relative">
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-9 h-9 rounded-lg object-cover ring-2 ring-blue-100 dark:ring-slate-600"
-                />
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-600 rounded-full border-2 border-white dark:border-slate-800"></div>
+              <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-slate-600 flex items-center justify-center ring-2 ring-blue-100 dark:ring-slate-600">
+  <span className="text-sm font-semibold text-blue-800 dark:text-white">
+    {user.name.charAt(0).toUpperCase()}
+  </span>
               </div>
+
               <div className="hidden sm:block text-left">
                 <p className="text-sm font-semibold text-slate-800 dark:text-white">
                   {user.name.split(' ')[0]}
@@ -273,7 +286,7 @@ const MedicalDashboard = () => {
                 </button>
                 <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2">
                   <button 
-  onClick={() => navigate('/login')}  // ✅ This will redirect to login
+  onClick={handleLogout}  // ✅ This will redirect to login
   className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
 >
   <LogOut className="h-4 w-4" />

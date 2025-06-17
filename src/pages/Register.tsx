@@ -57,7 +57,7 @@ const Register = () => {
           title: "Welcome to SMAK!",
           description: "Your account has been created successfully.",
         });
-        navigate('/dashboard');
+        navigate('/login');
       } else {
         toast({
           title: "Registration failed",
