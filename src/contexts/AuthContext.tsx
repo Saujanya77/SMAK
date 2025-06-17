@@ -1,4 +1,14 @@
-
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  User as FirebaseUser
+} from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase"; // adjust path if needed
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
@@ -15,6 +25,7 @@ interface AuthContextType {
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 interface RegisterData {
@@ -29,66 +40,205 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
+  // Initialize auth state from localStorage on mount
   useEffect(() => {
-    // Check for existing session
-    const savedUser = localStorage.getItem('smak-user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    const initializeAuth = () => {
+      try {
+        const storedUser = localStorage.getItem("smak-user");
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error("Error parsing stored user data:", error);
+        localStorage.removeItem("smak-user");
+      }
+      setInitialized(true);
+    };
+
+    initializeAuth();
   }, []);
 
+  // Listen to Firebase auth state changes
+  useEffect(() => {
+    if (!initialized) return;
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
+
+      if (firebaseUser) {
+        try {
+          // Fetch user data from Firestore
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+
+          let userData: User;
+          if (userDoc.exists()) {
+            const firestoreData = userDoc.data();
+            userData = {
+              id: firebaseUser.uid,
+              name: firestoreData.name || firebaseUser.displayName || "User",
+              email: firebaseUser.email || "",
+              college: firestoreData.college || "Unknown",
+              year: firestoreData.year || "Unknown"
+            };
+          } else {
+            // If no Firestore document exists, create basic user object
+            userData = {
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || "User",
+              email: firebaseUser.email || "",
+              college: "Unknown",
+              year: "Unknown"
+            };
+          }
+
+          setUser(userData);
+          localStorage.setItem("smak-user", JSON.stringify(userData));
+        } catch (error) {
+          console.error("Error fetching user data from Firestore:", error);
+          // Fallback to basic user data from Firebase Auth
+          const userData: User = {
+            id: firebaseUser.uid,
+            name: firebaseUser.displayName || "User",
+            email: firebaseUser.email || "",
+            college: "Unknown",
+            year: "Unknown"
+          };
+          setUser(userData);
+          localStorage.setItem("smak-user", JSON.stringify(userData));
+        }
+      } else {
+        // User is signed out
+        setUser(null);
+        localStorage.removeItem("smak-user");
+      }
+
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [initialized]);
+
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    if (email && password) {
-      const mockUser: User = {
-        id: '1',
-        name: 'Dr. Arjun Kumar',
-        email: email,
-        college: 'AIIMS Delhi',
-        year: '4th Year'
-      };
-      setUser(mockUser);
-      localStorage.setItem('smak-user', JSON.stringify(mockUser));
+    try {
+      setLoading(true);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+
+      // Fetch additional user data from Firestore
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+
+      let userData: User;
+      if (userDoc.exists()) {
+        const firestoreData = userDoc.data();
+        userData = {
+          id: firebaseUser.uid,
+          name: firestoreData.name || firebaseUser.displayName || "User",
+          email: firebaseUser.email || "",
+          college: firestoreData.college || "Unknown",
+          year: firestoreData.year || "Unknown"
+        };
+      } else {
+        userData = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || "User",
+          email: firebaseUser.email || "",
+          college: "Unknown",
+          year: "Unknown"
+        };
+      }
+
+      setUser(userData);
+      localStorage.setItem("smak-user", JSON.stringify(userData));
+      setLoading(false);
       return true;
+    } catch (error) {
+      console.error("Login error:", error);
+      setLoading(false);
+      return false;
     }
-    return false;
   };
 
   const register = async (userData: RegisterData): Promise<boolean> => {
-    // Simulate API call
-    if (userData.email && userData.password) {
-      const newUser: User = {
-        id: Date.now().toString(),
+    try {
+      setLoading(true);
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+      const firebaseUser = userCredential.user;
+
+      // Update Firebase Auth profile
+      await updateProfile(firebaseUser, {
+        displayName: userData.name,
+      });
+
+      // Store additional data in Firestore
+      await setDoc(doc(db, 'users', firebaseUser.uid), {
         name: userData.name,
         email: userData.email,
         college: userData.college,
-        year: userData.year
+        year: userData.year,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+
+      const newUser: User = {
+        id: firebaseUser.uid,
+        name: userData.name,
+        email: userData.email,
+        college: userData.college,
+        year: userData.year,
       };
+
       setUser(newUser);
       localStorage.setItem('smak-user', JSON.stringify(newUser));
+      setLoading(false);
       return true;
+    } catch (error) {
+      console.error("Registration error:", error);
+      setLoading(false);
+      return false;
     }
-    return false;
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('smak-user');
+  const logout = async () => {
+    try {
+      setLoading(true);
+      await signOut(auth);
+      setUser(null);
+      localStorage.removeItem("smak-user");
+      setLoading(false);
+    } catch (error) {
+      console.error("Logout error:", error);
+      setLoading(false);
+    }
   };
+
+  // Don't render children until auth is initialized
+  if (!initialized) {
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+          <p className="ml-4">Initializing...</p>
+        </div>
+    );
+  }
 
   const value = {
     user,
     login,
     register,
     logout,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    loading
   };
 
   return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider value={value}>
+        {children}
+      </AuthContext.Provider>
   );
 };
 
