@@ -31,6 +31,7 @@ import {
   TrendingUp,
   Send
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface BlogProps {
   onBack: () => void;
@@ -265,6 +266,16 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
     }
   ]);
 
+  const { user, logout } = useAuth();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setProfileDropdownOpen(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
   const [newBlog, setNewBlog] = useState({
     title: '',
     author: '',
@@ -275,12 +286,7 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
     coverImage: null as File | null
   });
 
-  const user = {
-    name: "Dr. John Doe",
-    year: "3rd Year MBBS",
-    college: "SMAK Medical College",
-    avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face"
-  };
+
 
   const categories = ['All', 'Healthcare Technology', 'Medical Education', 'Research', 'Preventive Medicine', 'Medical Technology', 'Pediatrics'];
 
@@ -293,11 +299,7 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
     }
   };
 
-  const handleLogout = () => {
-    console.log('Logging out...');
-    setProfileDropdownOpen(false);
-    navigate('/login');
-  };
+
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -576,7 +578,7 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
             </p>
             <div className="flex items-center justify-center space-x-4">
               <Button 
-                onClick={() => setShowAddForm(true)}
+                onClick={() => setShowAddForm(prevState => !prevState)}
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg px-8 py-3"
               >
                 <Plus className="h-5 w-5 mr-2" />
@@ -588,7 +590,111 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
               </Button>
             </div>
           </div>
-
+          {/* Add New Blog Form */}
+          {showAddForm && (
+              <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-blue-800 dark:text-blue-300 flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Share Your Medical Story
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Blog Title</label>
+                    <Input
+                        placeholder="What's your story about?"
+                        value={newBlog.title}
+                        onChange={(e) => setNewBlog(prev => ({ ...prev, title: e.target.value }))}
+                        className="text-lg"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Author</label>
+                      <Input
+                          placeholder="Your name"
+                          value={newBlog.author}
+                          onChange={(e) => setNewBlog(prev => ({ ...prev, author: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                      <Input
+                          placeholder="e.g., Healthcare Technology, Medical Education"
+                          value={newBlog.category}
+                          onChange={(e) => setNewBlog(prev => ({ ...prev, category: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+                      <Input
+                          placeholder="Add tags separated by commas"
+                          value={newBlog.tags}
+                          onChange={(e) => setNewBlog(prev => ({ ...prev, tags: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brief Summary</label>
+                    <Textarea
+                        placeholder="Give readers a preview of what they'll learn..."
+                        rows={3}
+                        value={newBlog.excerpt}
+                        onChange={(e) => setNewBlog(prev => ({ ...prev, excerpt: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Your Story</label>
+                    <Textarea
+                        placeholder="Share your insights, experiences, and knowledge with the community..."
+                        rows={12}
+                        value={newBlog.content}
+                        onChange={(e) => setNewBlog(prev => ({ ...prev, content: e.target.value }))}
+                        className="min-h-[200px]"
+                    />
+                  </div>
+                  <div>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="image-upload"
+                    />
+                    <Button
+                        variant="outline"
+                        className={`flex items-center ${newBlog.coverImage ? 'bg-green-50 border-green-300 text-green-700' : ''}`}
+                        asChild
+                    >
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <Upload className="h-4 w-4 mr-2" />
+                        {newBlog.coverImage ? `Image: ${newBlog.coverImage.name}` : 'Add Cover Image'}
+                      </label>
+                    </Button>
+                    {newBlog.coverImage && (
+                        <div className="mt-4">
+                          <img
+                              src={URL.createObjectURL(newBlog.coverImage)}
+                              alt="Cover preview"
+                              className="w-full max-w-md h-32 object-cover rounded-lg border shadow-md"
+                          />
+                        </div>
+                    )}
+                  </div>
+                  <div className="flex space-x-4">
+                    <Button
+                        onClick={handleAddBlog}
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-8"
+                        disabled={!newBlog.title || !newBlog.author || !newBlog.content || !newBlog.excerpt}
+                    >
+                      Publish Story
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                  </div>
+                </CardContent>
+              </Card>
+          )}
           {/* Featured Blogs Section */}
           {featuredBlogs.length > 0 && (
             <div className="mb-12">
@@ -679,111 +785,7 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
             ))}
           </div>
 
-          {/* Add New Blog Form */}
-          {showAddForm && (
-            <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-blue-800 dark:text-blue-300 flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Share Your Medical Story
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Blog Title</label>
-                  <Input 
-                    placeholder="What's your story about?" 
-                    value={newBlog.title}
-                    onChange={(e) => setNewBlog(prev => ({ ...prev, title: e.target.value }))}
-                    className="text-lg"
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Author</label>
-                    <Input 
-                      placeholder="Your name" 
-                      value={newBlog.author}
-                      onChange={(e) => setNewBlog(prev => ({ ...prev, author: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
-                    <Input 
-                      placeholder="e.g., Healthcare Technology, Medical Education" 
-                      value={newBlog.category}
-                      onChange={(e) => setNewBlog(prev => ({ ...prev, category: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
-                    <Input 
-                      placeholder="Add tags separated by commas" 
-                      value={newBlog.tags}
-                      onChange={(e) => setNewBlog(prev => ({ ...prev, tags: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brief Summary</label>
-                  <Textarea 
-                    placeholder="Give readers a preview of what they'll learn..." 
-                    rows={3} 
-                    value={newBlog.excerpt}
-                    onChange={(e) => setNewBlog(prev => ({ ...prev, excerpt: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Your Story</label>
-                  <Textarea 
-                    placeholder="Share your insights, experiences, and knowledge with the community..." 
-                    rows={12} 
-                    value={newBlog.content}
-                    onChange={(e) => setNewBlog(prev => ({ ...prev, content: e.target.value }))}
-                    className="min-h-[200px]"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <Button 
-                    variant="outline" 
-                    className={`flex items-center ${newBlog.coverImage ? 'bg-green-50 border-green-300 text-green-700' : ''}`} 
-                    asChild
-                  >
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <Upload className="h-4 w-4 mr-2" />
-                      {newBlog.coverImage ? `Image: ${newBlog.coverImage.name}` : 'Add Cover Image'}
-                    </label>
-                  </Button>
-                  {newBlog.coverImage && (
-                    <div className="mt-4">
-                      <img 
-                        src={URL.createObjectURL(newBlog.coverImage)} 
-                        alt="Cover preview" 
-                        className="w-full max-w-md h-32 object-cover rounded-lg border shadow-md"
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="flex space-x-4">
-                  <Button 
-                    onClick={handleAddBlog}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-8"
-                    disabled={!newBlog.title || !newBlog.author || !newBlog.content || !newBlog.excerpt}
-                  >
-                    Publish Story
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
 
           {/* All Blogs Section */}
           <div className="mb-8">
