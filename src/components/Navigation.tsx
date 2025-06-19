@@ -49,11 +49,11 @@ const Navigation = () => {
     try {
       // Call logout function from context
       await logout();
-      
+
       // Close any open menus
       setIsOpen(false);
       setIsMobileMenuOpen(false);
-      
+
       // Redirect to login page
       navigate('/login');
     } catch (error) {
