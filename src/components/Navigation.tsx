@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
+import Logo from '../Images/Logo.jpg';
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -71,8 +71,8 @@ const Navigation = () => {
           
 <Link to="/" className="flex items-center space-x-3">
   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-gray-100">
-    <img 
-      src="/src/Images/Logo.jpg" 
+    <img
+      src= {Logo}
       alt="SMAK - Society For Medical Academia and Knowledge Logo" 
       className="w-10 h-10 object-contain"
     />
