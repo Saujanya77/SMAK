@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Bell, Search, Sun, Moon, Upload, Eye, Plus, Edit, Trash2, Play, BookOpen, Brain, Users, Clock, FileText, Download } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,29 +7,38 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import {db, storage} from "@/firebase.ts";
+
+
+
 interface QuestionBank {
-  id: number;
+  id: string;
   title: string;
   description: string;
   questions: number;
   uploadDate: string;
   documentUrl?: string;
+  documentName?: string;
   category?: string;
   difficulty?: 'Easy' | 'Medium' | 'Hard';
+  createdAt: Date;
 }
 
 interface MCQTest {
-  id: number;
+  id: string;
   title: string;
   questions: MCQQuestion[];
   totalMarks: number;
   duration: number;
   category?: string;
   difficulty?: 'Easy' | 'Medium' | 'Hard';
+  createdAt: Date;
 }
 
 interface MCQQuestion {
-  id: number;
+  id: string;
   question: string;
   options: string[];
   correctAnswer: number;
@@ -45,91 +54,13 @@ const MCQQuestionBank = () => {
   const [previewDocument, setPreviewDocument] = useState<string | null>(null);
   const [showMCQTest, setShowMCQTest] = useState<MCQTest | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<{[key: number]: number}>({});
+  const [answers, setAnswers] = useState<{[key: string]: number}>({});
+  const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Sample data with enhanced properties
-  const [questionBanks, setQuestionBanks] = useState<QuestionBank[]>([
-    {
-      id: 1,
-      title: "Cardiology Question Bank",
-      description: "Comprehensive collection of cardiology questions covering all major topics including arrhythmias, heart failure, and interventional cardiology",
-      questions: 150,
-      uploadDate: "2024-01-15",
-      documentUrl: "sample-cardiology.pdf",
-      category: "Cardiology",
-      difficulty: "Hard"
-    },
-    {
-      id: 2,
-      title: "Neurology MCQs",
-      description: "Advanced neurology questions for medical students and professionals covering neuroanatomy, pathophysiology, and clinical cases",
-      questions: 120,
-      uploadDate: "2024-01-10",
-      documentUrl: "sample-neurology.pdf",
-      category: "Neurology", 
-      difficulty: "Medium"
-    },
-    {
-      id: 3,
-      title: "Internal Medicine Basics",
-      description: "Essential internal medicine questions covering diabetes, hypertension, and common medical conditions",
-      questions: 200,
-      uploadDate: "2024-01-08",
-      category: "Internal Medicine",
-      difficulty: "Easy"
-    }
-  ]);
-
-  const [mcqTests, setMcqTests] = useState<MCQTest[]>([
-    {
-      id: 1,
-      title: "Basic Anatomy Test",
-      totalMarks: 50,
-      duration: 60,
-      category: "Anatomy",
-      difficulty: "Easy",
-      questions: [
-        {
-          id: 1,
-          question: "Which is the largest organ in the human body?",
-          options: ["Heart", "Liver", "Skin", "Brain"],
-          correctAnswer: 2,
-          marks: 5
-        },
-        {
-          id: 2,
-          question: "How many bones are there in an adult human body?",
-          options: ["198", "206", "215", "225"],
-          correctAnswer: 1,
-          marks: 5
-        },
-        {
-          id: 3,
-          question: "Which part of the brain controls balance and coordination?",
-          options: ["Cerebrum", "Cerebellum", "Medulla", "Pons"],
-          correctAnswer: 1,
-          marks: 5
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: "Advanced Pharmacology",
-      totalMarks: 100,
-      duration: 120,
-      category: "Pharmacology",
-      difficulty: "Hard",
-      questions: [
-        {
-          id: 1,
-          question: "What is the mechanism of action of ACE inhibitors?",
-          options: ["Block calcium channels", "Inhibit angiotensin converting enzyme", "Block beta receptors", "Inhibit sodium channels"],
-          correctAnswer: 1,
-          marks: 10
-        }
-      ]
-    }
-  ]);
+  // State for Firebase data
+  const [questionBanks, setQuestionBanks] = useState<QuestionBank[]>([]);
+  const [mcqTests, setMcqTests] = useState<MCQTest[]>([]);
 
   const [newQuestionBank, setNewQuestionBank] = useState({
     title: '',
@@ -154,58 +85,208 @@ const MCQQuestionBank = () => {
     marks: 1
   });
 
-  const handleAddQuestionBank = () => {
-    if (newQuestionBank.title && newQuestionBank.description) {
-      const questionBank: QuestionBank = {
-        id: Date.now(),
+  // Load data from Firebase on component mount
+  useEffect(() => {
+    loadQuestionBanks();
+    loadMCQTests();
+  }, []);
+
+  const loadQuestionBanks = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'questionBanks'));
+      const banks: QuestionBank[] = [];
+      querySnapshot.forEach((doc) => {
+        banks.push({ id: doc.id, ...doc.data() } as QuestionBank);
+      });
+      banks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      setQuestionBanks(banks);
+    } catch (error) {
+      console.error('Error loading question banks:', error);
+    }
+  };
+
+  const loadMCQTests = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'mcqTests'));
+      const tests: MCQTest[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        tests.push({
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date()
+        } as MCQTest);
+      });
+      tests.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      setMcqTests(tests);
+    } catch (error) {
+      console.error('Error loading MCQ tests:', error);
+    }
+  };
+
+  const uploadFile = async (file: File): Promise<{ url: string; name: string }> => {
+    const fileRef = ref(storage, `questionBanks/${Date.now()}_${file.name}`);
+
+    try {
+      setUploadProgress(0);
+      const snapshot = await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      setUploadProgress(100);
+
+      return {
+        url: downloadURL,
+        name: file.name
+      };
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
+  };
+
+  const handleAddQuestionBank = async () => {
+    if (!newQuestionBank.title || !newQuestionBank.description) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let documentUrl = '';
+      let documentName = '';
+
+      // Upload file if provided
+      if (newQuestionBank.file) {
+        const uploadResult = await uploadFile(newQuestionBank.file);
+        documentUrl = uploadResult.url;
+        documentName = uploadResult.name;
+      }
+
+      const questionBank = {
         title: newQuestionBank.title,
         description: newQuestionBank.description,
-        questions: Math.floor(Math.random() * 100) + 50,
+        questions: Math.floor(Math.random() * 100) + 50, // You can make this dynamic
         uploadDate: new Date().toISOString().split('T')[0],
-        documentUrl: newQuestionBank.file?.name,
+        documentUrl,
+        documentName,
         category: newQuestionBank.category,
-        difficulty: newQuestionBank.difficulty
+        difficulty: newQuestionBank.difficulty,
+        createdAt: new Date()
       };
-      setQuestionBanks([...questionBanks, questionBank]);
+
+      await addDoc(collection(db, 'questionBanks'), questionBank);
+
+      // Reset form
       setNewQuestionBank({ title: '', description: '', file: null, category: '', difficulty: 'Medium' });
       setShowAddQuestionBank(false);
+      setUploadProgress(0);
+
+      // Reload data
+      await loadQuestionBanks();
+
+    } catch (error) {
+      console.error('Error adding question bank:', error);
+      alert('Error adding question bank. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteQuestionBank = async (id: string, documentUrl?: string) => {
+    if (!confirm('Are you sure you want to delete this question bank?')) return;
+
+    try {
+      // Delete from Firestore
+      await deleteDoc(doc(db, 'questionBanks', id));
+
+      // Delete file from Storage if exists
+      if (documentUrl) {
+        try {
+          const fileRef = ref(storage, documentUrl);
+          await deleteObject(fileRef);
+        } catch (error) {
+          console.log('File already deleted or does not exist');
+        }
+      }
+
+      // Reload data
+      await loadQuestionBanks();
+
+    } catch (error) {
+      console.error('Error deleting question bank:', error);
+      alert('Error deleting question bank. Please try again.');
     }
   };
 
   const handleAddQuestion = () => {
-    if (newQuestion.question && newQuestion.options.every(opt => opt.trim())) {
-      const questionWithId: MCQQuestion = {
-        ...newQuestion,
-        id: Date.now()
-      };
-      setNewMCQ({
-        ...newMCQ,
-        questions: [...newMCQ.questions, questionWithId]
-      });
-      setNewQuestion({
-        question: '',
-        options: ['', '', '', ''],
-        correctAnswer: 0,
-        marks: 1
-      });
+    if (!newQuestion.question || !newQuestion.options.every(opt => opt.trim())) {
+      alert('Please fill in the question and all options');
+      return;
     }
+
+    const questionWithId: MCQQuestion = {
+      ...newQuestion,
+      id: `q_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    };
+
+    setNewMCQ({
+      ...newMCQ,
+      questions: [...newMCQ.questions, questionWithId]
+    });
+
+    setNewQuestion({
+      question: '',
+      options: ['', '', '', ''],
+      correctAnswer: 0,
+      marks: 1
+    });
   };
 
-  const handleSaveMCQ = () => {
-    if (newMCQ.title && newMCQ.questions.length > 0) {
+  const handleSaveMCQ = async () => {
+    if (!newMCQ.title || newMCQ.questions.length === 0) {
+      alert('Please provide a title and add at least one question');
+      return;
+    }
+
+    setLoading(true);
+    try {
       const totalMarks = newMCQ.questions.reduce((sum, q) => sum + q.marks, 0);
-      const mcqTest: MCQTest = {
-        id: Date.now(),
+
+      const mcqTest = {
         title: newMCQ.title,
         duration: newMCQ.duration,
         totalMarks,
         category: newMCQ.category,
         difficulty: newMCQ.difficulty,
-        questions: newMCQ.questions
+        questions: newMCQ.questions,
+        createdAt: new Date()
       };
-      setMcqTests([...mcqTests, mcqTest]);
+
+      await addDoc(collection(db, 'mcqTests'), mcqTest);
+
+      // Reset form
       setNewMCQ({ title: '', duration: 60, category: '', difficulty: 'Medium', questions: [] });
       setShowAddMCQ(false);
+
+      // Reload data
+      await loadMCQTests();
+
+    } catch (error) {
+      console.error('Error saving MCQ test:', error);
+      alert('Error saving MCQ test. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteMCQ = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this MCQ test?')) return;
+
+    try {
+      await deleteDoc(doc(db, 'mcqTests', id));
+      await loadMCQTests();
+    } catch (error) {
+      console.error('Error deleting MCQ test:', error);
+      alert('Error deleting MCQ test. Please try again.');
     }
   };
 
@@ -215,7 +296,7 @@ const MCQQuestionBank = () => {
     setAnswers({});
   };
 
-  const handleAnswerSelect = (questionId: number, answerIndex: number) => {
+  const handleAnswerSelect = (questionId: string, answerIndex: number) => {
     setAnswers(prev => ({
       ...prev,
       [questionId]: answerIndex
@@ -236,14 +317,14 @@ const MCQQuestionBank = () => {
 
   const handleSubmitTest = () => {
     if (!showMCQTest) return;
-    
+
     let score = 0;
     showMCQTest.questions.forEach(question => {
       if (answers[question.id] === question.correctAnswer) {
         score += question.marks;
       }
     });
-    
+
     alert(`Test completed! Your score: ${score}/${showMCQTest.totalMarks}`);
     setShowMCQTest(null);
     setAnswers({});
@@ -258,6 +339,18 @@ const MCQQuestionBank = () => {
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
     }
   };
+
+  const filteredQuestionBanks = questionBanks.filter(bank =>
+      bank.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bank.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bank.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredMCQTests = mcqTests.filter(test =>
+      test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      test.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
 
   // MCQ Test Interface
   if (showMCQTest) {
@@ -450,6 +543,7 @@ const MCQQuestionBank = () => {
                 <Sun className={`h-4 w-4 ${isDarkMode ? 'text-gray-400' : 'text-blue-600'}`} />
                 <Switch
                   checked={isDarkMode}
+
                   onCheckedChange={setIsDarkMode}
                 />
                 <Moon className={`h-4 w-4 ${isDarkMode ? 'text-blue-400' : 'text-gray-400'}`} />
@@ -788,7 +882,7 @@ const MCQQuestionBank = () => {
                         className={`${
                           isDarkMode 
                             ? 'border-blue-700 text-blue-300 hover:bg-blue-800/30' 
-                            : 'border-blue-200 text-blue-700 hover:bg-blue-50'
+                            : 'border-blue-200 text-blue-700 hover:bg-blue-50 bg-white'
                         } flex-1`}
                       >
                         <Eye className="h-3 w-3 mr-1" />
@@ -801,7 +895,7 @@ const MCQQuestionBank = () => {
                       className={`${
                         isDarkMode 
                           ? 'border-blue-700 text-blue-300 hover:bg-blue-800/30' 
-                          : 'border-blue-200 text-blue-700 hover:bg-blue-50'
+                          : 'border-blue-200 text-blue-700 hover:bg-blue-50 bg-white'
                       } flex-1`}
                     >
                       <Edit className="h-3 w-3 mr-1" />
@@ -1097,7 +1191,7 @@ const MCQQuestionBank = () => {
                       className={`${
                         isDarkMode 
                           ? 'border-blue-700 text-blue-300 hover:bg-blue-800/30' 
-                          : 'border-blue-200 text-blue-700 hover:bg-blue-50'
+                          : 'border-blue-200 text-blue-700 hover:bg-blue-50 bg-white'
                       } flex-1`}
                     >
                       <Edit className="h-3 w-3 mr-1" />
