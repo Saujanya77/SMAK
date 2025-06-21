@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import Navigation from '@/components/Navigation';
 import { Stethoscope, ShieldCheck, Users } from 'lucide-react';
-
+import LoginPic from '../Images/login.jpg'
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,7 +58,7 @@ const Login = () => {
           <div className="hidden lg:block">
             <div className="relative">
               <img 
-                src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&h=800&fit=crop&crop=center" 
+                src={LoginPic}
                 alt="Medical professionals in discussion"
                 className="rounded-2xl shadow-2xl w-full h-[600px] object-cover"
               />

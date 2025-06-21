@@ -75,7 +75,7 @@ import {
 } from 'lucide-react';
 import Login from './Login';
 import { useAuth } from '../contexts/AuthContext'; // adjust path as needed
-
+import Logo from '../Images/Logo.jpg'
 const MedicalDashboard = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -181,7 +181,7 @@ const MedicalDashboard = () => {
           <div className="flex items-center space-x-3">
   <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm overflow-hidden">
     <img 
-      src="src\Images\Logo.jpg" 
+      src={Logo}
       alt="SMAK Logo" 
       className="w-full h-full object-cover rounded-full"
     />
