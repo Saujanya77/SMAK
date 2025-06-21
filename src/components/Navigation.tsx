@@ -49,7 +49,6 @@ const Navigation = () => {
     try {
       // Call logout function from context
       await logout();
-
       // Close any open menus
       setIsOpen(false);
       setIsMobileMenuOpen(false);
