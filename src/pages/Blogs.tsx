@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { 
+import {
   ArrowLeft, 
   Plus, 
   Upload, 
@@ -31,13 +29,35 @@ import {
   TrendingUp,
   Send
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  increment,
+  serverTimestamp,
+  Timestamp
+} from 'firebase/firestore';
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+
+} from 'firebase/storage';
+import { db, storage } from '../firebase.ts';
 
 interface BlogProps {
   onBack: () => void;
 }
 
 interface Blog {
-  id: number;
+  id: string;
   title: string;
   author: string;
   category: string;
@@ -52,11 +72,18 @@ interface Blog {
   image: string;
   tags: string[];
   featured?: boolean;
+  createdAt?: Timestamp;
 }
-
+interface Comment {
+  id: string;
+  author: string;
+  text: string;
+  date: string;
+  blogId: string;
+}
 const Blog: React.FC<BlogProps> = ({ onBack }) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -64,210 +91,27 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [likedBlogs, setLikedBlogs] = useState<Set<number>>(new Set());
-  const [bookmarkedBlogs, setBookmarkedBlogs] = useState<Set<number>>(new Set());
-  const [comments, setComments] = useState<{[key: number]: Array<{id: number, author: string, text: string, date: string}>}>({});
+  const [likedBlogs, setLikedBlogs] = useState<Set<string>>(new Set());
+  const [bookmarkedBlogs, setBookmarkedBlogs] = useState<Set<string>>(new Set());
+  const [comments, setComments] = useState<{[key: string]: Comment[]}>({});
   const [newComment, setNewComment] = useState('');
   const [showComments, setShowComments] = useState(false);
-  const [commentBlogId, setCommentBlogId] = useState<number | null>(null);
-
-  const [blogs, setBlogs] = useState<Blog[]>([
-    {
-      id: 1,
-      title: "The Future of Telemedicine: Revolutionizing Healthcare Access",
-      author: "Dr. Sarah Johnson",
-      category: "Healthcare Technology",
-      content: `
-        <div class="blog-content">
-          <h2>Introduction</h2>
-          <p>Telemedicine has emerged as one of the most significant innovations in healthcare delivery, especially in the wake of the global pandemic. This revolutionary approach to medical care is transforming how patients access healthcare services and how providers deliver care.</p>
-          
-          <h2>Key Benefits of Telemedicine</h2>
-          <p>The adoption of telemedicine brings numerous advantages:</p>
-          <ul>
-            <li><strong>Increased Access:</strong> Patients in remote areas can now access specialized care without traveling long distances.</li>
-            <li><strong>Cost-Effective:</strong> Reduced overhead costs for both patients and healthcare providers.</li>
-            <li><strong>Convenience:</strong> Appointments can be scheduled more flexibly, reducing waiting times.</li>
-            <li><strong>Continuity of Care:</strong> Chronic disease management becomes more efficient with regular virtual check-ups.</li>
-          </ul>
-          
-          <h2>Challenges and Solutions</h2>
-          <p>Despite its benefits, telemedicine faces several challenges including technology barriers, regulatory issues, and the need for digital literacy among patients. Healthcare institutions are addressing these challenges through comprehensive training programs and user-friendly platforms.</p>
-          
-          <h2>The Road Ahead</h2>
-          <p>As technology continues to advance, we can expect to see even more sophisticated telemedicine solutions, including AI-powered diagnostics, virtual reality consultations, and integrated health monitoring systems.</p>
-        </div>
-      `,
-      excerpt: "Exploring how telemedicine is transforming healthcare delivery and making medical care more accessible to patients worldwide through innovative technology solutions.",
-      publishedDate: "March 15, 2024",
-      readTime: "8 min read",
-      likes: 142,
-      views: 3246,
-      comments: 28,
-      status: "Published",
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=400&fit=crop",
-      tags: ["Telemedicine", "Healthcare", "Technology", "Digital Health"],
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Mental Health in Medical School: Breaking the Silence",
-      author: "Alex Chen",
-      category: "Medical Education",
-      content: `
-        <div class="blog-content">
-          <h2>The Hidden Struggle</h2>
-          <p>Medical school is often portrayed as a challenging but rewarding journey. However, the mental health challenges faced by medical students are often overlooked or stigmatized within the medical community.</p>
-          
-          <h2>Common Mental Health Issues</h2>
-          <p>Medical students face unique stressors that can impact their mental well-being:</p>
-          <ul>
-            <li><strong>Academic Pressure:</strong> The demanding curriculum and high expectations can lead to chronic stress and anxiety.</li>
-            <li><strong>Financial Stress:</strong> The cost of medical education creates additional pressure and worry.</li>
-            <li><strong>Work-Life Balance:</strong> Long study hours and clinical rotations leave little time for personal relationships and self-care.</li>
-            <li><strong>Imposter Syndrome:</strong> Many students struggle with feelings of inadequacy despite their achievements.</li>
-          </ul>
-          
-          <h2>Breaking the Stigma</h2>
-          <p>It's crucial to normalize conversations about mental health in medical education. Seeking help should be viewed as a sign of strength, not weakness.</p>
-          
-          <h2>Resources and Support</h2>
-          <p>Medical schools are increasingly recognizing the importance of student mental health and implementing support systems including counseling services, peer support groups, and wellness programs.</p>
-        </div>
-      `,
-      excerpt: "An honest discussion about mental health challenges in medical school and the importance of seeking support in a demanding academic environment.",
-      publishedDate: "March 12, 2024",
-      readTime: "6 min read",
-      likes: 89,
-      views: 1854,
-      comments: 15,
-      status: "Published",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=400&fit=crop",
-      tags: ["Mental Health", "Medical School", "Student Life", "Wellness"]
-    },
-    {
-      id: 3,
-      title: "Breaking Into Medical Research: A Complete Guide",
-      author: "Dr. Michael Rodriguez",
-      category: "Research",
-      content: `
-        <div class="blog-content">
-          <h2>Why Medical Research Matters</h2>
-          <p>Medical research is the cornerstone of advancing healthcare and improving patient outcomes. For medical students and early-career professionals, getting involved in research can be both rewarding and career-defining.</p>
-          
-          <h2>Getting Started</h2>
-          <p>Here are essential steps for beginners interested in medical research:</p>
-          <ol>
-            <li><strong>Identify Your Interests:</strong> Choose a field that genuinely excites you, whether it's clinical research, basic science, or public health.</li>
-            <li><strong>Find a Mentor:</strong> Connect with experienced researchers who can guide your journey and provide valuable insights.</li>
-            <li><strong>Start Small:</strong> Begin with literature reviews or assist in ongoing projects before leading your own research.</li>
-            <li><strong>Learn the Basics:</strong> Understand research methodology, statistics, and ethical considerations.</li>
-          </ol>
-          
-          <h2>Types of Medical Research</h2>
-          <p>Medical research encompasses various approaches including clinical trials, observational studies, systematic reviews, and laboratory research. Each type has its own methodology and applications.</p>
-          
-          <h2>Building Your Research Portfolio</h2>
-          <p>Consistency is key in research. Regular participation in research activities, publishing papers, and presenting at conferences will help build a strong research portfolio.</p>
-        </div>
-      `,
-      excerpt: "Essential tips and guidance for medical students and professionals looking to start their research journey and build a successful academic career.",
-      publishedDate: "March 10, 2024",
-      readTime: "10 min read",
-      likes: 176,
-      views: 2567,
-      comments: 34,
-      status: "Published",
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=400&fit=crop",
-      tags: ["Research", "Medical Research", "Career Development", "Academic Medicine"]
-    },
-    {
-      id: 4,
-      title: "Nutrition and Prevention: The Power of Food as Medicine",
-      author: "Dr. Emma Thompson",
-      category: "Preventive Medicine",
-      content: `
-        <div class="blog-content">
-          <h2>Food as Medicine</h2>
-          <p>The concept of food as medicine is not new, but it's gaining renewed attention in modern healthcare. Proper nutrition plays a crucial role in preventing chronic diseases and promoting overall health.</p>
-          
-          <h2>The Science Behind Nutritional Medicine</h2>
-          <p>Recent research has shown that specific nutrients can have powerful effects on our health, from reducing inflammation to supporting immune function and preventing disease.</p>
-          
-          <h2>Practical Applications</h2>
-          <p>Healthcare providers are increasingly incorporating nutritional counseling into their practice, recognizing that dietary interventions can be as effective as medications for certain conditions.</p>
-        </div>
-      `,
-      excerpt: "Discover how proper nutrition can serve as powerful medicine in preventing chronic diseases and promoting optimal health outcomes.",
-      publishedDate: "March 8, 2024",
-      readTime: "7 min read",
-      likes: 98,
-      views: 1432,
-      comments: 19,
-      status: "Published",
-      image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=400&fit=crop",
-      tags: ["Nutrition", "Preventive Medicine", "Wellness", "Lifestyle Medicine"]
-    },
-    {
-      id: 5,
-      title: "The Rise of Artificial Intelligence in Medical Diagnosis",
-      author: "Dr. James Kim",
-      category: "Medical Technology",
-      content: `
-        <div class="blog-content">
-          <h2>AI Revolution in Healthcare</h2>
-          <p>Artificial Intelligence is transforming medical diagnosis, offering unprecedented accuracy and speed in detecting diseases that were previously difficult to diagnose early.</p>
-          
-          <h2>Current Applications</h2>
-          <p>From radiology to pathology, AI systems are now assisting doctors in making more accurate diagnoses and treatment decisions.</p>
-          
-          <h2>Future Implications</h2>
-          <p>As AI technology continues to evolve, we can expect even more sophisticated diagnostic tools that will revolutionize patient care.</p>
-        </div>
-      `,
-      excerpt: "Exploring how artificial intelligence is revolutionizing medical diagnosis and what the future holds for AI-powered healthcare solutions.",
-      publishedDate: "March 5, 2024",
-      readTime: "9 min read",
-      likes: 203,
-      views: 4321,
-      comments: 45,
-      status: "Published",
-      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop",
-      tags: ["Artificial Intelligence", "Medical Technology", "Diagnosis", "Innovation"],
-      featured: true
-    },
-    {
-      id: 6,
-      title: "Pediatric Care During Pandemic: Lessons Learned",
-      author: "Dr. Maria Garcia",
-      category: "Pediatrics",
-      content: `
-        <div class="blog-content">
-          <h2>Adapting Pediatric Care</h2>
-          <p>The pandemic has significantly changed how we approach pediatric care, from telemedicine adoption to new safety protocols in clinical settings.</p>
-          
-          <h2>Key Challenges</h2>
-          <p>Healthcare providers had to quickly adapt to new challenges while maintaining quality care for children and their families.</p>
-          
-          <h2>Moving Forward</h2>
-          <p>The lessons learned during this period will continue to shape pediatric care practices for years to come.</p>
-        </div>
-      `,
-      excerpt: "Insights into how pediatric care has evolved during the pandemic and the lasting changes that will benefit children's healthcare.",
-      publishedDate: "March 3, 2024",
-      readTime: "6 min read",
-      likes: 67,
-      views: 1234,
-      comments: 12,
-      status: "Published",
-      image: "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=800&h=400&fit=crop",
-      tags: ["Pediatrics", "Pandemic", "Healthcare", "Telemedicine"]
+  const [commentBlogId, setCommentBlogId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user, logout } = useAuth();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setProfileDropdownOpen(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
     }
-  ]);
-
+  };
   const [newBlog, setNewBlog] = useState({
     title: '',
-    author: '',
+    author: user.name,
     category: '',
     content: '',
     excerpt: '',
@@ -275,12 +119,7 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
     coverImage: null as File | null
   });
 
-  const user = {
-    name: "Dr. John Doe",
-    year: "3rd Year MBBS",
-    college: "SMAK Medical College",
-    avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face"
-  };
+
 
   const categories = ['All', 'Healthcare Technology', 'Medical Education', 'Research', 'Preventive Medicine', 'Medical Technology', 'Pediatrics'];
 
@@ -293,44 +132,105 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
     }
   };
 
-  const handleLogout = () => {
-    console.log('Logging out...');
-    setProfileDropdownOpen(false);
-    navigate('/login');
-  };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setNewBlog(prev => ({ ...prev, coverImage: file }));
-      setUploadedImage(file);
-      console.log('Cover image uploaded:', file.name);
+
+  const fetchBlogs = async () => {
+    try {
+      const blogsQuery = query(
+          collection(db, 'blogs'),
+          orderBy('createdAt', 'desc')
+      );
+
+      const unsubscribe = onSnapshot(blogsQuery, (snapshot) => {
+        const blogsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          publishedDate: doc.data().createdAt?.toDate().toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+          }) || new Date().toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+          })
+        })) as Blog[];
+
+        setBlogs(blogsData);
+        setLoading(false);
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+      setLoading(false);
     }
   };
 
-  const handleAddBlog = () => {
-    if (newBlog.title && newBlog.author && newBlog.content && newBlog.excerpt) {
-      const blog: Blog = {
-        id: Date.now(),
+  const fetchComments = async (blogId: string) => {
+    try {
+      const commentsQuery = query(
+          collection(db, 'comments'),
+          orderBy('createdAt', 'desc')
+      );
+
+      const snapshot = await getDocs(commentsQuery);
+      const commentsData = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(comment => comment.blogId === blogId) as Comment[];
+
+      setComments(prev => ({
+        ...prev,
+        [blogId]: commentsData
+      }));
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const imageRef = ref(storage, `blog-images/${Date.now()}-${file.name}`);
+    const snapshot = await uploadBytes(imageRef, file);
+    return await getDownloadURL(snapshot.ref);
+  };
+
+  const handleAddBlog = async () => {
+    if (!newBlog.title || !newBlog.content || !newBlog.excerpt) {
+      showToast('Please fill in all required fields', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      let imageUrl = "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop";
+
+      if (newBlog.coverImage) {
+        imageUrl = await uploadImage(newBlog.coverImage);
+      }
+
+      const blogData = {
         title: newBlog.title,
         author: newBlog.author,
         category: newBlog.category || 'General',
         content: `<div class="blog-content">${newBlog.content.replace(/\n/g, '<br>')}</div>`,
         excerpt: newBlog.excerpt,
-        publishedDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         readTime: Math.max(1, Math.ceil(newBlog.content.split(' ').length / 200)) + ' min read',
         likes: 0,
         views: 0,
         comments: 0,
         status: 'Published',
-        image: newBlog.coverImage ? URL.createObjectURL(newBlog.coverImage) : "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop",
-        tags: newBlog.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        image: imageUrl,
+        tags: newBlog.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        featured: false,
+        createdAt: serverTimestamp()
       };
 
-      setBlogs(prev => [blog, ...prev]);
+      await addDoc(collection(db, 'blogs'), blogData);
+
+      // Reset form
       setNewBlog({
         title: '',
-        author: '',
+        author: user.name,
         category: '',
         content: '',
         excerpt: '',
@@ -339,71 +239,118 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
       });
       setUploadedImage(null);
       setShowAddForm(false);
-      
-      console.log('Blog added:', blog);
+
+      showToast('Blog published successfully!', 'success');
+    } catch (error) {
+      console.error('Error adding blog:', error);
+      showToast('Error publishing blog. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleViewBlog = (blog: Blog) => {
+  const handleViewBlog = async (blog: Blog) => {
     setSelectedBlog(blog);
     setShowPreview(true);
-    // Increment views
-    setBlogs(prev => prev.map(b => 
-      b.id === blog.id ? { ...b, views: b.views + 1 } : b
-    ));
-  };
 
-  const handleLikeBlog = (blogId: number) => {
-    const isLiked = likedBlogs.has(blogId);
-    
-    if (isLiked) {
-      setLikedBlogs(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(blogId);
-        return newSet;
+    // Increment views
+    try {
+      const blogRef = doc(db, 'blogs', blog.id);
+      await updateDoc(blogRef, {
+        views: increment(1)
       });
-      setBlogs(prev => prev.map(blog => 
-        blog.id === blogId 
-          ? { ...blog, likes: blog.likes - 1 }
-          : blog
-      ));
-      toast({
-        title: "Like removed",
-        description: "You unliked this blog post.",
-      });
-    } else {
-      setLikedBlogs(prev => new Set(prev).add(blogId));
-      setBlogs(prev => prev.map(blog => 
-        blog.id === blogId 
-          ? { ...blog, likes: blog.likes + 1 }
-          : blog
-      ));
-      toast({
-        title: "Blog liked!",
-        description: "You liked this blog post.",
-      });
+    } catch (error) {
+      console.error('Error updating views:', error);
     }
   };
 
-  const handleBookmarkBlog = (blogId: number) => {
+  const handleLikeBlog = async (blogId: string) => {
+    const isLiked = likedBlogs.has(blogId);
+
+    try {
+      const blogRef = doc(db, 'blogs', blogId);
+
+      if (isLiked) {
+        setLikedBlogs(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(blogId);
+          return newSet;
+        });
+        await updateDoc(blogRef, {
+          likes: increment(-1)
+        });
+        showToast('Like removed', 'info');
+      } else {
+        setLikedBlogs(prev => new Set(prev).add(blogId));
+        await updateDoc(blogRef, {
+          likes: increment(1)
+        });
+        showToast('Blog liked!', 'success');
+      }
+    } catch (error) {
+      console.error('Error updating likes:', error);
+      showToast('Error updating like. Please try again.', 'error');
+    }
+  };
+
+  const handleBookmarkBlog = (blogId: string) => {
     const isBookmarked = bookmarkedBlogs.has(blogId);
-    
+
     if (isBookmarked) {
       setBookmarkedBlogs(prev => {
         const newSet = new Set(prev);
         newSet.delete(blogId);
         return newSet;
       });
-      toast({
-        title: "Bookmark removed",
-        description: "Blog removed from your bookmarks.",
-      });
+      showToast('Bookmark removed', 'info');
     } else {
       setBookmarkedBlogs(prev => new Set(prev).add(blogId));
-      toast({
-        title: "Blog bookmarked!",
-        description: "Blog saved to your bookmarks.",
+      showToast('Blog bookmarked!', 'success');
+    }
+  };
+
+  const handleAddComment = async (blogId: string) => {
+    if (!newComment.trim()) return;
+
+    try {
+      const commentData = {
+        author: user.name,
+        text: newComment,
+        date: new Date().toLocaleDateString(),
+        blogId: blogId,
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'comments'), commentData);
+
+      // Update comment count
+      const blogRef = doc(db, 'blogs', blogId);
+      await updateDoc(blogRef, {
+        comments: increment(1)
       });
+
+      setNewComment('');
+      showToast('Comment added!', 'success');
+
+      // Refresh comments
+      fetchComments(blogId);
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      showToast('Error adding comment. Please try again.', 'error');
+    }
+  };
+
+  const handleShowComments = (blogId: string) => {
+    setCommentBlogId(blogId);
+    setShowComments(true);
+    fetchComments(blogId);
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setNewBlog(prev => ({ ...prev, coverImage: file }));
+      setUploadedImage(file);
     }
   };
 
@@ -416,51 +363,8 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
       });
     } else {
       navigator.clipboard.writeText(window.location.href).then(() => {
-        toast({
-          title: "Link copied!",
-          description: "Blog link copied to clipboard.",
-        });
+        showToast('Link copied to clipboard!', 'success');
       });
-    }
-  };
-
-  const handleAddComment = (blogId: number) => {
-    if (!newComment.trim()) return;
-    
-    const comment = {
-      id: Date.now(),
-      author: user.name,
-      text: newComment,
-      date: new Date().toLocaleDateString()
-    };
-    
-    setComments(prev => ({
-      ...prev,
-      [blogId]: [...(prev[blogId] || []), comment]
-    }));
-    
-    setBlogs(prev => prev.map(blog => 
-      blog.id === blogId 
-        ? { ...blog, comments: blog.comments + 1 }
-        : blog
-    ));
-    
-    setNewComment('');
-    toast({
-      title: "Comment added!",
-      description: "Your comment has been posted.",
-    });
-  };
-
-  const handleShowComments = (blogId: number) => {
-    setCommentBlogId(blogId);
-    setShowComments(true);
-    // Initialize comments for blog if not exists
-    if (!comments[blogId]) {
-      setComments(prev => ({
-        ...prev,
-        [blogId]: []
-      }));
     }
   };
 
@@ -479,11 +383,37 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
     setNewComment('');
   };
 
-  const filteredBlogs = selectedCategory === 'All' 
-    ? blogs 
-    : blogs.filter(blog => blog.category === selectedCategory);
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    // Simple toast implementation
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${
+        type === 'success' ? 'bg-green-500' :
+            type === 'error' ? 'bg-red-500' :
+                'bg-blue-500'
+    }`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 3000);
+  };
+
+  // Filter blogs
+  const filteredBlogs = blogs.filter(blog => {
+    const matchesCategory = selectedCategory === 'All' || blog.category === selectedCategory;
+    const matchesSearch = blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        blog.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        blog.author.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const featuredBlogs = blogs.filter(blog => blog.featured);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
@@ -576,19 +506,120 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
             </p>
             <div className="flex items-center justify-center space-x-4">
               <Button 
-                onClick={() => setShowAddForm(true)}
+                onClick={() => setShowAddForm(prevState => !prevState)}
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg px-8 py-3"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Write Your Story
               </Button>
-              <Button variant="outline" className="px-8 py-3">
-                <TrendingUp className="h-5 w-5 mr-2" />
-                Trending Topics
-              </Button>
+
             </div>
           </div>
-
+          {/* Add New Blog Form */}
+          {showAddForm && (
+              <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-blue-800 dark:text-blue-300 flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Share Your Medical Story
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Blog Title</label>
+                    <Input
+                        placeholder="What's your story about?"
+                        value={newBlog.title}
+                        onChange={(e) => setNewBlog(prev => ({ ...prev, title: e.target.value }))}
+                        className="text-lg"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Author</label>
+                      <Input
+                          placeholder="Your name"
+                          value={newBlog.author}
+                          onChange={(e) => setNewBlog(prev => ({ ...prev, author: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                      <Input
+                          placeholder="e.g., Healthcare Technology, Medical Education"
+                          value={newBlog.category}
+                          onChange={(e) => setNewBlog(prev => ({ ...prev, category: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+                      <Input
+                          placeholder="Add tags separated by commas"
+                          value={newBlog.tags}
+                          onChange={(e) => setNewBlog(prev => ({ ...prev, tags: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brief Summary</label>
+                    <Textarea
+                        placeholder="Give readers a preview of what they'll learn..."
+                        rows={3}
+                        value={newBlog.excerpt}
+                        onChange={(e) => setNewBlog(prev => ({ ...prev, excerpt: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Your Story</label>
+                    <Textarea
+                        placeholder="Share your insights, experiences, and knowledge with the community..."
+                        rows={12}
+                        value={newBlog.content}
+                        onChange={(e) => setNewBlog(prev => ({ ...prev, content: e.target.value }))}
+                        className="min-h-[200px]"
+                    />
+                  </div>
+                  <div>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="image-upload"
+                    />
+                    <Button
+                        variant="outline"
+                        className={`flex items-center ${newBlog.coverImage ? 'bg-green-50 border-green-300 text-green-700' : ''}`}
+                        asChild
+                    >
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <Upload className="h-4 w-4 mr-2" />
+                        {newBlog.coverImage ? `Image: ${newBlog.coverImage.name}` : 'Add Cover Image'}
+                      </label>
+                    </Button>
+                    {newBlog.coverImage && (
+                        <div className="mt-4">
+                          <img
+                              src={URL.createObjectURL(newBlog.coverImage)}
+                              alt="Cover preview"
+                              className="w-full max-w-md h-32 object-cover rounded-lg border shadow-md"
+                          />
+                        </div>
+                    )}
+                  </div>
+                  <div className="flex space-x-4">
+                    <Button
+                        onClick={handleAddBlog}
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-8"
+                        disabled={!newBlog.title || !newBlog.author || !newBlog.content || !newBlog.excerpt}
+                    >
+                      Publish Story
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                  </div>
+                </CardContent>
+              </Card>
+          )}
           {/* Featured Blogs Section */}
           {featuredBlogs.length > 0 && (
             <div className="mb-12">
@@ -679,111 +710,7 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
             ))}
           </div>
 
-          {/* Add New Blog Form */}
-          {showAddForm && (
-            <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-blue-800 dark:text-blue-300 flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Share Your Medical Story
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Blog Title</label>
-                  <Input 
-                    placeholder="What's your story about?" 
-                    value={newBlog.title}
-                    onChange={(e) => setNewBlog(prev => ({ ...prev, title: e.target.value }))}
-                    className="text-lg"
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Author</label>
-                    <Input 
-                      placeholder="Your name" 
-                      value={newBlog.author}
-                      onChange={(e) => setNewBlog(prev => ({ ...prev, author: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
-                    <Input 
-                      placeholder="e.g., Healthcare Technology, Medical Education" 
-                      value={newBlog.category}
-                      onChange={(e) => setNewBlog(prev => ({ ...prev, category: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
-                    <Input 
-                      placeholder="Add tags separated by commas" 
-                      value={newBlog.tags}
-                      onChange={(e) => setNewBlog(prev => ({ ...prev, tags: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brief Summary</label>
-                  <Textarea 
-                    placeholder="Give readers a preview of what they'll learn..." 
-                    rows={3} 
-                    value={newBlog.excerpt}
-                    onChange={(e) => setNewBlog(prev => ({ ...prev, excerpt: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Your Story</label>
-                  <Textarea 
-                    placeholder="Share your insights, experiences, and knowledge with the community..." 
-                    rows={12} 
-                    value={newBlog.content}
-                    onChange={(e) => setNewBlog(prev => ({ ...prev, content: e.target.value }))}
-                    className="min-h-[200px]"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <Button 
-                    variant="outline" 
-                    className={`flex items-center ${newBlog.coverImage ? 'bg-green-50 border-green-300 text-green-700' : ''}`} 
-                    asChild
-                  >
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <Upload className="h-4 w-4 mr-2" />
-                      {newBlog.coverImage ? `Image: ${newBlog.coverImage.name}` : 'Add Cover Image'}
-                    </label>
-                  </Button>
-                  {newBlog.coverImage && (
-                    <div className="mt-4">
-                      <img 
-                        src={URL.createObjectURL(newBlog.coverImage)} 
-                        alt="Cover preview" 
-                        className="w-full max-w-md h-32 object-cover rounded-lg border shadow-md"
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="flex space-x-4">
-                  <Button 
-                    onClick={handleAddBlog}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-8"
-                    disabled={!newBlog.title || !newBlog.author || !newBlog.content || !newBlog.excerpt}
-                  >
-                    Publish Story
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
 
           {/* All Blogs Section */}
           <div className="mb-8">
