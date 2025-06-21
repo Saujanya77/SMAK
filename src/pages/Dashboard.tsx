@@ -89,7 +89,6 @@ const MedicalDashboard = () => {
     setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
   }, []);
 
-  // Apply theme to document
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
