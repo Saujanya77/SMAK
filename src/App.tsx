@@ -28,7 +28,8 @@ import VideoLectures from "./pages/VideoLectures";
 import MCQBank from "./pages/MCQBank";
 import Journals from "./pages/Journals";
 import SubjectNotes from "./pages/SubjectNotes";
-
+import Emergency_Protocols from "./pages/Emergency_Protocols";
+import Lab_Imaging from "./pages/Lab_Imaging";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -65,6 +66,20 @@ const App = () => (
                         <VideoLectures />
                       </ProtectedRoute>
                     }
+                />
+                <Route
+                    path="/Emergency_Protocols"
+                    element={
+                    <ProtectedRoute>
+                        <Emergency_Protocols />
+                    </ProtectedRoute>}
+                />
+                <Route
+                    path="/Lab_Imaging"
+                    element={
+                    <ProtectedRoute>
+                        <Lab_Imaging />
+                    </ProtectedRoute>}
                 />
                 <Route
                     path="/mcq-bank"

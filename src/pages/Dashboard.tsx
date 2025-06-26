@@ -118,17 +118,14 @@ const MedicalDashboard = () => {
         { id: 'mcq-bank', label: 'MCQ & Q-Bank', icon: HelpCircle, route: '/mcq-bank' },
       ]
     },
-    { 
-      id: 'clinical-corner', 
-      label: 'Clinical Corner', 
+    {
+      id: 'clinical-corner',
+      label: 'Clinical Corner',
       icon: Stethoscope,
       subItems: [
         { id: 'clinical-cases', label: 'Clinical Cases', icon: Clipboard, route: '/clinical-cases' },
-        { id: 'examination-skills', label: 'Examination Skills', icon: Activity, route: '/examination-skills' },
-        { id: 'emergency-protocols', label: 'Emergency Protocols', icon: Zap },
-        { id: 'clinical-procedures', label: 'Clinical Procedures', icon: Target },
-        { id: 'patient-communication', label: 'Doctor-Patient Communication', icon: MessageCircle },
-        { id: 'lab-imaging', label: 'Lab & Imaging Interpretation', icon: TestTube },
+        { id: 'emergency-protocols', label: 'Emergency Protocols', icon: Zap, route: '/Emergency_Protocols' },
+        { id: 'lab-imaging', label: 'Lab & Imaging Interpretation', icon: TestTube , route: '/Lab_Imaging' },
       ]
     },
     { id: 'journals', label: 'Journals', icon: FileText, route: '/journals' },
