@@ -69,8 +69,8 @@ type VideoLecture = {
   notesUrl?: string;
   isLocalVideo?: boolean;
   videoFile?: File;
-  createdAt?: any;
-  updatedAt?: any;
+  createdAt?: import('firebase/firestore').Timestamp | Date | import('firebase/firestore').FieldValue | null;
+  updatedAt?: import('firebase/firestore').Timestamp | Date | import('firebase/firestore').FieldValue | null;
 };
 
 const VideoLectures = () => {
@@ -285,7 +285,7 @@ const VideoLectures = () => {
       }
 
       // Prepare video data - only include fields that have values
-      const videoData = {
+      const videoData: Partial<VideoLecture> = {
         title: formData.title,
         description: formData.description,
         subject: formData.subject,
@@ -365,11 +365,8 @@ const VideoLectures = () => {
       console.error('Error updating view count:', error);
     }
 
-    if (video.isLink && video.externalLink) {
-      window.open(video.externalLink, '_blank');
-    } else {
-      setSelectedVideo(video);
-    }
+    // Always show video in the current page, never redirect
+    setSelectedVideo(video);
   };
 
   const handleLike = async (videoId: string) => {
@@ -386,13 +383,26 @@ const VideoLectures = () => {
 
   const getEmbedUrl = (url?: string) => {
     if (!url) return '';
+    
+    // YouTube URL handling
     if (url.includes('youtube.com/watch?v=')) {
-      const videoId = url.split('v=')[1];
+      const videoId = url.split('v=')[1].split('&')[0];
       return `https://www.youtube.com/embed/${videoId}`;
     } else if (url.includes('youtu.be/')) {
-      const videoId = url.split('youtu.be/')[1];
+      const videoId = url.split('youtu.be/')[1].split('?')[0];
       return `https://www.youtube.com/embed/${videoId}`;
     }
+    // Vimeo URL handling
+    else if (url.includes('vimeo.com/')) {
+      const videoId = url.split('vimeo.com/')[1].split('/')[0];
+      return `https://player.vimeo.com/video/${videoId}`;
+    }
+    // Dailymotion URL handling
+    else if (url.includes('dailymotion.com/video/')) {
+      const videoId = url.split('video/')[1].split('_')[0];
+      return `https://www.dailymotion.com/embed/video/${videoId}`;
+    }
+    
     return url;
   };
 
@@ -410,7 +420,8 @@ const VideoLectures = () => {
             Your browser does not support the video tag.
           </video>
       );
-    } else {
+    } else if (video.videoUrl) {
+      // For external links, always embed within iframe instead of redirecting
       return (
           <iframe
               src={getEmbedUrl(video.videoUrl)}
@@ -420,6 +431,12 @@ const VideoLectures = () => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
           ></iframe>
+      );
+    } else {
+      return (
+          <div className="w-full h-full rounded-t-lg bg-gray-200 flex items-center justify-center">
+            <p className="text-gray-500">No video available</p>
+          </div>
       );
     }
   };
@@ -499,6 +516,14 @@ const VideoLectures = () => {
                                   <span>•</span>
                                   <Badge variant="outline" className="text-green-600 border-green-200">
                                     Local Video
+                                  </Badge>
+                                </>
+                            )}
+                            {selectedVideo.isLink && !selectedVideo.isLocalVideo && (
+                                <>
+                                  <span>•</span>
+                                  <Badge variant="outline" className="text-blue-600 border-blue-200">
+                                    External Video
                                   </Badge>
                                 </>
                             )}
@@ -804,193 +829,184 @@ const VideoLectures = () => {
                           type="checkbox"
                           id="isVideoLink"
                           checked={formData.isLink}
-
-
-                    onChange={(e) => handleInputChange('isLink', e.target.checked)}
-                    className="rounded"
-                  />
-                  <label htmlFor="isVideoLink" className="text-sm text-gray-700 dark:text-gray-300">
-                    External Video Link (YouTube, Vimeo, etc.)
-                  </label>
-                </div>
-
-                {formData.isLink ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL (for embedding)</label>
-                      <Input 
-                        placeholder="https://www.youtube.com/watch?v=..." 
-                        value={formData.videoUrl}
-                        onChange={(e) => handleInputChange('videoUrl', e.target.value)}
+                          onChange={(e) => handleInputChange('isLink', e.target.checked)}
+                          className="rounded"
                       />
+                      <label htmlFor="isVideoLink" className="text-sm text-gray-700 dark:text-gray-300">
+                        External Video Link (YouTube, Vimeo, etc.)
+                      </label>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">External Link (for redirection)</label>
-                      <Input 
-                        placeholder="https://www.youtube.com/watch?v=..." 
-                        value={formData.externalLink}
-                        onChange={(e) => handleInputChange('externalLink', e.target.value)}
+
+                    {formData.isLink ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL (for embedding)</label>
+                            <Input 
+                                placeholder="https://www.youtube.com/watch?v=..." 
+                                value={formData.videoUrl}
+                                onChange={(e) => handleInputChange('videoUrl', e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">External Link (optional - same as video URL if not provided)</label>
+                            <Input 
+                                placeholder="https://www.youtube.com/watch?v=..." 
+                                value={formData.externalLink}
+                                onChange={(e) => handleInputChange('externalLink', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                    ) : (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL</label>
+                          <Input 
+                              placeholder="https://www.youtube.com/watch?v=..." 
+                              value={formData.videoUrl}
+                              onChange={(e) => handleInputChange('videoUrl', e.target.value)}
+                          />
+                        </div>
+                    )}
+
+                    <div className="flex space-x-4">
+                      <Button 
+                          variant="outline" 
+                          className="flex items-center"
+                          onClick={() => handleFileUpload('video')}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Video File
+                      </Button>
+                      <Button 
+                          variant="outline" 
+                          className="flex items-center"
+                          onClick={() => handleFileUpload('thumbnail')}
+                      >
+                        <Image className="h-4 w-4 mr-2" />
+                        Upload Thumbnail
+                      </Button>
+                      <Button 
+                          variant="outline" 
+                          className="flex items-center"
+                          onClick={() => handleFileUpload('notes')}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Upload Notes
+                      </Button>
+                    </div>
+
+                    {(formData.thumbnail || formData.notes || formData.videoFile) && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {formData.thumbnail && (
+                              <div>
+                                <p className="text-sm text-gray-600 mb-1">Thumbnail:</p>
+                                <img src={formData.thumbnail} alt="Preview" className="w-full h-20 object-cover rounded" />
+                              </div>
+                          )}
+                          {formData.notes && (
+                              <div>
+                                <p className="text-sm text-gray-600 mb-1">Notes:</p>
+                                <p className="text-sm bg-gray-100 p-2 rounded">{formData.notes}</p>
+                              </div>
+                          )}
+                          {formData.videoFile && (
+                              <div>
+                                <p className="text-sm text-gray-600 mb-1">Video File:</p>
+                                <p className="text-sm bg-green-100 p-2 rounded text-green-800">{formData.videoFile.name}</p>
+                              </div>
+                          )}
+                        </div>
+                    )}
+
+                    <div className="flex space-x-4">
+                      <Button 
+                          className="bg-blue-600 hover:bg-blue-700"
+                          onClick={handleSubmit}
+                      >
+                        Upload Video
+                      </Button>
+                      <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+            )}
+
+            {/* Video Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videoLectures.map((video) => (
+                  <Card key={video.id} className="group hover:shadow-lg transition-all border-gray-200 hover:border-blue-300 cursor-pointer">
+                    <div className="relative h-48 overflow-hidden rounded-t-lg">
+                      <img 
+                          src={video.thumbnail} 
+                          alt={video.title}
+                          className="w-full h-full object-cover"
                       />
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL</label>
-                    <Input 
-                      placeholder="https://www.youtube.com/watch?v=..." 
-                      value={formData.videoUrl}
-                      onChange={(e) => handleInputChange('videoUrl', e.target.value)}
-                    />
-                  </div>
-                )}
-
-                <div className="flex space-x-4">
-                  <Button 
-                    variant="outline" 
-                    className="flex items-center"
-                    onClick={() => handleFileUpload('video')}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Video File
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="flex items-center"
-                    onClick={() => handleFileUpload('thumbnail')}
-                  >
-                    <Image className="h-4 w-4 mr-2" />
-                    Upload Thumbnail
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="flex items-center"
-                    onClick={() => handleFileUpload('notes')}
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Upload Notes
-                  </Button>
-                </div>
-
-                {(formData.thumbnail || formData.notes || formData.videoFile) && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {formData.thumbnail && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Thumbnail:</p>
-                        <img src={formData.thumbnail} alt="Preview" className="w-full h-20 object-cover rounded" />
+                      <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <PlayCircle className="h-16 w-16 text-white" />
                       </div>
-                    )}
-                    {formData.notes && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Notes:</p>
-                        <p className="text-sm bg-gray-100 p-2 rounded">{formData.notes}</p>
-                      </div>
-                    )}
-                    {formData.videoFile && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Video File:</p>
-                        <p className="text-sm bg-green-100 p-2 rounded text-green-800">{formData.videoFile.name}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex space-x-4">
-                  <Button 
-                    className="bg-blue-600 hover:bg-blue-700"
-                    onClick={handleSubmit}
-                  >
-                    Upload Video
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Video Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {videoLectures.map((video) => (
-              <Card key={video.id} className="group hover:shadow-lg transition-all border-gray-200 hover:border-blue-300 cursor-pointer">
-                <div className="relative h-48 overflow-hidden rounded-t-lg">
-                  <img 
-                    src={video.thumbnail} 
-                    alt={video.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="h-16 w-16 text-white" />
-                  </div>
-                  <Badge className="absolute top-3 right-3 bg-blue-600 text-white">
-                    {video.level}
-                  </Badge>
-                  {video.isLink && (
-                    <Badge className="absolute top-3 left-3 bg-green-600 text-white">
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      Link
-                    </Badge>
-                  )}
-                  {video.isLocalVideo && (
-                    <Badge className="absolute top-12 left-3 bg-purple-600 text-white">
-                      <Upload className="h-3 w-3 mr-1" />
-                      Local
-                    </Badge>
-                  )}
-                  <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                    {video.duration}
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className="text-blue-600 border-blue-200">
-                      {video.subject}
-                    </Badge>
-                    <Button variant="ghost" size="sm">
-                      <Bookmark className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                    {video.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                    {video.description}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>By {video.instructor}</span>
-                    <span>{video.publishedDate}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span className="flex items-center">
-                        <Eye className="h-4 w-4 mr-1" />
-                        {video.views}
-                      </span>
-                      <span className="flex items-center">
-                        <Heart className="h-4 w-4 mr-1" />
-                        {video.likes}
-                      </span>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={() => handleVideoClick(video)}
-                    >
-                      {video.isLink && video.externalLink ? (
-                        <>
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Open Link
-                        </>
-                      ) : (
-                        'Watch Now'
+                      <Badge className="absolute top-3 right-3 bg-blue-600 text-white">
+                        {video.level}
+                      </Badge>
+                      {video.isLink && (
+                          <Badge className="absolute top-3 left-3 bg-green-600 text-white">
+                            <ExternalLink className="h-3 w-3 mr-1" />
+                            Link
+                          </Badge>
                       )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      {video.isLocalVideo && (
+                          <Badge className="absolute top-12 left-3 bg-purple-600 text-white">
+                            <Upload className="h-3 w-3 mr-1" />
+                            Local
+                          </Badge>
+                      )}
+                      <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                        {video.duration}
+                      </div>
+                    </div>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="outline" className="text-blue-600 border-blue-200">
+                          {video.subject}
+                        </Badge>
+                        <Button variant="ghost" size="sm">
+                          <Bookmark className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                        {video.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                        {video.description}
+                      </p>
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                        <span>By {video.instructor}</span>
+                        <span>{video.publishedDate}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span className="flex items-center">
+                            <Eye className="h-4 w-4 mr-1" />
+                            {video.views}
+                          </span>
+                          <span className="flex items-center">
+                            <Heart className="h-4 w-4 mr-1" />
+                            {video.likes}
+                          </span>
+                        </div>
+                        <Button 
+                            size="sm" 
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={() => handleVideoClick(video)}
+                        >
+                          Watch Now
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
