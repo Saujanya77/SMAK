@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  ArrowLeft, 
-  Download, 
+import {
+  ArrowLeft,
+  Download,
   Search,
   Bell,
   ChevronDown,
-  User, 
-  Settings, 
-  LogOut, 
+  User,
+  Settings,
+  LogOut,
   Sun,
   Moon,
   X,
@@ -29,8 +29,27 @@ import {
   Plus,
   Filter,
   Upload,
-  Image
+  Image,
+  Loader2
 } from 'lucide-react';
+
+// Firebase imports
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp
+} from 'firebase/firestore';
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from 'firebase/storage';
+import { db, storage } from '../firebase';
 
 const EmergencyProtocols = () => {
   const [selectedProtocol, setSelectedProtocol] = useState<EmergencyProtocol | null>(null);
@@ -41,12 +60,17 @@ const EmergencyProtocols = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedPriority, setSelectedPriority] = useState('All');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [emergencyProtocols, setEmergencyProtocols] = useState<EmergencyProtocol[]>([]);
+  const [fetchingData, setFetchingData] = useState(true);
+
   const navigate = useNavigate();
 
   interface EmergencyProtocol {
-    id: number;
+    id: string;
     title: string;
     description: string;
     category: string;
@@ -60,6 +84,7 @@ const EmergencyProtocols = () => {
     contraindications: string[];
     followUp: string;
     icon: React.ReactNode;
+    createdAt?: any;
   }
 
   const user = {
@@ -68,383 +93,6 @@ const EmergencyProtocols = () => {
     college: "SMAK Medical College",
     avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face"
   };
-
-  const [emergencyProtocols, setEmergencyProtocols] = useState<EmergencyProtocol[]>([
-    {
-      id: 1,
-      title: "Acute Stroke (FAST Protocol)",
-      description: "Rapid assessment and management of suspected stroke patients using the FAST protocol for optimal outcomes.",
-      category: "Neurology",
-      priority: "Critical",
-      timeframe: "< 4.5 hours",
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
-      icon: <Brain className="h-6 w-6" />,
-      steps: [
-        "Ensure scene safety and approach patient",
-        "Perform primary assessment (ABCDE)",
-        "Check blood glucose level immediately",
-        "Perform FAST assessment: Face, Arms, Speech, Time",
-        "Obtain IV access and draw blood samples",
-        "Perform neurological examination (NIHSS)",
-        "Urgent CT scan of head without contrast",
-        "Consider thrombolytic therapy if within window",
-        "Monitor vital signs and neurological status",
-        "Prepare for potential transfer to stroke center"
-      ],
-      signs: [
-        "Sudden onset facial drooping",
-        "Arm weakness or numbness",
-        "Speech difficulties or slurred speech",
-        "Sudden severe headache",
-        "Loss of balance or coordination",
-        "Sudden vision changes",
-        "Altered level of consciousness"
-      ],
-      immediateActions: [
-        "Call for immediate medical assistance",
-        "Note time of symptom onset",
-        "Keep patient calm and lying flat",
-        "Do NOT give food or water",
-        "Monitor airway and breathing",
-        "Prepare for rapid transport"
-      ],
-      medications: [
-        "Alteplase (tPA) if within 4.5 hours",
-        "Aspirin 325mg (after hemorrhage excluded)",
-        "Antihypertensives if BP >220/120",
-        "Antiemetics if nausea/vomiting"
-      ],
-      contraindications: [
-        "Hemorrhagic stroke on CT",
-        "Recent surgery or trauma",
-        "Active bleeding or coagulopathy",
-        "Severe hypertension (>185/110)",
-        "Pregnancy",
-        "Age considerations (relative)"
-      ],
-      followUp: "Continuous monitoring in stroke unit, physical therapy evaluation, speech therapy if needed, and secondary prevention measures."
-    },
-    {
-      id: 2,
-      title: "Cardiac Arrest (CPR/AED)",
-      description: "Immediate cardiopulmonary resuscitation and advanced cardiac life support for cardiac arrest victims.",
-      category: "Emergency Medicine",
-      priority: "Critical",
-      timeframe: "Immediate",
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&h=400&fit=crop",
-      icon: <Heart className="h-6 w-6" />,
-      steps: [
-        "Check responsiveness and breathing",
-        "Call for help and request AED",
-        "Position patient on firm surface",
-        "Begin chest compressions (30:2 ratio)",
-        "Apply AED pads and follow prompts",
-        "Continue CPR cycles until help arrives",
-        "Establish IV/IO access when available",
-        "Administer medications per ACLS protocol",
-        "Consider reversible causes (H's and T's)",
-        "Continue resuscitation efforts appropriately"
-      ],
-      signs: [
-        "Unresponsive to verbal/tactile stimuli",
-        "Absent or abnormal breathing",
-        "No palpable pulse",
-        "Cyanosis or pallor",
-        "Unconsciousness",
-        "Witnessed collapse"
-      ],
-      immediateActions: [
-        "Start chest compressions immediately",
-        "Call 911 and get AED",
-        "Push hard and fast (100-120/min)",
-        "Allow complete chest recoil",
-        "Minimize interruptions",
-        "Switch compressors every 2 minutes"
-      ],
-      medications: [
-        "Epinephrine 1mg IV every 3-5 minutes",
-        "Amiodarone 300mg IV for VF/VT",
-        "Atropine 1mg IV for asystole/PEA",
-        "Sodium bicarbonate if indicated"
-      ],
-      contraindications: [
-        "Obviously deceased (rigor mortis)",
-        "Do Not Resuscitate (DNR) order",
-        "Futile resuscitation scenarios",
-        "Unsafe scene conditions"
-      ],
-      followUp: "Post-cardiac arrest care, therapeutic hypothermia consideration, neurological assessment, and underlying cause investigation."
-    },
-    {
-      id: 3,
-      title: "Anaphylaxis Management",
-      description: "Rapid recognition and treatment of severe allergic reactions with epinephrine and supportive care.",
-      category: "Allergy/Immunology",
-      priority: "Critical",
-      timeframe: "< 15 minutes",
-      image: "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=600&h=400&fit=crop",
-      icon: <AlertTriangle className="h-6 w-6" />,
-      steps: [
-        "Recognize anaphylaxis symptoms",
-        "Remove or avoid triggering allergen",
-        "Administer epinephrine immediately",
-        "Call for emergency medical assistance",
-        "Position patient appropriately",
-        "Establish IV access and give fluids",
-        "Administer H1 and H2 antihistamines",
-        "Give corticosteroids",
-        "Monitor for biphasic reactions",
-        "Provide patient education and EpiPen"
-      ],
-      signs: [
-        "Sudden onset skin reactions (hives, itching)",
-        "Swelling of face, lips, tongue, throat",
-        "Difficulty breathing or wheezing",
-        "Rapid weak pulse",
-        "Nausea, vomiting, diarrhea",
-        "Dizziness or fainting",
-        "Feeling of impending doom"
-      ],
-      immediateActions: [
-        "Administer epinephrine auto-injector",
-        "Call emergency services immediately",
-        "Remove allergen source if known",
-        "Keep patient lying flat",
-        "Monitor airway and breathing",
-        "Be prepared for second injection"
-      ],
-      medications: [
-        "Epinephrine 0.3-0.5mg IM (first-line)",
-        "Diphenhydramine 25-50mg IV/IM",
-        "Ranitidine 50mg IV or famotidine 20mg IV",
-        "Methylprednisolone 125mg IV",
-        "Albuterol if bronchospasm",
-        "Glucagon if on beta-blockers"
-      ],
-      contraindications: [
-        "No absolute contraindications for epinephrine",
-        "Caution with severe hypertension",
-        "Caution with coronary artery disease",
-        "Avoid delays in treatment"
-      ],
-      followUp: "Observation for 4-6 hours, allergy specialist referral, EpiPen prescription and training, and allergen avoidance education."
-    },
-    {
-      id: 4,
-      title: "Severe Asthma Exacerbation",
-      description: "Management of acute severe asthma attacks with bronchodilators and systemic corticosteroids.",
-      category: "Pulmonology",
-      priority: "High",
-      timeframe: "< 30 minutes",
-      image: "https://images.unsplash.com/photo-1584362917165-526a968579e8?w=600&h=400&fit=crop",
-      icon: <Activity className="h-6 w-6" />,
-      steps: [
-        "Assess severity of exacerbation",
-        "Position patient upright",
-        "Administer high-flow oxygen",
-        "Give bronchodilators (SABA)",
-        "Administer systemic corticosteroids",
-        "Monitor oxygen saturation and ABG",
-        "Consider magnesium sulfate",
-        "Assess response to treatment",
-        "Consider ICU admission if severe",
-        "Plan discharge with action plan"
-      ],
-      signs: [
-        "Severe breathlessness",
-        "Unable to speak in full sentences",
-        "Use of accessory muscles",
-        "Wheeze or silent chest",
-        "Tachycardia >120 bpm",
-        "Peak flow <50% predicted",
-        "Cyanosis or altered consciousness"
-      ],
-      immediateActions: [
-        "Sit patient upright",
-        "Give high-flow oxygen",
-        "Administer bronchodilator",
-        "Stay calm and reassure patient",
-        "Monitor breathing closely",
-        "Call for medical help"
-      ],
-      medications: [
-        "Albuterol 2.5-5mg nebulized q20min",
-        "Ipratropium 0.5mg nebulized",
-        "Prednisolone 40-50mg PO",
-        "Methylprednisolone 125mg IV",
-        "Magnesium sulfate 2g IV over 20min",
-        "Epinephrine if near-fatal"
-      ],
-      contraindications: [
-        "Avoid sedatives",
-        "Avoid beta-blockers",
-        "Caution with theophylline",
-        "Avoid chest physiotherapy"
-      ],
-      followUp: "Peak flow monitoring, inhaler technique review, asthma action plan update, and follow-up with pulmonologist."
-    },
-    {
-      id: 5,
-      title: "Diabetic Ketoacidosis (DKA)",
-      description: "Management of severe diabetic ketoacidosis with insulin, fluids, and electrolyte replacement.",
-      category: "Endocrinology",
-      priority: "High",
-      timeframe: "< 1 hour",
-      image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=600&h=400&fit=crop",
-      icon: <Zap className="h-6 w-6" />,
-      steps: [
-        "Confirm DKA diagnosis (glucose, ketones, pH)",
-        "Assess level of consciousness",
-        "Begin IV fluid resuscitation",
-        "Start insulin infusion",
-        "Monitor electrolytes closely",
-        "Replace potassium as needed",
-        "Monitor for cerebral edema",
-        "Treat underlying precipitant",
-        "Transition to subcutaneous insulin",
-        "Monitor for complications"
-      ],
-      signs: [
-        "Blood glucose >250 mg/dL",
-        "Ketones in blood/urine",
-        "Arterial pH <7.3",
-        "Kussmaul respirations",
-        "Fruity breath odor",
-        "Altered mental status",
-        "Dehydration signs"
-      ],
-      immediateActions: [
-        "Check blood glucose immediately",
-        "Test for ketones",
-        "Start IV access",
-        "Begin fluid replacement",
-        "Call for medical assistance",
-        "Monitor vital signs"
-      ],
-      medications: [
-        "Regular insulin 0.1 units/kg/hr IV",
-        "Normal saline 15-20 mL/kg/hr",
-        "Potassium chloride 20-30 mEq/L",
-        "Sodium bicarbonate if pH <7.0",
-        "Phosphate replacement if needed"
-      ],
-      contraindications: [
-        "Avoid insulin bolus initially",
-        "Avoid rapid fluid correction",
-        "Caution with bicarbonate use",
-        "Monitor for hypokalemia"
-      ],
-      followUp: "Diabetes education, insulin regimen adjustment, monitoring for complications, and endocrinology follow-up."
-    },
-    {
-      id: 6,
-      title: "Seizure Management",
-      description: "Immediate care for seizure patients including airway protection and antiepileptic medications.",
-      category: "Neurology",
-      priority: "High",
-      timeframe: "< 5 minutes",
-      image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=600&h=400&fit=crop",
-      icon: <Brain className="h-6 w-6" />,
-      steps: [
-        "Ensure scene and patient safety",
-        "Protect airway and breathing",
-        "Position patient on side",
-        "Time the seizure duration",
-        "Remove harmful objects nearby",
-        "Administer oxygen if needed",
-        "Give antiepileptic if >5 minutes",
-        "Monitor vital signs",
-        "Assess post-ictal state",
-        "Investigate underlying cause"
-      ],
-      signs: [
-        "Rhythmic jerking movements",
-        "Loss of consciousness",
-        "Tongue biting",
-        "Incontinence",
-        "Cyanosis during seizure",
-        "Post-ictal confusion",
-        "Status epilepticus if >5 minutes"
-      ],
-      immediateActions: [
-        "Stay with patient",
-        "Time the seizure",
-        "Clear area of dangerous objects",
-        "Turn patient on side",
-        "Do NOT restrain patient",
-        "Call for help if prolonged"
-      ],
-      medications: [
-        "Lorazepam 0.1mg/kg IV (max 4mg)",
-        "Diazepam 0.15mg/kg IV",
-        "Midazolam 10mg IM if no IV",
-        "Phenytoin 20mg/kg IV loading",
-        "Levetiracetam 60mg/kg IV",
-        "Valproic acid 40mg/kg IV"
-      ],
-      contraindications: [
-        "Do not put anything in mouth",
-        "Avoid restraining patient",
-        "Do not give oral medications",
-        "Avoid excessive stimulation"
-      ],
-      followUp: "EEG monitoring, neuroimaging if indicated, antiepileptic drug level monitoring, and neurology consultation."
-    },
-    {
-      id: 7,
-      title: "Massive Bleeding/Hemorrhage",
-      description: "Rapid control of severe bleeding with direct pressure, tourniquets, and blood product transfusion.",
-      category: "Trauma/Surgery",
-      priority: "Critical",
-      timeframe: "Immediate",
-      image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?w=600&h=400&fit=crop",
-      icon: <Shield className="h-6 w-6" />,
-      steps: [
-        "Ensure scene safety first",
-        "Apply direct pressure to wound",
-        "Elevate bleeding extremity",
-        "Apply tourniquet if extremity bleeding",
-        "Establish large bore IV access",
-        "Send blood for type and crossmatch",
-        "Begin blood product transfusion",
-        "Monitor vital signs closely",
-        "Prepare for surgical intervention",
-        "Activate massive transfusion protocol"
-      ],
-      signs: [
-        "Visible active bleeding",
-        "Hypotension (SBP <90)",
-        "Tachycardia >100 bpm",
-        "Altered mental status",
-        "Pale, cool, clammy skin",
-        "Decreased urine output",
-        "Signs of shock"
-      ],
-      immediateActions: [
-        "Apply direct pressure immediately",
-        "Call for emergency help",
-        "Elevate bleeding part if possible",
-        "Apply tourniquet if needed",
-        "Keep patient warm",
-        "Monitor consciousness level"
-      ],
-      medications: [
-        "Tranexamic acid 1g IV over 10min",
-        "Packed RBCs as needed",
-        "Fresh frozen plasma",
-        "Platelets if thrombocytopenic",
-        "Factor concentrates if indicated",
-        "Vasopressors if needed"
-      ],
-      contraindications: [
-        "Avoid removing impaled objects",
-        "Do not remove blood clots",
-        "Avoid excessive crystalloid fluids",
-        "Caution with anticoagulated patients"
-      ],
-      followUp: "Surgical consultation, hematology evaluation, monitoring for complications, and rehabilitation planning."
-    }
-  ]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -460,8 +108,63 @@ const EmergencyProtocols = () => {
     followUp: ''
   });
 
-  const categories = ['All', 'Neurology', 'Emergency Medicine', 'Allergy/Immunology', 'Pulmonology', 'Endocrinology', 'Trauma/Surgery'];
+  const categories = ['All', 'Neurology', 'Emergency Medicine', 'Allergy/Immunology', 'Pulmonology', 'Endocrinology', 'Trauma/Surgery', 'Cardiology', 'Pediatrics'];
   const priorities = ['All', 'Critical', 'High', 'Medium'];
+
+  // Default protocols for initial seeding
+
+
+  // Get icon for category
+  const getIconForCategory = (category: string) => {
+    switch (category) {
+      case 'Neurology': return <Brain className="h-6 w-6" />;
+      case 'Emergency Medicine': return <Heart className="h-6 w-6" />;
+      case 'Allergy/Immunology': return <AlertTriangle className="h-6 w-6" />;
+      case 'Pulmonology': return <Activity className="h-6 w-6" />;
+      case 'Endocrinology': return <Zap className="h-6 w-6" />;
+      case 'Trauma/Surgery': return <Shield className="h-6 w-6" />;
+      case 'Cardiology': return <Heart className="h-6 w-6" />;
+      case 'Pediatrics': return <Users className="h-6 w-6" />;
+      default: return <AlertTriangle className="h-6 w-6" />;
+    }
+  };
+
+  // Load protocols from Firebase
+  useEffect(() => {
+    const loadProtocols = async () => {
+      try {
+        setFetchingData(true);
+        const protocolsRef = collection(db, 'emergencyProtocols');
+        const q = query(protocolsRef, orderBy('createdAt', 'desc'));
+
+        // Set up real-time listener
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const protocols: EmergencyProtocol[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            protocols.push({
+              id: doc.id,
+              ...data,
+              icon: getIconForCategory(data.category)
+            } as EmergencyProtocol);
+          });
+
+          setEmergencyProtocols(protocols);
+          setFetchingData(false);
+        });
+
+        return () => unsubscribe();
+      } catch (error) {
+        console.error('Error loading protocols:', error);
+        setFetchingData(false);
+      }
+    };
+
+    loadProtocols();
+  }, []);
+
+
+
 
   const toggleTheme = () => {
     setDarkMode(!darkMode);
@@ -486,9 +189,10 @@ const EmergencyProtocols = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setSelectedImage(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setSelectedImage(e.target?.result as string);
+        setSelectedImagePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -501,61 +205,82 @@ const EmergencyProtocols = () => {
     }));
   };
 
-  const handleSubmitProtocol = () => {
+  const uploadImageToFirebase = async (file: File): Promise<string> => {
+    try {
+      const timestamp = Date.now();
+      const fileName = `protocol-images/${timestamp}_${file.name}`;
+      const storageRef = ref(storage, fileName);
+
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
+
+  const handleSubmitProtocol = async () => {
     if (!formData.title || !formData.description || !formData.category) {
       alert('Please fill in all required fields');
       return;
     }
 
-    const getIconForCategory = (category: string) => {
-      switch (category) {
-        case 'Neurology': return <Brain className="h-6 w-6" />;
-        case 'Emergency Medicine': return <Heart className="h-6 w-6" />;
-        case 'Allergy/Immunology': return <AlertTriangle className="h-6 w-6" />;
-        case 'Pulmonology': return <Activity className="h-6 w-6" />;
-        case 'Endocrinology': return <Zap className="h-6 w-6" />;
-        case 'Trauma/Surgery': return <Shield className="h-6 w-6" />;
-        default: return <AlertTriangle className="h-6 w-6" />;
+    setUploading(true);
+    try {
+      let imageUrl = "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop";
+
+      // Upload image if selected
+      if (selectedImage) {
+        imageUrl = await uploadImageToFirebase(selectedImage);
       }
-    };
 
-    const newProtocol: EmergencyProtocol = {
-      id: emergencyProtocols.length + 1,
-      title: formData.title,
-      description: formData.description,
-      category: formData.category,
-      priority: formData.priority,
-      timeframe: formData.timeframe,
-      image: selectedImage || "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
-      icon: getIconForCategory(formData.category),
-      steps: formData.steps.split('\n').filter(step => step.trim() !== ''),
-      signs: formData.signs.split('\n').filter(sign => sign.trim() !== ''),
-      immediateActions: formData.immediateActions.split('\n').filter(action => action.trim() !== ''),
-      medications: formData.medications.split('\n').filter(med => med.trim() !== ''),
-      contraindications: formData.contraindications.split('\n').filter(contra => contra.trim() !== ''),
-      followUp: formData.followUp
-    };
+      const newProtocol = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        priority: formData.priority,
+        timeframe: formData.timeframe,
+        image: imageUrl,
+        steps: formData.steps.split('\n').filter(step => step.trim() !== ''),
+        signs: formData.signs.split('\n').filter(sign => sign.trim() !== ''),
+        immediateActions: formData.immediateActions.split('\n').filter(action => action.trim() !== ''),
+        medications: formData.medications.split('\n').filter(med => med.trim() !== ''),
+        contraindications: formData.contraindications.split('\n').filter(contra => contra.trim() !== ''),
+        followUp: formData.followUp,
+        createdAt: serverTimestamp()
+      };
 
-    setEmergencyProtocols(prev => [newProtocol, ...prev]);
-    
-    // Reset form
-    setFormData({
-      title: '',
-      description: '',
-      category: '',
-      priority: 'High',
-      timeframe: '',
-      steps: '',
-      signs: '',
-      immediateActions: '',
-      medications: '',
-      contraindications: '',
-      followUp: ''
-    });
-    setSelectedImage(null);
-    setShowAddForm(false);
-    
-    alert('Emergency protocol added successfully!');
+      // Add to Firebase
+      const protocolsRef = collection(db, 'emergencyProtocols');
+      await addDoc(protocolsRef, newProtocol);
+
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        category: '',
+        priority: 'High',
+        timeframe: '',
+        steps: '',
+        signs: '',
+        immediateActions: '',
+        medications: '',
+        contraindications: '',
+        followUp: ''
+      });
+      setSelectedImage(null);
+      setSelectedImagePreview(null);
+      setShowAddForm(false);
+
+      alert('Emergency protocol added successfully!');
+    } catch (error) {
+      console.error('Error adding protocol:', error);
+      alert('Error adding protocol. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleDownloadProtocol = (protocol: EmergencyProtocol) => {
@@ -604,12 +329,12 @@ Date: ${new Date().toLocaleDateString()}
 
   const filteredProtocols = emergencyProtocols.filter(protocol => {
     const matchesSearch = protocol.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      protocol.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      protocol.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+        protocol.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        protocol.description.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesCategory = selectedCategory === 'All' || protocol.category === selectedCategory;
     const matchesPriority = selectedPriority === 'All' || protocol.priority === selectedPriority;
-    
+
     return matchesSearch && matchesCategory && matchesPriority;
   });
 
@@ -622,256 +347,267 @@ Date: ${new Date().toLocaleDateString()}
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Full Protocol Modal */}
-      {showFullProtocol && selectedProtocol && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Emergency Protocol Details</h2>
-              <div className="flex items-center space-x-2">
-                <Button 
-                  onClick={() => handleDownloadProtocol(selectedProtocol)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                  size="sm"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Protocol
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => setShowFullProtocol(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <img 
-                    src={selectedProtocol.image} 
-                    alt={selectedProtocol.title}
-                    className="w-full h-64 object-cover rounded-lg shadow-md"
-                  />
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <Badge variant="outline" className="text-blue-600 border-blue-200">
-                      {selectedProtocol.category}
-                    </Badge>
-                    <Badge className={`${getPriorityColor(selectedProtocol.priority)} text-white`}>
-                      {selectedProtocol.priority} Priority
-                    </Badge>
-                    <Badge variant="outline" className="text-green-600 border-green-200">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {selectedProtocol.timeframe}
-                    </Badge>
-                  </div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                    {selectedProtocol.icon}
-                    <span className="ml-2">{selectedProtocol.title}</span>
-                  </h1>
-                  <p className="text-gray-700 dark:text-gray-300">{selectedProtocol.description}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="bg-red-50 dark:bg-red-900/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-red-700 dark:text-red-400">Signs & Symptoms</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                      {selectedProtocol.signs.map((sign, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-red-500 mr-2">•</span>
-                          {sign}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-orange-50 dark:bg-orange-900/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-400">Immediate Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                      {selectedProtocol.immediateActions.map((action, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-orange-500 mr-2">•</span>
-                          {action}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-blue-50 dark:bg-blue-900/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">Step-by-Step Protocol</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                      {selectedProtocol.steps.slice(0, 5).map((step, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-blue-500 mr-2 font-medium">{index + 1}.</span>
-                          {step}
-                        </li>
-                      ))}
-                      {selectedProtocol.steps.length > 5 && (
-                        <li className="text-blue-600 font-medium">... and {selectedProtocol.steps.length - 5} more steps</li>
-                      )}
-                    </ol>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-green-50 dark:bg-green-900/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">Medications</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                      {selectedProtocol.medications.map((med, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-green-500 mr-2">•</span>
-                          {med}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-yellow-50 dark:bg-yellow-900/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Contraindications</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                      {selectedProtocol.contraindications.map((contra, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-yellow-500 mr-2">•</span>
-                          {contra}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-purple-50 dark:bg-purple-900/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-400">Follow-up Care</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedProtocol.followUp}</p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+  if (fetchingData) {
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+            <p className="text-gray-600 dark:text-gray-400">Loading emergency protocols...</p>
           </div>
         </div>
-      )}
+    );
+  }
 
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => window.history.back()}
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Emergency Protocols</h1>
+  return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Full Protocol Modal */}
+        {showFullProtocol && selectedProtocol && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Emergency Protocol Details</h2>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                        onClick={() => handleDownloadProtocol(selectedProtocol)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        size="sm"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Protocol
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setShowFullProtocol(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <img
+                          src={selectedProtocol.image}
+                          alt={selectedProtocol.title}
+                          className="w-full h-64 object-cover rounded-lg shadow-md"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-4">
+                        <Badge variant="outline" className="text-blue-600 border-blue-200">
+                          {selectedProtocol.category}
+                        </Badge>
+                        <Badge className={`${getPriorityColor(selectedProtocol.priority)} text-white`}>
+                          {selectedProtocol.priority} Priority
+                        </Badge>
+                        <Badge variant="outline" className="text-green-600 border-green-200">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {selectedProtocol.timeframe}
+                        </Badge>
+                      </div>
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                        {selectedProtocol.icon}
+                        <span className="ml-2">{selectedProtocol.title}</span>
+                      </h1>
+                      <p className="text-gray-700 dark:text-gray-300">{selectedProtocol.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Card className="bg-red-50 dark:bg-red-900/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-red-700 dark:text-red-400">Signs & Symptoms</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                          {selectedProtocol.signs.map((sign, index) => (
+                              <li key={index} className="flex items-start">
+                                <span className="text-red-500 mr-2">•</span>
+                                {sign}
+                              </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-orange-50 dark:bg-orange-900/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-400">Immediate Actions</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                          {selectedProtocol.immediateActions.map((action, index) => (
+                              <li key={index} className="flex items-start">
+                                <span className="text-orange-500 mr-2">•</span>
+                                {action}
+                              </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-blue-50 dark:bg-blue-900/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">Step-by-Step Protocol</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                          {selectedProtocol.steps.slice(0, 5).map((step, index) => (
+                              <li key={index} className="flex items-start">
+                                <span className="text-blue-500 mr-2 font-medium">{index + 1}.</span>
+                                {step}
+                              </li>
+                          ))}
+                          {selectedProtocol.steps.length > 5 && (
+                              <li className="text-blue-600 font-medium">... and {selectedProtocol.steps.length - 5} more steps</li>
+                          )}
+                        </ol>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-green-50 dark:bg-green-900/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">Medications</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                          {selectedProtocol.medications.map((med, index) => (
+                              <li key={index} className="flex items-start">
+                                <span className="text-green-500 mr-2">•</span>
+                                {med}
+                              </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-yellow-50 dark:bg-yellow-900/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Contraindications</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                          {selectedProtocol.contraindications.map((contra, index) => (
+                              <li key={index} className="flex items-start">
+                                <span className="text-yellow-500 mr-2">•</span>
+                                {contra}
+                              </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-purple-50 dark:bg-purple-900/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-400">Follow-up Care</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{selectedProtocol.followUp}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+        )}
 
-          <div className="flex items-center space-x-4">
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search protocols..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64 pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-            
-            <Button 
-              variant="ghost"
-              size="sm"
-              onClick={toggleTheme}
-              className="text-gray-600 hover:text-gray-700 hover:bg-gray-100"
-            >
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-            
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-5 w-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-            </Button>
-
-            <div className="relative">
+        {/* Header */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+          <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex items-center space-x-4">
               <Button
-                variant="ghost"
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.history.back()}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
               >
-                <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
-                <ChevronDown className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+              <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Emergency Protocols</h1>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <div className="relative hidden md:block">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                    type="text"
+                    placeholder="Search protocols..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-64 pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+
+              <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="text-gray-600 hover:text-gray-700 hover:bg-gray-100"
+              >
+                {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
 
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
-                  <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.college}</p>
-                  </div>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
-                  </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start text-red-600">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </Button>
-                </div>
-              )}
+              <Button variant="ghost" size="sm" className="relative">
+                <Bell className="h-5 w-5 text-gray-600" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              </Button>
+
+              <div className="relative">
+                <Button
+                    variant="ghost"
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="flex items-center space-x-2"
+                >
+                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+
+                {profileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+                      <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{user.college}</p>
+                      </div>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        <User className="h-4 w-4 mr-2" />
+                        Profile
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Settings
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start text-red-600">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                      </Button>
+                    </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <div className="p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Emergency Medical Protocols</h2>
-              <p className="text-gray-600 dark:text-gray-400">Life-saving protocols for critical medical emergencies</p>
+        {/* Main Content */}
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Header Section */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Emergency Medical Protocols</h2>
+                <p className="text-gray-600 dark:text-gray-400">Life-saving protocols for critical medical emergencies</p>
+              </div>
+              <Button
+                  onClick={() => setShowAddForm(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Protocol
+              </Button>
             </div>
-            <Button 
-              onClick={() => setShowAddForm(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Protocol
-            </Button>
-          </div>
 
-          {/* Add New Protocol Form */}
+            {/* Add New Protocol Form */}
           {showAddForm && (
             <Card className="mb-8 border-blue-200 bg-blue-50 dark:bg-blue-900/10">
               <CardHeader>
