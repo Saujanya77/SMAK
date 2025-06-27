@@ -26,51 +26,54 @@ import {
   Stethoscope,
   Sun,
   Moon,
-  Loader2
+  X,
+  Calendar
 } from 'lucide-react';
-
-// Firebase imports
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  orderBy,
-  serverTimestamp,
-  updateDoc,
-  doc,
-  increment
-} from 'firebase/firestore';
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  uploadBytesResumable
-} from 'firebase/storage';
 import { db, storage } from '../firebase';
+import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-const ClinicalCases = () => {
+const ClinicalCaseOfTheDay = () => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showFullCase, setShowFullCase] = useState(false);
+  interface ClinicalCase {
+    id: number;
+    title: string;
+    description: string;
+    category: string;
+    difficulty: string;
+    presentation: string;
+    diagnosis: string;
+    treatment: string;
+    image: string;
+    author: string;
+    publishedDate: string;
+    caseDate: string;
+    views: number;
+    likes: number;
+    comments: number;
+    isNew: boolean;
+  }
+
+  const [selectedCase, setSelectedCase] = useState<ClinicalCase | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [clinicalCases, setClinicalCases] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-
-  // Form states
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
-    category: '',
     description: '',
-    difficulty: 'Beginner',
-    duration: ''
+    category: '',
+    difficulty: '',
+    presentation: '',
+    diagnosis: '',
+    treatment: '',
+    caseDate: ''
   });
-  const [selectedFiles, setSelectedFiles] = useState({
-    images: [],
-    videos: [],
-    documents: []
-  });
+
+  const [allCases, setAllCases] = useState([]);
+  const [todayCase, setTodayCase] = useState(null);
+  const [previousCases, setPreviousCases] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -81,224 +84,59 @@ const ClinicalCases = () => {
     avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face"
   };
 
-  // Fetch clinical cases from Firebase
-  const fetchClinicalCases = async () => {
+  const fetchCasesFromFirebase = async () => {
     try {
       setLoading(true);
       const casesRef = collection(db, 'clinicalCases');
-      const q = query(casesRef, orderBy('createdAt', 'desc'));
+      const q = query(casesRef, orderBy('publishedTimestamp', 'desc'));
       const querySnapshot = await getDocs(q);
 
       const cases = [];
       querySnapshot.forEach((doc) => {
-        cases.push({
-          id: doc.id,
-          ...doc.data()
-        });
+        cases.push({ id: doc.id, ...doc.data() });
       });
 
-      setClinicalCases(cases);
+      setAllCases(cases);
+
+      if (cases.length > 0) {
+        setTodayCase(cases[0]);
+        setPreviousCases(cases.slice(1));
+      }
+
+      setLoading(false);
     } catch (error) {
-      console.error('Error fetching clinical cases:', error);
-    } finally {
+      console.error('Error fetching cases:', error);
       setLoading(false);
     }
   };
 
-  // Upload file to Firebase Storage
-  const uploadFile = async (file, path) => {
-    const storageRef = ref(storage, `clinical-cases/${path}/${Date.now()}_${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+  useEffect(() => {
+    fetchCasesFromFirebase();
+  }, []);
 
-    return new Promise((resolve, reject) => {
-      uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            setUploadProgress(progress);
-          },
-          (error) => {
-            console.error('Upload error:', error);
-            reject(error);
-          },
-          async () => {
-            try {
-              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve(downloadURL);
-            } catch (error) {
-              reject(error);
-            }
-          }
-      );
-    });
-  };
+  const formatDate = (dateString: string) => {
+    if (dateString === "Today") return "Today";
+    if (dateString === "Yesterday") return "Yesterday";
 
-  // Handle file selection
-  const handleFileSelect = (type, files) => {
-    setSelectedFiles(prev => ({
-      ...prev,
-      [type]: Array.from(files)
-    }));
-  };
+    // For other date strings, try to parse and format
+    const today = new Date();
+    const todayTime = today.getTime();
 
-  // Handle form submission
-  const handleSubmitCase = async (e) => {
-    e.preventDefault();
-
-    if (!formData.title || !formData.category || !formData.description) {
-      alert('Please fill in all required fields');
-      return;
+    // Handle "X days ago" format
+    if (dateString.includes("days ago")) {
+      const days = parseInt(dateString.split(" ")[0]);
+      const caseDate = new Date(todayTime - days * 24 * 60 * 60 * 1000);
+      return caseDate.toLocaleDateString();
     }
 
-    try {
-      setUploading(true);
-
-      // Upload files
-      const uploadedFiles = {
-        images: [],
-        videos: [],
-        documents: []
-      };
-
-      // Upload images
-      for (const file of selectedFiles.images) {
-        const url = await uploadFile(file, 'images');
-        uploadedFiles.images.push({
-          name: file.name,
-          url: url,
-          type: file.type
-        });
-      }
-
-      // Upload videos
-      for (const file of selectedFiles.videos) {
-        const url = await uploadFile(file, 'videos');
-        uploadedFiles.videos.push({
-          name: file.name,
-          url: url,
-          type: file.type
-        });
-      }
-
-      // Upload documents
-      for (const file of selectedFiles.documents) {
-        const url = await uploadFile(file, 'documents');
-        uploadedFiles.documents.push({
-          name: file.name,
-          url: url,
-          type: file.type
-        });
-      }
-
-      // Create case document
-      const caseData = {
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
-        difficulty: formData.difficulty,
-        duration: formData.duration,
-        author: user.name,
-        authorCollege: user.college,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        views: 0,
-        likes: 0,
-        files: uploadedFiles,
-        // Use first uploaded image as main image, or default
-        image: uploadedFiles.images.length > 0
-            ? uploadedFiles.images[0].url
-            : "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop"
-      };
-
-      // Add to Firestore
-      await addDoc(collection(db, 'clinicalCases'), caseData);
-
-      // Reset form
-      setFormData({
-        title: '',
-        category: '',
-        description: '',
-        difficulty: 'Beginner',
-        duration: ''
-      });
-      setSelectedFiles({
-        images: [],
-        videos: [],
-        documents: []
-      });
-      setShowAddForm(false);
-
-      // Refresh cases list
-      fetchClinicalCases();
-
-      alert('Clinical case added successfully!');
-    } catch (error) {
-      console.error('Error adding clinical case:', error);
-      alert('Error adding clinical case. Please try again.');
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
+    // Handle "X week ago" format
+    if (dateString.includes("week ago")) {
+      const weeks = dateString.includes("1 week") ? 1 : parseInt(dateString.split(" ")[0]);
+      const caseDate = new Date(todayTime - weeks * 7 * 24 * 60 * 60 * 1000);
+      return caseDate.toLocaleDateString();
     }
-  };
 
-  // Handle case view (increment views)
-  const handleViewCase = async (caseId) => {
-    try {
-      const caseRef = doc(db, 'clinicalCases', caseId);
-      await updateDoc(caseRef, {
-        views: increment(1)
-      });
-
-      // Update local state
-      setClinicalCases(prev =>
-          prev.map(case_ =>
-              case_.id === caseId
-                  ? { ...case_, views: (case_.views || 0) + 1 }
-                  : case_
-          )
-      );
-
-      // Navigate to case detail (you can implement this)
-      console.log('Navigate to case:', caseId);
-    } catch (error) {
-      console.error('Error updating views:', error);
-    }
-  };
-
-  // Handle like toggle
-  const handleLikeCase = async (caseId) => {
-    try {
-      const caseRef = doc(db, 'clinicalCases', caseId);
-      await updateDoc(caseRef, {
-        likes: increment(1)
-      });
-
-      // Update local state
-      setClinicalCases(prev =>
-          prev.map(case_ =>
-              case_.id === caseId
-                  ? { ...case_, likes: (case_.likes || 0) + 1 }
-                  : case_
-          )
-      );
-    } catch (error) {
-      console.error('Error updating likes:', error);
-    }
-  };
-
-  // Format timestamp
-  const formatDate = (timestamp) => {
-    if (!timestamp) return 'Recently';
-
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
-    return `${Math.ceil(diffDays / 30)} months ago`;
+    return dateString;
   };
 
   const toggleTheme = () => {
@@ -316,13 +154,201 @@ const ClinicalCases = () => {
     navigate('/login');
   };
 
-  // Fetch cases on component mount
-  useEffect(() => {
-    fetchClinicalCases();
-  }, []);
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmitCase = async () => {
+    if (!formData.title || !formData.description || !formData.category) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      let imageUrl = "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop";
+
+      if (selectedImage) {
+        const imageFile = document.getElementById('image-upload').files[0];
+        const imageRef = ref(storage, `case-images/${Date.now()}-${imageFile.name}`);
+        const uploadResult = await uploadBytes(imageRef, imageFile);
+        imageUrl = await getDownloadURL(uploadResult.ref);
+      }
+
+      const caseDate = formData.caseDate ? new Date(formData.caseDate) : new Date();
+      const publishedTimestamp = new Date();
+
+      const newCase = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        difficulty: formData.difficulty || 'Intermediate',
+        presentation: formData.presentation,
+        diagnosis: formData.diagnosis,
+        treatment: formData.treatment,
+        image: imageUrl,
+        author: user.name,
+        publishedDate: publishedTimestamp.toLocaleDateString(),
+        publishedTimestamp: publishedTimestamp,
+        caseDate: caseDate.toLocaleDateString(),
+        caseDateTimestamp: caseDate,
+        views: 0,
+        likes: 0,
+        comments: 0,
+        isNew: true
+      };
+
+      const docRef = await addDoc(collection(db, 'clinicalCases'), newCase);
+
+      const caseWithId = { id: docRef.id, ...newCase };
+
+      setAllCases(prev => [caseWithId, ...prev]);
+      setTodayCase(caseWithId);
+      setPreviousCases(prev => todayCase ? [todayCase, ...prev] : prev);
+
+      setFormData({
+        title: '',
+        description: '',
+        category: '',
+        difficulty: '',
+        presentation: '',
+        diagnosis: '',
+        treatment: '',
+        caseDate: ''
+      });
+      setSelectedImage(null);
+      setShowAddForm(false);
+      setLoading(false);
+
+      alert('Case added successfully and featured as today\'s case!');
+    } catch (error) {
+      console.error('Error adding case:', error);
+      alert('Error adding case. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  const handleViewFullCase = (caseItem: ClinicalCase) => {
+    setSelectedCase(caseItem);
+    setShowFullCase(true);
+  };
+
+  if (loading && !todayCase) {
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading today's featured case...</p>
+          </div>
+        </div>
+    );
+  }
 
   return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Full Case Study Modal */}
+        {showFullCase && selectedCase && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Full Case Study</h2>
+                  <Button variant="ghost" size="sm" onClick={() => setShowFullCase(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <img
+                          src={selectedCase.image}
+                          alt={selectedCase.title}
+                          className="w-full h-64 object-cover rounded-lg shadow-md"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-4">
+                        <Badge variant="outline" className="text-blue-600 border-blue-200">
+                          {selectedCase.category}
+                        </Badge>
+                        <Badge className="bg-orange-500 text-white">
+                          {selectedCase.difficulty}
+                        </Badge>
+                        {selectedCase.isNew && (
+                            <Badge className="bg-green-500 text-white animate-pulse">
+                              Today's Featured Case
+                            </Badge>
+                        )}
+                      </div>
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedCase.title}</h1>
+                      <p className="text-gray-700 dark:text-gray-300">{selectedCase.description}</p>
+                      <div className="text-sm text-gray-500">
+                        <span>By {selectedCase.author} • Case Date: {selectedCase.caseDate}</span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span className="flex items-center">
+                      <Eye className="h-4 w-4 mr-1" />
+                      {selectedCase.views}
+                    </span>
+                        <span className="flex items-center">
+                      <Heart className="h-4 w-4 mr-1" />
+                          {selectedCase.likes}
+                    </span>
+                        <span className="flex items-center">
+                      <MessageCircle className="h-4 w-4 mr-1" />
+                          {selectedCase.comments}
+                    </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Card className="bg-green-50 dark:bg-green-900/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">Clinical Presentation</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{selectedCase.presentation || "Detailed clinical presentation not provided."}</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-blue-50 dark:bg-blue-900/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">Diagnosis</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{selectedCase.diagnosis || "Diagnostic information not provided."}</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-purple-50 dark:bg-purple-900/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-400">Treatment</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{selectedCase.treatment || "Treatment information not provided."}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </div>
+        )}
+
         {/* Header */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
           <div className="flex items-center justify-between px-6 py-4">
@@ -337,7 +363,10 @@ const ClinicalCases = () => {
                 Back to Dashboard
               </Button>
               <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Clinical Cases</h1>
+              <div className="flex items-center space-x-2">
+                <Stethoscope className="h-5 w-5 text-blue-600" />
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Clinical Case of the Day</h1>
+              </div>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -405,294 +434,291 @@ const ClinicalCases = () => {
             {/* Header Section */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Clinical Cases</h2>
-                <p className="text-gray-600 dark:text-gray-400">Real patient scenarios and comprehensive case studies</p>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Today's Featured Case</h2>
+                <p className="text-gray-600 dark:text-gray-400">Learn from real clinical scenarios updated daily</p>
               </div>
               <Button
                   onClick={() => setShowAddForm(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
-                  disabled={uploading}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add New Case
+                Submit Your Case
               </Button>
             </div>
+
+            {/* Featured Case of the Day */}
+            {todayCase && (
+                <Card className="mb-8 border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Badge className="bg-blue-600 text-white mb-2">Case of the Day</Badge>
+                        {todayCase.isNew && (
+                            <Badge className="bg-green-500 text-white animate-pulse mb-2">
+                              New Today!
+                            </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      {todayCase.caseDate}
+                    </span>
+                        <span className="flex items-center">
+                      <Eye className="h-4 w-4 mr-1" />
+                          {todayCase.views}
+                    </span>
+                        <span className="flex items-center">
+                      <Heart className="h-4 w-4 mr-1" />
+                          {todayCase.likes}
+                    </span>
+                        <span className="flex items-center">
+                      <MessageCircle className="h-4 w-4 mr-1" />
+                          {todayCase.comments}
+                    </span>
+                      </div>
+                    </div>
+                    <CardTitle className="text-2xl text-blue-800 dark:text-blue-300">{todayCase.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <img
+                            src={todayCase.image}
+                            alt={todayCase.title}
+                            className="w-full h-64 object-cover rounded-lg shadow-md"
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-4">
+                          <Badge variant="outline" className="text-blue-600 border-blue-200">
+                            {todayCase.category}
+                          </Badge>
+                          <Badge className="bg-orange-500 text-white">
+                            {todayCase.difficulty}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-700 dark:text-gray-300">{todayCase.description}</p>
+                        <div className="text-sm text-gray-500">
+                          <span>By {todayCase.author} • Published: {todayCase.publishedDate}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center mt-6">
+                      <Button
+                          onClick={() => handleViewFullCase(todayCase)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+                      >
+                        View Full Case Study
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+            )}
 
             {/* Add New Case Form */}
             {showAddForm && (
                 <Card className="mb-8 border-blue-200 bg-blue-50 dark:bg-blue-900/10">
                   <CardHeader>
-                    <CardTitle className="text-blue-800 dark:text-blue-300">Add New Clinical Case</CardTitle>
+                    <CardTitle className="text-blue-800 dark:text-blue-300">Submit Your Clinical Case of the Day</CardTitle>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Share an interesting case with the medical community</p>
                   </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSubmitCase} className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Case Title *
-                          </label>
-                          <Input
-                              placeholder="Enter case title"
-                              value={formData.title}
-                              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                              required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Category *
-                          </label>
-                          <Input
-                              placeholder="e.g., Cardiology, Neurology"
-                              value={formData.category}
-                              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                              required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Difficulty Level
-                          </label>
-                          <select
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              value={formData.difficulty}
-                              onChange={(e) => setFormData(prev => ({ ...prev, difficulty: e.target.value }))}
-                          >
-                            <option value="Beginner">Beginner</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Duration
-                          </label>
-                          <Input
-                              placeholder="e.g., 30 min, 1 hour"
-                              value={formData.duration}
-                              onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Case Description *
-                        </label>
-                        <Textarea
-                            placeholder="Detailed case description..."
-                            rows={4}
-                            value={formData.description}
-                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                            required
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Case Title *</label>
+                        <Input
+                            placeholder="Enter case title"
+                            value={formData.title}
+                            onChange={(e) => handleInputChange('title', e.target.value)}
                         />
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category *</label>
+                        <Input
+                            placeholder="e.g., Cardiology, Neurology"
+                            value={formData.category}
+                            onChange={(e) => handleInputChange('category', e.target.value)}
+                        />
+                      </div>
+                    </div>
 
-                      <div className="flex flex-wrap gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Images
-                          </label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Difficulty Level</label>
+                        <select
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={formData.difficulty}
+                            onChange={(e) => handleInputChange('difficulty', e.target.value)}
+                        >
+                          <option value="">Select difficulty</option>
+                          <option value="Beginner">Beginner</option>
+                          <option value="Intermediate">Intermediate</option>
+                          <option value="Advanced">Advanced</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Case Date</label>
+                        <Input
+                            type="date"
+                            value={formData.caseDate}
+                            onChange={(e) => handleInputChange('caseDate', e.target.value)}
+                            className="w-full"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Case Image</label>
+                        <div className="flex items-center space-x-2">
                           <input
                               type="file"
-                              multiple
                               accept="image/*"
-                              onChange={(e) => handleFileSelect('images', e.target.files)}
+                              onChange={handleImageUpload}
                               className="hidden"
-                              id="images-upload"
+                              id="image-upload"
                           />
-                          <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => document.getElementById('images-upload').click()}
-                              className="flex items-center"
+                          <label
+                              htmlFor="image-upload"
+                              className="flex items-center px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer"
                           >
                             <Image className="h-4 w-4 mr-2" />
-                            Upload Images ({selectedFiles.images.length})
-                          </Button>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Videos
+                            Upload Image
                           </label>
-                          <input
-                              type="file"
-                              multiple
-                              accept="video/*"
-                              onChange={(e) => handleFileSelect('videos', e.target.files)}
-                              className="hidden"
-                              id="videos-upload"
-                          />
-                          <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => document.getElementById('videos-upload').click()}
-                              className="flex items-center"
-                          >
-                            <Video className="h-4 w-4 mr-2" />
-                            Upload Videos ({selectedFiles.videos.length})
-                          </Button>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Documents
-                          </label>
-                          <input
-                              type="file"
-                              multiple
-                              accept=".pdf,.doc,.docx,.txt"
-                              onChange={(e) => handleFileSelect('documents', e.target.files)}
-                              className="hidden"
-                              id="documents-upload"
-                          />
-                          <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => document.getElementById('documents-upload').click()}
-                              className="flex items-center"
-                          >
-                            <FileText className="h-4 w-4 mr-2" />
-                            Upload Documents ({selectedFiles.documents.length})
-                          </Button>
+                          {selectedImage && <span className="text-sm text-green-600">Image selected</span>}
                         </div>
                       </div>
+                    </div>
 
-                      {uploading && (
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                style={{ width: `${uploadProgress}%` }}
-                            ></div>
-                          </div>
-                      )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Case Description *</label>
+                      <Textarea
+                          placeholder="Brief description of the case..."
+                          rows={3}
+                          value={formData.description}
+                          onChange={(e) => handleInputChange('description', e.target.value)}
+                      />
+                    </div>
 
-                      <div className="flex space-x-4">
-                        <Button
-                            type="submit"
-                            className="bg-blue-600 hover:bg-blue-700"
-                            disabled={uploading}
-                        >
-                          {uploading ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Uploading...
-                              </>
-                          ) : (
-                              'Save Case'
-                          )}
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowAddForm(false)}
-                            disabled={uploading}
-                        >
-                          Cancel
-                        </Button>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Clinical Presentation</label>
+                      <Textarea
+                          placeholder="Patient presentation, symptoms, vital signs..."
+                          rows={3}
+                          value={formData.presentation}
+                          onChange={(e) => handleInputChange('presentation', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Diagnosis</label>
+                        <Textarea
+                            placeholder="Diagnosis and diagnostic findings..."
+                            rows={3}
+                            value={formData.diagnosis}
+                            onChange={(e) => handleInputChange('diagnosis', e.target.value)}
+                        />
                       </div>
-                    </form>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Treatment</label>
+                        <Textarea
+                            placeholder="Treatment plan and interventions..."
+                            rows={3}
+                            value={formData.treatment}
+                            onChange={(e) => handleInputChange('treatment', e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {selectedImage && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image Preview</label>
+                          <img src={selectedImage} alt="Preview" className="w-32 h-32 object-cover rounded-md border" />
+                        </div>
+                    )}
+
+                    <div className="flex space-x-4">
+                      <Button onClick={handleSubmitCase} className="bg-blue-600 hover:bg-blue-700" disabled={loading}>
+                        {loading ? 'Submitting...' : 'Submit as Today\'s Case'}
+                      </Button>
+                      <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                        Cancel
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
             )}
 
-            {/* Loading State */}
-            {loading ? (
-                <div className="flex justify-center items-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                  <span className="ml-2 text-gray-600">Loading clinical cases...</span>
-                </div>
-            ) : (
-                /* Cases Grid */
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {clinicalCases.length === 0 ? (
-                      <div className="col-span-full text-center py-12">
-                        <Stethoscope className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                          No Clinical Cases Yet
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">
-                          Start by adding your first clinical case to share with the community.
-                        </p>
-                        <Button
-                            onClick={() => setShowAddForm(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add First Case
-                        </Button>
+            {/* Previous Cases Section */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Previous Cases of the Day</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {previousCases.map((caseItem) => (
+                    <Card key={caseItem.id} className="group hover:shadow-lg transition-all border-gray-200 hover:border-blue-300 relative">
+                      {caseItem.isNew && (
+                          <div className="absolute top-2 left-2 z-10">
+                            <Badge className="bg-green-500 text-white animate-pulse">
+                              New Case Added
+                            </Badge>
+                          </div>
+                      )}
+                      <div className="relative h-48 overflow-hidden rounded-t-lg">
+                        <img
+                            src={caseItem.image}
+                            alt={caseItem.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <Badge className="absolute top-3 right-3 bg-orange-500 text-white">
+                          {caseItem.difficulty}
+                        </Badge>
                       </div>
-                  ) : (
-                      clinicalCases.map((caseItem) => (
-                          <Card key={caseItem.id} className="group hover:shadow-lg transition-all border-gray-200 hover:border-blue-300">
-                            <div className="relative h-48 overflow-hidden rounded-t-lg">
-                              <img
-                                  src={caseItem.image}
-                                  alt={caseItem.title}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
-                              <Badge className="absolute top-3 right-3 bg-blue-600 text-white">
-                                {caseItem.difficulty}
-                              </Badge>
-                            </div>
-                            <CardContent className="p-6">
-                              <div className="flex items-center justify-between mb-2">
-                                <Badge variant="outline" className="text-blue-600 border-blue-200">
-                                  {caseItem.category}
-                                </Badge>
-                                {caseItem.duration && (
-                                    <span className="text-sm text-gray-500 flex items-center">
-                            <Clock className="h-3 w-3 mr-1" />
-                                      {caseItem.duration}
-                          </span>
-                                )}
-                              </div>
-                              <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                                {caseItem.title}
-                              </h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                                {caseItem.description}
-                              </p>
-                              <div className="flex items-center justify-between text-sm text-gray-500">
-                                <span>By {caseItem.author}</span>
-                                <span>{formatDate(caseItem.createdAt)}</span>
-                              </div>
-                              <div className="flex items-center justify-between mt-4">
-                                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span className="flex items-center">
-                            <Eye className="h-4 w-4 mr-1" />
-                            {caseItem.views || 0}
-                          </span>
-                                  <button
-                                      onClick={() => handleLikeCase(caseItem.id)}
-                                      className="flex items-center hover:text-red-500 transition-colors"
-                                  >
-                                    <Heart className="h-4 w-4 mr-1" />
-                                    {caseItem.likes || 0}
-                                  </button>
-                                </div>
-                                <Button
-                                    size="sm"
-                                    onClick={() => handleViewCase(caseItem.id)}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                  View Case
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                      ))
-                  )}
-                </div>
-            )}
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="outline" className="text-blue-600 border-blue-200">
+                            {caseItem.category}
+                          </Badge>
+                          <span className="text-sm text-gray-500 font-medium flex items-center">
+                        <Calendar className="h-3 w-3 mr-1" />
+                            {caseItem.caseDate}
+                      </span>
+                        </div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                          {caseItem.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                          {caseItem.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <span className="flex items-center">
+                          <Eye className="h-4 w-4 mr-1" />
+                          {caseItem.views}
+                        </span>
+                        <span className="flex items-center">
+                          <Heart className="h-4 w-4 mr-1" />
+                          {caseItem.likes}
+                        </span>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleViewFullCase(caseItem)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        View Case
+                      </Button>
+                    </div>
+                    <div className="mt-3 text-xs text-gray-500">
+                      By {caseItem.author} • Published: {caseItem.publishedDate}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
-export default ClinicalCases;
+export default ClinicalCaseOfTheDay;
