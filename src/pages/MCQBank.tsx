@@ -96,7 +96,12 @@ const MCQQuestionBank = () => {
       const querySnapshot = await getDocs(collection(db, 'questionBanks'));
       const banks: QuestionBank[] = [];
       querySnapshot.forEach((doc) => {
-        banks.push({ id: doc.id, ...doc.data() } as QuestionBank);
+        const data = doc.data();
+        banks.push({
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date() // Fix: Convert Firestore timestamp
+        } as QuestionBank);
       });
       banks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       setQuestionBanks(banks);
@@ -201,10 +206,11 @@ const MCQQuestionBank = () => {
       // Delete file from Storage if exists
       if (documentUrl) {
         try {
+          // Fix: Create reference from URL properly
           const fileRef = ref(storage, documentUrl);
           await deleteObject(fileRef);
         } catch (error) {
-          console.log('File already deleted or does not exist');
+          console.log('File deletion error:', error);
         }
       }
 
@@ -309,12 +315,12 @@ const MCQQuestionBank = () => {
     }
   };
 
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+  const handlePreviewDocument = (documentUrl: string) => {
+    if (documentUrl) {
+      // Open PDF in new tab for preview
+      window.open(documentUrl, '_blank');
     }
   };
-
   const handleSubmitTest = () => {
     if (!showMCQTest) return;
 
@@ -875,8 +881,8 @@ const MCQQuestionBank = () => {
                   </CardContent>
                   <CardFooter className="space-x-2 pt-3">
                     {bank.documentUrl && (
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => setPreviewDocument(bank.documentUrl!)}
                         className={`${
@@ -889,8 +895,8 @@ const MCQQuestionBank = () => {
                         Preview
                       </Button>
                     )}
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       className={`${
                         isDarkMode 
