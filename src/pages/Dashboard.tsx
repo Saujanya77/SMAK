@@ -112,6 +112,8 @@ const MedicalDashboard = () => {
       id: 'content-hub', 
       label: 'Content Hub', 
       icon: LibraryBig,
+      route: '/Contenthub',
+      
       subItems: [
         { id: 'video-lectures', label: 'Video Lectures', icon: Video, route: '/video-lectures' },
         { id: 'subject-notes', label: 'Subject-wise Notes', icon: BookOpen , route: '/SubjectNotes' },
@@ -122,6 +124,7 @@ const MedicalDashboard = () => {
       id: 'clinical-corner',
       label: 'Clinical Corner',
       icon: Stethoscope,
+      route: '/Clinicalcorner',
       subItems: [
         { id: 'clinical-cases', label: 'Clinical Cases', icon: Clipboard, route: '/clinical-cases' },
         { id: 'emergency-protocols', label: 'Emergency Protocols', icon: Zap, route: '/Emergency_Protocols' },
