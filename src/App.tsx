@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+
+
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Events from "./pages/Events";
@@ -28,8 +30,12 @@ import VideoLectures from "./pages/VideoLectures";
 import MCQBank from "./pages/MCQBank";
 import Journals from "./pages/Journals";
 import SubjectNotes from "./pages/SubjectNotes";
-import Emergency_Protocols from "./pages/Emergency_Protocols";
-import Lab_Imaging from "./pages/Lab_Imaging";
+import Exploregallery from "./pages/exploregallery";
+import Clinicalcorner from "./pages/Clinicalcorner";
+import Contenthub from "./pages/Contenthub";
+import Homeclinicalcorner from "./pages/Homeclinicalcorner";
+
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -57,6 +63,10 @@ const App = () => (
                 <Route path="/SubjectNotes" element={<SubjectNotes />} />
                 <Route path="/notes" element={<Notes />} />
                 <Route path="/TestimonialsSlider" element={<TestimonialsSlider />} />
+                <Route path="/exploregalllery" element={<Exploregallery />} />
+                <Route path="/Clinicalcorner" element={<Clinicalcorner />} />
+                <Route path="/Contenthub" element={<Contenthub />} />
+                <Route path="/Homeclinicalcorner" element={<Homeclinicalcorner />} />
 
                 {/* Protected Routes */}
                 <Route
@@ -66,20 +76,6 @@ const App = () => (
                         <VideoLectures />
                       </ProtectedRoute>
                     }
-                />
-                <Route
-                    path="/Emergency_Protocols"
-                    element={
-                    <ProtectedRoute>
-                        <Emergency_Protocols />
-                    </ProtectedRoute>}
-                />
-                <Route
-                    path="/Lab_Imaging"
-                    element={
-                    <ProtectedRoute>
-                        <Lab_Imaging />
-                    </ProtectedRoute>}
                 />
                 <Route
                     path="/mcq-bank"
