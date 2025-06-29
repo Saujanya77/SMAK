@@ -24,6 +24,7 @@ const Navigation = () => {
     { name: 'About SMAK', path: '/about', icon: null },
     { name: 'Events', path: '/events', icon: null },
     { name: 'Journal', path: '/journal', icon: FileText },
+    { name: 'Clinical Corner', path: '/Homeclinicalcorner', icon: FileText },
     { name: 'Research Hub', path: '/research-hub', icon: null },
     { name: 'Members', path: '/members', icon: null },
     { name: 'Collaborate', path: '/collaborate', icon: null },
