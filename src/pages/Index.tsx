@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Badge } from "@/components/ui/badge";
+
+
+
 // import TestimonialsSlider from ".pages/components/TestimonialsSlider";
 
 import { 
@@ -22,8 +25,17 @@ import {
   ChevronLeft,
   Send,
   ArrowRight,
-  CheckCircle
+  CheckCircle,
+  Eye,
+  Network,
+  DollarSign,
+  Accessibility,
+  Handshake,
+  ExternalLink
 } from 'lucide-react';
+
+
+
 
 
 
@@ -34,141 +46,324 @@ const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedStory, setSelectedStory] = useState(0);
 
-  const pillars = [
-    {
-      icon: BookOpen,
-      title: 'Academics',
-      description: 'Excellence in medical education and learning resources',
-      color: 'from-blue-500 to-blue-600'
-    },
-    {
-      icon: Microscope,
-      title: 'Research & Journal',
-      description: 'Peer-reviewed research and academic publications',
-      color: 'from-blue-600 to-blue-700'
-    },
-    {
-      icon: Brain,
-      title: 'Skill Development',
-      description: 'Clinical skills and professional competency building',
-      color: 'from-blue-500 to-blue-600'
-    },
-    {
-      icon: Globe,
-      title: 'Collaborations',
-      description: 'Global partnerships and knowledge exchange',
-      color: 'from-blue-600 to-blue-700'
-    }
-  ];
-
-  const features = [
-    {
-      icon: Stethoscope,
-      title: 'Clinical Excellence',
-      description: 'Advanced clinical training and skill development',
-      stats: '500+ Students'
-    },
-    {
-      icon: GraduationCap,
-      title: 'Academic Leadership',
-      description: 'Fostering next-generation medical leaders',
-      stats: '50+ Colleges'
-    },
-    {
-      icon: Award,
-      title: 'Research Impact',
-      description: 'Published research with real-world applications',
-      stats: '100+ Papers'
-    },
-    {
-      icon: Heart,
-      title: 'Community Care',
-      description: 'Serving communities through medical outreach',
-      stats: '1000+ Lives Touched'
-    }
-  ];
-
-  const achievements = [
-    { icon: Trophy, value: '2024', label: 'Established' },
-    { icon: Users, value: '1000+', label: 'Active Members' },
-    { icon: BookOpen, value: '200+', label: 'Research Papers' },
-    { icon: Globe, value: '50+', label: 'Partner Colleges' }
-  ];
-
-  const galleryImages = [
-    {
-      src: "public/Images/IMG-20250613-WA0032.jpg",
-      title: "World Asthma Day",
-      description: "Annual medical conference with leading experts"
-    },
-    {
-      src: "public/Images/IMG-20250613-WA0033.jpg",
-      title: "World Asthma Day",
-      description: "Students presenting their groundbreaking research"
-    },
-    {
-      src: "public/Images/IMG-20250613-WA0034.jpg",
-      title: "World Asthma Day",
-      description: "Hands-on training in advanced medical procedures"
-    },
-    {
-      src: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=600&h=400&fit=crop&crop=center",
-      title: "Community Outreach",
-      description: "Medical camps serving rural communities"
-    },
-    {
-      src: "https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=600&h=400&fit=crop&crop=center",
-      title: "Laboratory Research",
-      description: "Cutting-edge research in medical laboratories"
-    },
-    {
-      src: "https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?w=600&h=400&fit=crop&crop=center",
-      title: "Student Collaboration",
-      description: "Medical students working together on projects"
-    }
-  ];
-
-  const testimonials = [
-    {
-      quote: "Through SMAK, I was mentored by a Padma Shri neurosurgeon who changed my perspective on academic medicine.",
-      author: "Kushal Pal",
-      position: "4th Year, FMCH",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-      rating: 5
-    },
-    {
-      quote: "SMAK provided me with research opportunities that led to my first publication in an international journal.",
-      author: "Dr. Priya Sharma",
-      position: "Final Year, AIIMS Delhi",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face",
-      rating: 5
-    },
-    {
-      quote: "The collaborative learning environment at SMAK helped me develop both clinical skills and leadership qualities.",
-      author: "Arjun Kumar",
-      position: "3rd Year, JIPMER",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face",
-      rating: 5
-    }
-  ];
-
-  function prevSlide(event: React.MouseEvent<HTMLButtonElement>): void {
-    throw new Error('Function not implemented.');
+// Updated pillars array with new items
+const pillars = [
+  {
+    icon: BookOpen,
+    title: 'Academics',
+    description: 'Excellence in medical education and learning resources',
+    color: 'from-blue-500 to-blue-600',
+    stats: 'Excellence'
+  },
+  {
+    icon: Microscope,
+    title: 'Research & Journal',
+    description: 'Peer-reviewed research and academic publications',
+    color: 'from-blue-600 to-blue-700',
+    stats: 'Peer-Reviewed'
+  },
+  {
+    icon: Brain,
+    title: 'Skill Development',
+    description: 'Clinical skills and professional competency building',
+    color: 'from-blue-500 to-blue-600',
+    stats: 'Clinical Skills'
+  },
+  {
+    icon: Globe,
+    title: 'Collaborations',
+    description: 'Global partnerships and knowledge exchange',
+    color: 'from-blue-600 to-blue-700',
+    stats: 'Global'
+  },
+  {
+    icon: Eye,
+    title: "National Visibility",
+    description: "Get your institution recognized across the country through our extensive network and platform reach.",
+    color: 'from-blue-500 to-blue-600',
+    stats: "Pan-India"
+  },
+  {
+    icon: Users,
+    title: "Leadership Exposure", 
+    description: "Empower students with leadership opportunities and skill development through active participation.",
+    color: 'from-blue-600 to-blue-700',
+    stats: "Student-Led"
+  },
+  {
+    icon: FileText,
+    title: "Free Research Publishing",
+    description: "Publish your research without any fees or barriers, making knowledge accessible to all.",
+    color: 'from-blue-500 to-blue-600',
+    stats: "Open Access"
+  },
+  {
+    icon: Network,
+    title: "Academic Collaboration",
+    description: "Connect and collaborate with medical colleges nationwide, fostering innovation and knowledge exchange.",
+    color: 'from-blue-600 to-blue-700',
+    stats: "Cross-College"
+  },
+  {
+    icon: DollarSign,
+    title: "No Fees",
+    description: "Join our community without any financial barriers or hidden conditions attached.",
+    color: 'from-blue-500 to-blue-600',
+    stats: "100% Free"
+  },
+  {
+    icon: Shield,
+    title: "Credibility",
+    description: "Build your reputation through our credible platform backed by academic excellence.",
+    color: 'from-blue-600 to-blue-700',
+    stats: "Trusted"
+  },
+  {
+    icon: Accessibility,
+    title: "Accessibility",
+    description: "Ensuring equal opportunities and access for all members regardless of background or location.",
+    color: 'from-blue-500 to-blue-600',
+    stats: "Universal"
+  },
+  {
+    icon: Handshake,
+    title: "Collaboration",
+    description: "Foster meaningful partnerships and collaborative efforts across the medical education ecosystem.",
+    color: 'from-blue-600 to-blue-700',
+    stats: "Together"
   }
+];
 
-  function nextSlide(event: React.MouseEvent<HTMLButtonElement>): void {
-    throw new Error('Function not implemented.');
+const galleryImages = [
+  {
+    src: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop&crop=center",
+    title: "Medical Conference 2024",
+    description: "Annual gathering of medical professionals discussing latest innovations in healthcare technology and patient care methodologies."
+  },
+  {
+    src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=600&fit=crop&crop=center",
+    title: "Surgery Training Session",
+    description: "Hands-on training session for residents learning advanced surgical techniques under expert supervision."
+  },
+  {
+    src: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=800&h=600&fit=crop&crop=center",
+    title: "Research Laboratory",
+    description: "State-of-the-art research facility where breakthrough medical discoveries are made daily."
+  },
+  {
+    src: "https://images.unsplash.com/photo-1551190822-a9333d879b1f?w=800&h=600&fit=crop&crop=center",
+    title: "Patient Care Excellence",
+    description: "Dedicated healthcare professionals providing compassionate care and support to patients and families."
+  },
+  {
+    src: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=800&h=600&fit=crop&crop=center",
+    title: "Medical Education",
+    description: "Interactive learning sessions where medical students engage with cutting-edge educational content."
+  },
+  {
+    src: "https://images.unsplash.com/photo-1559757175-8a6c4f73d2d7?w=800&h=600&fit=crop&crop=center",
+    title: "Healthcare Innovation",
+    description: "Showcasing the latest medical technologies and innovations that are transforming patient care."
   }
+];
 
-  function prevStory(event: React.MouseEvent<HTMLDivElement>): void {
-    throw new Error('Function not implemented.');
+const nextSlide = () => {
+  setCurrentSlide((prev) => (prev + 1) % galleryImages.length);
+};
+
+const prevSlide = () => {
+  setCurrentSlide((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+};
+
+const nextStory = () => {
+  setSelectedStory((prev) => (prev + 1) % galleryImages.length);
+};
+
+const prevStory = () => {
+  setSelectedStory((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+};
+
+const features = [
+  {
+    icon: Stethoscope,
+    title: 'Clinical Excellence',
+    description: 'Advanced clinical training and skill development',
+    stats: '500+ Students'
+  },
+  {
+    icon: GraduationCap,
+    title: 'Academic Leadership',
+    description: 'Fostering next-generation medical leaders',
+    stats: '50+ Colleges'
+  },
+  {
+    icon: Award,
+    title: 'Research Impact',
+    description: 'Published research with real-world applications',
+    stats: '100+ Papers'
+  },
+  {
+    icon: Heart,
+    title: 'Community Care',
+    description: 'Serving communities through medical outreach',
+    stats: '1000+ Lives Touched'
   }
+];
 
-  function nextStory(event: React.MouseEvent<HTMLDivElement>): void {
-    throw new Error('Function not implemented.');
+const achievements = [
+  { icon: Trophy, value: '2024', label: 'Established' },
+  { icon: Users, value: '1000+', label: 'Active Members' },
+  { icon: BookOpen, value: '200+', label: 'Research Papers' },
+  { icon: Globe, value: '50+', label: 'Partner Colleges' }
+];
+
+// Define the values array for "Our Values" section
+const values = [
+  {
+    icon: Heart,
+    title: 'Compassion',
+    description: 'We put empathy and patient care at the heart of everything we do.',
+    color: 'from-red-400 to-pink-500'
+  },
+  {
+    icon: Award,
+    title: 'Excellence',
+    description: 'We strive for the highest standards in academics, research, and service.',
+    color: 'from-yellow-400 to-yellow-600'
+  },
+  {
+    icon: Lightbulb,
+    title: 'Innovation',
+    description: 'We embrace new ideas and creative solutions in medical education.',
+    color: 'from-blue-400 to-cyan-500'
+  },
+  {
+    icon: Handshake,
+    title: 'Collaboration',
+    description: 'We believe in teamwork and building bridges across disciplines.',
+    color: 'from-green-400 to-teal-500'
+  },
+  {
+    icon: Shield,
+    title: 'Integrity',
+    description: 'We uphold honesty, ethics, and transparency in all our actions.',
+    color: 'from-gray-400 to-gray-600'
   }
+];
 
-  return (
+const partners = [
+  { name: "Harvard Medical School", logo: "https://logo.clearbit.com/harvard.edu" },
+  { name: "Johns Hopkins", logo: "https://logo.clearbit.com/jhu.edu" },
+  { name: "Stanford Medicine", logo: "https://logo.clearbit.com/stanford.edu" },
+  { name: "Mayo Clinic", logo: "https://logo.clearbit.com/mayoclinic.org" },
+  { name: "UCLA", logo: "https://logo.clearbit.com/ucla.edu" },
+  { name: "NYU Langone", logo: "https://logo.clearbit.com/nyu.edu" },
+  { name: "UCSF", logo: "https://logo.clearbit.com/ucsf.edu" },
+  { name: "Yale School of Medicine", logo: "https://logo.clearbit.com/yale.edu" },
+  { name: "Columbia Medicine", logo: "https://logo.clearbit.com/columbia.edu" },
+  { name: "University of Pennsylvania", logo: "https://logo.clearbit.com/upenn.edu" }
+];
+
+const duplicatedPartners = [...partners, ...partners];
+
+// Sample testimonials data
+const testimonials = [
+  {
+    quote: "This platform transformed my MCAT preparation. The personalized study plans and AI-powered practice questions helped me achieve my target score.",
+    author: "Sarah Johnson",
+    position: "Pre-Med Student, Harvard University",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b742?w=150&h=150&fit=crop&crop=face",
+    rating: 5
+  },
+  {
+    quote: "The comprehensive resources and expert guidance made medical school applications so much easier. I got accepted to my dream school!",
+    author: "Michael Chen",
+    position: "Medical Student, Johns Hopkins",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    rating: 5
+  },
+  {
+    quote: "Outstanding support throughout my medical journey. The mentorship program connected me with amazing physicians who guided my career path.",
+    author: "Emily Rodriguez",
+    position: "Resident, Mayo Clinic",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    rating: 5
+  },
+  {
+    quote: "The clinical rotation resources were invaluable. I felt more prepared and confident during my hospital rotations thanks to this platform.",
+    author: "David Kumar",
+    position: "Medical Student, Stanford Medicine",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    rating: 5
+  },
+  {
+    quote: "From MCAT prep to residency matching, this platform supported me every step of the way. Couldn't have done it without them!",
+    author: "Jessica Park",
+    position: "Resident, Mass General Brigham",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+    rating: 5
+  },
+  {
+    quote: "The community aspect is incredible. Connecting with fellow pre-med students and sharing experiences made the journey less isolating.",
+    author: "Alex Thompson",
+    position: "Pre-Med Student, UCLA",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    rating: 5
+  }
+];
+
+// Duplicate testimonials for seamless loop
+const duplicatedTestimonials = [...testimonials, ...testimonials];
+
+// Features for "Why Join SMAK?" section
+const whyJoinFeatures = [
+  {
+    icon: GraduationCap,
+    title: "Leadership Opportunities",
+    description: "Take on leadership roles in organizing events, research, and outreach programs.",
+    stats: "50+ Student Leaders",
+    badge: "Leadership"
+  },
+  {
+    icon: Microscope,
+    title: "Research Mentorship",
+    description: "Get mentored by top doctors and researchers for your academic projects.",
+    stats: "100+ Mentors",
+    badge: "Mentorship"
+  },
+  {
+    icon: BookOpen,
+    title: "Academic Resources",
+    description: "Access exclusive study materials, webinars, and journal archives.",
+    stats: "200+ Resources",
+    badge: "Academics"
+  },
+  {
+    icon: Users,
+    title: "Nationwide Network",
+    description: "Connect with medical students and professionals across India.",
+    stats: "1000+ Members",
+    badge: "Community"
+  },
+  {
+    icon: Award,
+    title: "Recognition & Awards",
+    description: "Earn certificates, awards, and recognition for your contributions.",
+    stats: "30+ Awards",
+    badge: "Recognition"
+  },
+  {
+    icon: Globe,
+    title: "Collaborative Projects",
+    description: "Participate in multi-institutional research and outreach projects.",
+    stats: "20+ Projects",
+    badge: "Collaboration"
+  }
+];
+
+// (Removed the TestimonialSlider component as it was not used elsewhere)
+  
+return (
     <div className="min-h-screen bg-background">
       <Navigation />
       
@@ -279,7 +474,7 @@ const Index = () => {
           <span className="animate-fade-in-up">Empowering Tomorrow's</span>
         </div>
         <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-600 bg-clip-text text-transparent animate-fade-in-up-delayed">
-          Empowering Tomorrow’s Healers Through Knowledge Today
+          Empowering Tomorrow’s Healers Through Knowledge today
         </div>
       </h1>
       
@@ -288,7 +483,7 @@ const Index = () => {
           Welcome to <span className="font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">The Society of Medical Academia and Knowledge</span>
         </p>
         <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
-          A National Platform for Medical Students to Learn, Lead & Innovate with Purpose and Compassion.
+          A student-led nonprofit platform uniting future doctors through knowledge,  research, leadership andcollaboration
         </p>
       </div>
       
@@ -344,7 +539,8 @@ const Index = () => {
   </div>
   
   {/* Custom CSS for animations */}
-  <style>{`
+        <style>
+  {`
     @keyframes float {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-20px) rotate(5deg); }
@@ -420,36 +616,122 @@ const Index = () => {
 </section>
 
       {/* Enhanced Features Section */}
-      <section className="py-20 bg-gradient-to-r from-white to-blue-50/30 dark:from-background dark:to-blue-950/10">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-              <Zap className="inline h-10 w-10 text-blue-500 mr-3" />
-              Why Choose SMAK?
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Discover what makes SMAK the premier platform for medical education and collaboration
-            </p>
-          </div>
+      
+  <section className="py-20 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-background">
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-16">
+        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+          <Heart className="inline h-10 w-10 text-red-500 mr-3" />
+          Our Values
+        </h2>
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          The core principles that guide everything we do at SMAK
+        </p>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-blue-200 dark:hover:border-blue-800 transform hover:-translate-y-2 bg-gradient-to-br from-white to-blue-50/30 dark:from-card dark:to-blue-950/10">
-                <CardHeader className="text-center pb-4">
-                  <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="h-10 w-10 text-blue-600" />
-                  </div>
-                  <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-                  <div className="text-2xl font-bold text-blue-600 mb-2">{feature.stats}</div>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <CardDescription className="text-base">{feature.description}</CardDescription>
-                </CardContent>
-              </Card>
-            ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {values.map((value, index) => (
+          <div key={index} className="group">
+            <Card className="h-full transition-all duration-500 border-0 bg-white dark:bg-card shadow-lg hover:shadow-2xl transform hover:-translate-y-1 overflow-hidden">
+              <div className={`h-2 bg-gradient-to-r ${value.color}`}></div>
+              <CardHeader className="text-center pb-4 pt-8">
+                <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-r ${value.color} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                  <value.icon className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-lg mb-3 group-hover:text-gray-800 dark:group-hover:text-gray-100 transition-colors duration-300">
+                  {value.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center px-4 pb-6">
+                <CardDescription className="text-sm leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
+                  {value.description}
+                </CardDescription>
+              </CardContent>
+            </Card>
           </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* Why Join SMAK Section */}
+  <section className="py-20 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-16">
+        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <Sparkles className="inline h-10 w-10 text-blue-500 mr-3" />
+          Why Join SMAK?
+        </h2>
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          Discover the exclusive benefits and opportunities waiting for you
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {whyJoinFeatures.map((feature, index) => (
+          <Card key={index} className="group hover:shadow-2xl transition-all duration-500 border-2 border-blue-100 hover:border-blue-300 dark:border-blue-900 dark:hover:border-blue-700 transform hover:-translate-y-3 bg-white dark:bg-card relative overflow-hidden">
+            {/* Decorative background element */}
+            <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-blue-100 to-transparent dark:from-blue-900/30 rounded-bl-2xl"></div>
+            
+            {/* Badge */}
+            <div className="absolute top-4 right-4 z-20">
+              <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg">
+                {feature.badge}
+              </span>
+            </div>
+
+            <CardHeader className="pb-4 pt-6 pr-20 relative z-10">
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg flex-shrink-0">
+                  <feature.icon className="h-8 w-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-xl mb-2 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-300">
+                    {feature.title}
+                  </CardTitle>
+                  <div className="text-lg font-bold text-blue-600 group-hover:text-blue-700 transition-colors duration-300">
+                    {feature.stats}
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <CardDescription className="text-base leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
+                {feature.description}
+              </CardDescription>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* Final CTA Section */}
+  <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
+    <div className="container mx-auto px-4 text-center">
+      <div className="max-w-4xl mx-auto">
+        <h3 className="text-3xl md:text-5xl font-bold mb-6 text-white">
+          Let's break walls and build bridges
+        </h3>
+        <p className="text-xl md:text-2xl mb-8 text-blue-100">
+          Join SMAK and make history with us
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <Button 
+  size="lg" 
+  className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold"
+  asChild
+>
+  <Link to="/login">
+    Join SMAK Today
+    <ArrowRight className="ml-2 h-5 w-5" />
+  </Link>
+</Button>
+          
         </div>
-      </section>
+      </div>
+    </div>
+  </section>
 
       {/* Enhanced About SMAK Section */}
       <section className="py-20 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-950/10 dark:to-background">
@@ -478,12 +760,7 @@ const Index = () => {
                     <span className="text-lg">Innovation in medical practice</span>
                   </div>
                 </div>
-                <Button size="lg" variant="outline" className="rounded-full border-2 border-blue-200" asChild>
-                  <Link to="/about">
-                    <Lightbulb className="mr-2 h-5 w-5" />
-                    Learn More <ChevronRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+                
               </div>
               <div className="relative">
                 <img 
@@ -534,329 +811,329 @@ const Index = () => {
       </section>
 
       {/* Enhanced Gallery Section with Interactive Slider */}
-<section className="py-20 bg-gradient-to-br from-blue-50/30 via-white to-purple-50/20 dark:from-blue-950/10 dark:via-background dark:to-purple-950/10">
-  <div className="container mx-auto px-4">
-    <div className="text-center mb-16">
-      <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
-        <Camera className="inline h-12 w-12 text-blue-500 mr-4" />
-        SMAK Gallery
-      </h2>
-      <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-        Capturing moments of learning, collaboration, and medical excellence
-      </p>
-    </div>
+ <section className="py-20 bg-gradient-to-br from-blue-50/30 via-white to-purple-50/20 dark:from-blue-950/10 dark:via-background dark:to-purple-950/10">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+            <Camera className="inline h-12 w-12 text-blue-500 mr-4" />
+            SMAK Gallery
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Capturing moments of learning, collaboration, and medical excellence
+          </p>
+        </div>
 
-    {/* Gallery Mode Switcher */}
-    <div className="flex justify-center mb-12 space-x-2">
-      <Button 
-        size="sm"
-        variant={viewMode === 'grid' ? 'default' : 'outline'} 
-        onClick={() => setViewMode('grid')}
-        className="rounded-full transition-all duration-300 hover:scale-105"
-      >
-        <Grid3X3 className="mr-2 h-4 w-4" />
-        Grid
-      </Button>
-      <Button 
-        size="sm"
-        variant={viewMode === 'carousel' ? 'default' : 'outline'} 
-        onClick={() => setViewMode('carousel')}
-        className="rounded-full transition-all duration-300 hover:scale-105"
-      >
-        <RotateCcw className="mr-2 h-4 w-4" />
-        Carousel
-      </Button>
-      <Button 
-        size="sm"
-        variant={viewMode === 'stories' ? 'default' : 'outline'} 
-        onClick={() => setViewMode('stories')}
-        className="rounded-full transition-all duration-300 hover:scale-105"
-      >
-        <Circle className="mr-2 h-4 w-4" />
-        Stories
-      </Button>
-    </div>
-
-    {/* Grid View (Enhanced Original) */}
-    {viewMode === 'grid' && (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {galleryImages.map((image, index) => (
-          <Card 
-            key={index} 
-            className="group overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:rotate-1 relative"
-            style={{ animationDelay: `${index * 150}ms` }}
+        {/* Gallery Mode Switcher */}
+        <div className="flex justify-center mb-12 space-x-2">
+          <Button 
+            size="sm"
+            variant={viewMode === 'grid' ? 'default' : 'outline'} 
+            onClick={() => setViewMode('grid')}
+            className="rounded-full transition-all duration-300 hover:scale-105"
           >
-            <div className="relative overflow-hidden">
-              <img 
-                src={image.src}
-                alt={image.title}
-                className="w-full h-64 object-cover transition-all duration-700 group-hover:scale-125 group-hover:brightness-110"
-              />
-              
-              {/* Animated overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-              
-              {/* Floating action buttons */}
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-4 group-hover:translate-x-0">
-                <div className="flex flex-col gap-2">
-                  <Button size="sm" className="h-10 w-10 p-0 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20">
-                    <Heart className="h-4 w-4 text-white" />
-                  </Button>
-                  <Button size="sm" className="h-10 w-10 p-0 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20">
-                    <Share2 className="h-4 w-4 text-white" />
-                  </Button>
-                  <Button size="sm" className="h-10 w-10 p-0 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20">
-                    <Bookmark className="h-4 w-4 text-white" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Enhanced content overlay */}
-              <div className="absolute bottom-0 left-0 right-0 text-white transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 opacity-0 group-hover:opacity-100 p-6">
-                <div className="flex items-center mb-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                  <span className="text-xs text-white/70">LIVE EVENT</span>
-                </div>
-                <h3 className="font-bold text-xl mb-2 leading-tight">{image.title}</h3>
-                <p className="text-sm text-white/90 mb-4 line-clamp-2">{image.description}</p>
-                
-                {/* Social stats */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 text-xs text-white/80">
-                    <span className="flex items-center">
-                      <Heart className="h-3 w-3 mr-1" />
-                      {Math.floor(Math.random() * 100) + 20}
-                    </span>
-                    <span className="flex items-center">
-                      <MessageCircle className="h-3 w-3 mr-1" />
-                      {Math.floor(Math.random() * 20) + 5}
-                    </span>
-                  </div>
-                  <Button size="sm" className="text-xs px-3 py-1 rounded-full bg-blue-500 hover:bg-blue-600">
-                    View
-                  </Button>
-                </div>
-              </div>
-
-              {/* Decorative elements */}
-              <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-200">
-                <div className="w-8 h-8 border-2 border-white/30 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    )}
-
-    {/* Carousel View */}
-    {viewMode === 'carousel' && (
-      <div className="relative max-w-6xl mx-auto">
-        <div className="overflow-hidden rounded-3xl shadow-2xl bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm p-2">
-          <div 
-            className="flex transition-transform duration-700 ease-out"
-            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            <Grid3X3 className="mr-2 h-4 w-4" />
+            Grid
+          </Button>
+          <Button 
+            size="sm"
+            variant={viewMode === 'carousel' ? 'default' : 'outline'} 
+            onClick={() => setViewMode('carousel')}
+            className="rounded-full transition-all duration-300 hover:scale-105"
           >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Carousel
+          </Button>
+          <Button 
+            size="sm"
+            variant={viewMode === 'stories' ? 'default' : 'outline'} 
+            onClick={() => setViewMode('stories')}
+            className="rounded-full transition-all duration-300 hover:scale-105"
+          >
+            <Circle className="mr-2 h-4 w-4" />
+            Stories
+          </Button>
+        </div>
+
+        {/* Grid View (Enhanced Original) */}
+        {viewMode === 'grid' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {galleryImages.map((image, index) => (
-              <div key={index} className="w-full flex-shrink-0 relative group">
-                <div className="aspect-video relative overflow-hidden rounded-2xl">
+              <Card 
+                key={index} 
+                className="group overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:rotate-1 relative animate-fade-in"
+                style={{ animationDelay: `${index * 150}ms` }}
+              >
+                <div className="relative overflow-hidden">
                   <img 
-                    src={image.src} 
+                    src={image.src}
                     alt={image.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-64 object-cover transition-all duration-700 group-hover:scale-125 group-hover:brightness-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
                   
-                  {/* Carousel content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                    <div className="flex items-end justify-between">
-                      <div className="flex-1 max-w-2xl">
-                        <div className="flex items-center mb-3">
-                          <div className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></div>
-                          <span className="text-sm text-white/80 uppercase tracking-wider">Medical Excellence</span>
-                        </div>
-                        <h3 className="text-4xl font-bold mb-3 leading-tight">{image.title}</h3>
-                        <p className="text-lg text-white/90 mb-6 leading-relaxed">{image.description}</p>
-                        <div className="flex items-center space-x-4">
-                          <Button className="rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/20">
-                            <Play className="h-4 w-4 mr-2" />
-                            Watch Now
-                          </Button>
-                          <Button variant="outline" className="rounded-full border-white/20 text-white hover:bg-white/10">
-                            <Share2 className="h-4 w-4 mr-2" />
-                            Share
-                          </Button>
-                        </div>
+                  {/* Animated overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                  
+                  {/* Floating action buttons */}
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-4 group-hover:translate-x-0">
+                    <div className="flex flex-col gap-2">
+                      <Button size="sm" className="h-10 w-10 p-0 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20">
+                        <Heart className="h-4 w-4 text-white" />
+                      </Button>
+                      <Button size="sm" className="h-10 w-10 p-0 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20">
+                        <Share2 className="h-4 w-4 text-white" />
+                      </Button>
+                      <Button size="sm" className="h-10 w-10 p-0 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20">
+                        <Bookmark className="h-4 w-4 text-white" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Enhanced content overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 text-white transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 opacity-0 group-hover:opacity-100 p-6">
+                    <div className="flex items-center mb-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                      <span className="text-xs text-white/70">LIVE EVENT</span>
+                    </div>
+                    <h3 className="font-bold text-xl mb-2 leading-tight">{image.title}</h3>
+                    <p className="text-sm text-white/90 mb-4 line-clamp-2">{image.description}</p>
+                    
+                    {/* Social stats */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 text-xs text-white/80">
+                        <span className="flex items-center">
+                          <Heart className="h-3 w-3 mr-1" />
+                          {Math.floor(Math.random() * 100) + 20}
+                        </span>
+                        <span className="flex items-center">
+                          <Share2 className="h-3 w-3 mr-1" />
+                          {Math.floor(Math.random() * 20) + 5}
+                        </span>
                       </div>
+                      <Button size="sm" className="text-xs px-3 py-1 rounded-full bg-blue-500 hover:bg-blue-600">
+                        View
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Decorative elements */}  
+                  <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-200">
+                    <div className="w-8 h-8 border-2 border-white/30 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Carousel View */}
+        {viewMode === 'carousel' && (
+          <div className="relative max-w-6xl mx-auto">
+            <div className="overflow-hidden rounded-3xl shadow-2xl bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm p-2">
+              <div 
+                className="flex transition-transform duration-700 ease-out"
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              >
+                {galleryImages.map((image, index) => (
+                  <div key={index} className="w-full flex-shrink-0 relative group">
+                    <div className="aspect-video relative overflow-hidden rounded-2xl">
+                      <img 
+                        src={image.src} 
+                        alt={image.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
                       
-                      {/* Navigation */}
-                      <div className="text-right">
-                        <div className="text-sm text-white/70 mb-4">
-                          {String(index + 1).padStart(2, '0')} / {String(galleryImages.length).padStart(2, '0')}
-                        </div>
-                        <div className="flex space-x-3">
-                          <Button 
-                            size="lg" 
-                            variant="ghost" 
-                            className="h-12 w-12 p-0 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20"
-                            onClick={prevSlide}
-                          >
-                            <ChevronLeft className="h-6 w-6 text-white" />
-                          </Button>
-                          <Button 
-                            size="lg" 
-                            variant="ghost" 
-                            className="h-12 w-12 p-0 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20"
-                            onClick={nextSlide}
-                          >
-                            <ChevronRight className="h-6 w-6 text-white" />
-                          </Button>
+                      {/* Carousel content */}
+                      <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                        <div className="flex items-end justify-between">
+                          <div className="flex-1 max-w-2xl">
+                            <div className="flex items-center mb-3">
+                              <div className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></div>
+                              <span className="text-sm text-white/80 uppercase tracking-wider">Medical Excellence</span>
+                            </div>
+                            <h3 className="text-4xl font-bold mb-3 leading-tight">{image.title}</h3>
+                            <p className="text-lg text-white/90 mb-6 leading-relaxed">{image.description}</p>
+                            <div className="flex items-center space-x-4">
+                              <Button className="rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/20">
+                                <Play className="h-4 w-4 mr-2" />
+                                Watch Now
+                              </Button>
+                              <Button variant="outline" className="rounded-full border-white/20 text-white hover:bg-white/10">
+                                <Share2 className="h-4 w-4 mr-2" />
+                                Share
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Navigation */}
+                          <div className="text-right">
+                            <div className="text-sm text-white/70 mb-4">
+                              {String(index + 1).padStart(2, '0')} / {String(galleryImages.length).padStart(2, '0')}
+                            </div>
+                            <div className="flex space-x-3">
+                              <Button 
+                                size="lg" 
+                                variant="ghost" 
+                                className="h-12 w-12 p-0 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20"
+                                onClick={prevSlide}
+                              >
+                                <ChevronLeft className="h-6 w-6 text-white" />
+                              </Button>
+                              <Button 
+                                size="lg" 
+                                variant="ghost" 
+                                className="h-12 w-12 p-0 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20"
+                                onClick={nextSlide}
+                              >
+                                <ChevronRight className="h-6 w-6 text-white" />
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-        
-        {/* Enhanced indicators */}
-        <div className="flex justify-center mt-8 space-x-3">
-          {galleryImages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`relative transition-all duration-300 ${
-                index === currentSlide 
-                  ? 'w-12 h-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full' 
-                  : 'w-3 h-3 bg-gray-300 hover:bg-gray-400 rounded-full'
-              }`}
-            >
-              {index === currentSlide && (
-                <div className="absolute inset-0 bg-white/30 rounded-full animate-pulse"></div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-    )}
-
-    {/* Stories View */}
-    {viewMode === 'stories' && (
-      <div className="max-w-5xl mx-auto">
-        {/* Stories thumbnails */}
-        <div className="flex justify-center space-x-6 mb-10 overflow-x-auto pb-4">
-          {galleryImages.map((image, index) => (
-            <div 
-              key={index}
-              className={`flex-shrink-0 cursor-pointer transition-all duration-300 ${
-                selectedStory === index ? 'transform scale-110' : 'hover:scale-105'
-              }`}
-              onClick={() => setSelectedStory(index)}
-            >
-              <div className={`w-24 h-24 rounded-full p-1 ${
-                selectedStory === index 
-                  ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 shadow-lg' 
-                  : 'bg-gradient-to-r from-gray-300 to-gray-400 hover:from-blue-400 hover:to-purple-500'
-              }`}>
-                <img 
-                  src={image.src} 
-                  alt={image.title}
-                  className="w-full h-full rounded-full object-cover border-3 border-white shadow-md"
-                />
-                {selectedStory === index && (
-                  <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse"></div>
-                )}
-              </div>
-              <p className="text-center text-xs mt-3 font-medium truncate w-24 text-gray-600">
-                {image.title.split(' ')[0]}
-              </p>
             </div>
-          ))}
-        </div>
-
-        {/* Story viewer */}
-        <Card className="relative overflow-hidden rounded-3xl shadow-2xl max-w-sm mx-auto bg-black">
-          <div className="aspect-[9/16] relative">
-            <img 
-              src={galleryImages[selectedStory].src} 
-              alt={galleryImages[selectedStory].title}
-              className="w-full h-full object-cover"
-            />
             
-            {/* Story progress bars */}
-            <div className="absolute top-6 left-4 right-4 flex space-x-1 z-10">
+            {/* Enhanced indicators */}
+            <div className="flex justify-center mt-8 space-x-3">
               {galleryImages.map((_, index) => (
-                <div key={index} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full bg-white rounded-full transition-all duration-300 ${
-                      index < selectedStory ? 'w-full' : 
-                      index === selectedStory ? 'w-3/4 animate-pulse' : 'w-0'
-                    }`}
-                  />
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`relative transition-all duration-300 ${
+                    index === currentSlide 
+                      ? 'w-12 h-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full' 
+                      : 'w-3 h-3 bg-gray-300 hover:bg-gray-400 rounded-full'
+                  }`}
+                >
+                  {index === currentSlide && (
+                    <div className="absolute inset-0 bg-white/30 rounded-full animate-pulse"></div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Stories View */}
+        {viewMode === 'stories' && (
+          <div className="max-w-5xl mx-auto">
+            {/* Stories thumbnails */}
+            <div className="flex justify-center space-x-6 mb-10 overflow-x-auto pb-4">
+              {galleryImages.map((image, index) => (
+                <div 
+                  key={index}
+                  className={`flex-shrink-0 cursor-pointer transition-all duration-300 ${
+                    selectedStory === index ? 'transform scale-110' : 'hover:scale-105'
+                  }`}
+                  onClick={() => setSelectedStory(index)}
+                >
+                  <div className={`w-24 h-24 rounded-full p-1 ${
+                    selectedStory === index 
+                      ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 shadow-lg' 
+                      : 'bg-gradient-to-r from-gray-300 to-gray-400 hover:from-blue-400 hover:to-purple-500'
+                  }`}>
+                    <img 
+                      src={image.src} 
+                      alt={image.title}
+                      className="w-full h-full rounded-full object-cover border-3 border-white shadow-md"
+                    />
+                    {selectedStory === index && (
+                      <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse"></div>
+                    )}
+                  </div>
+                  <p className="text-center text-xs mt-3 font-medium truncate w-24 text-gray-600">
+                    {image.title.split(' ')[0]}
+                  </p>
                 </div>
               ))}
             </div>
 
-            {/* Story header */}
-            <div className="absolute top-16 left-4 right-4 flex items-center text-white z-10">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mr-3">
-                <Camera className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-semibold">SMAK Medical</p>
-                <p className="text-xs text-white/80">2 hours ago</p>
-              </div>
-            </div>
-
-            {/* Story content */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent text-white">
-              <h3 className="text-2xl font-bold mb-2 leading-tight">{galleryImages[selectedStory].title}</h3>
-              <p className="text-white/90 mb-6 text-sm leading-relaxed">{galleryImages[selectedStory].description}</p>
-              
-              {/* Story actions */}
-              <div className="flex justify-between items-center">
-                <div className="flex space-x-4">
-                  <Button size="sm" className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm">
-                    <Heart className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm">
-                    <MessageCircle className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm">
-                    <Send className="h-4 w-4" />
-                  </Button>
+            {/* Story viewer */}
+            <Card className="relative overflow-hidden rounded-3xl shadow-2xl max-w-sm mx-auto bg-black">
+              <div className="aspect-[9/16] relative">
+                <img 
+                  src={galleryImages[selectedStory].src} 
+                  alt={galleryImages[selectedStory].title}
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* Story progress bars */}
+                <div className="absolute top-6 left-4 right-4 flex space-x-1 z-10">
+                  {galleryImages.map((_, index) => (
+                    <div key={index} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full bg-white rounded-full transition-all duration-300 ${
+                          index < selectedStory ? 'w-full' : 
+                          index === selectedStory ? 'w-3/4 animate-pulse' : 'w-0'
+                        }`}
+                      />
+                    </div>
+                  ))}
                 </div>
-                <Button size="sm" className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm">
-                  <Bookmark className="h-4 w-4" />
-                </Button>
+
+                {/* Story header */}
+                <div className="absolute top-16 left-4 right-4 flex items-center text-white z-10">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mr-3">
+                    <Camera className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">SMAK Medical</p>
+                    <p className="text-xs text-white/80">2 hours ago</p>
+                  </div>
+                </div>
+
+                {/* Story content */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent text-white">
+                  <h3 className="text-2xl font-bold mb-2 leading-tight">{galleryImages[selectedStory].title}</h3>
+                  <p className="text-white/90 mb-6 text-sm leading-relaxed">{galleryImages[selectedStory].description}</p>
+                  
+                  {/* Story actions */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-4">
+                      <Button size="sm" className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm">
+                        <Heart className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm">
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm">
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Button size="sm" className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm">
+                      <Bookmark className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Tap zones for navigation */}
+                <div className="absolute inset-y-0 left-0 w-1/2 cursor-pointer z-5" onClick={prevStory}></div>
+                <div className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-5" onClick={nextStory}></div>
               </div>
-            </div>
-
-            {/* Tap zones for navigation */}
-            <div className="absolute inset-y-0 left-0 w-1/2 cursor-pointer z-5" onClick={prevStory}></div>
-            <div className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-5" onClick={nextStory}></div>
+            </Card>
           </div>
-        </Card>
-      </div>
-    )}
+        )}
 
-    {/* Enhanced action button */}
-    <div className="text-center mt-16">
-      <Button 
-        size="lg" 
-        className="rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 hover:from-blue-700 hover:via-purple-700 hover:to-pink-600 px-12 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1" 
-        asChild
-      >
-        <Link to="/gallery">
-          <Sparkles className="mr-3 h-6 w-6 animate-pulse" />
-          Explore Full Gallery
-          <ArrowRight className="ml-3 h-5 w-5" />
-        </Link>
-      </Button>
-    </div>
-  </div>
-</section>
+        {/* Enhanced action button */}
+        <div className="text-center mt-16">
+          <Button 
+            size="lg" 
+            className="rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 hover:from-blue-700 hover:via-purple-700 hover:to-pink-600 px-12 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1" 
+            asChild
+          >
+            <Link to="/exploregalllery">
+              <Sparkles className="mr-3 h-6 w-6 animate-pulse" />
+              Explore Full Gallery
+              <ArrowRight className="ml-3 h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
 
       {/* Keep existing sections with minor enhancements */}
       {/* Upcoming Events */}
@@ -1000,27 +1277,33 @@ const Index = () => {
       </section>
 
       {/* Enhanced Testimonials */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-              <Star className="inline h-10 w-10 text-blue-500 mr-3" />
-              Student Testimonials
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Hear from our community of future medical leaders
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="group text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white to-blue-50/30 dark:from-card dark:to-blue-950/10">
-                <CardContent className="pt-8">
+      <section className="py-20 bg-gradient-to-b from-white to-blue-50/50 dark:from-background dark:to-blue-950/20">
+      <div className="container mx-auto px-4">
+        {/* Testimonials Section */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+            <Star className="inline h-10 w-10 text-blue-500 mr-3" />
+            Student Testimonials
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300">
+            Hear from our community of future medical leaders
+          </p>
+        </div>
+
+        {/* Testimonials Slider */}
+        <div className="relative overflow-hidden mb-20">
+          <div className="flex animate-scroll-left">
+            {duplicatedTestimonials.map((testimonial, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 w-80 mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              >
+                <div className="p-6 text-center">
                   <div className="mb-6">
                     <img 
                       src={testimonial.avatar}
                       alt={testimonial.author}
-                      className="w-16 h-16 rounded-full mx-auto mb-4 border-4 border-blue-100 group-hover:border-blue-200 transition-colors"
+                      className="w-16 h-16 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover"
                     />
                     <div className="flex justify-center gap-1 mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
@@ -1028,19 +1311,86 @@ const Index = () => {
                       ))}
                     </div>
                   </div>
-                  <blockquote className="text-muted-foreground mb-6 italic text-lg leading-relaxed">
+                  <blockquote className="text-gray-600 dark:text-gray-300 mb-6 italic text-sm leading-relaxed min-h-[80px]">
                     "{testimonial.quote}"
                   </blockquote>
-                  <div className="border-t pt-6">
-                    <p className="font-semibold text-lg">{testimonial.author}</p>
-                    <p className="text-blue-600 font-medium">{testimonial.position}</p>
+                  <div className="border-t pt-4">
+                    <p className="font-semibold text-lg text-gray-800 dark:text-white">{testimonial.author}</p>
+                    <p className="text-blue-600 font-medium text-sm">{testimonial.position}</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
-      </section>
+
+        {/* Partner Institutions Section */}
+        <div className="text-center mb-12">
+          <h3 className="text-3xl font-bold mb-4 text-gray-800 dark:text-white">
+            Trusted by Leading Institutions
+          </h3>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            Partnering with top medical schools and healthcare institutions
+          </p>
+        </div>
+
+        {/* Partners Logo Carousel */}
+        <div className="relative overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-inner py-8">
+          <div className="flex animate-scroll-right">
+            {duplicatedPartners.map((partner, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 mx-8 flex items-center justify-center"
+              >
+                <div className="w-32 h-16 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="max-w-full max-h-full object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `https://via.placeholder.com/120x40/4F46E5/FFFFFF?text=${partner.name.split(' ')[0]}`;
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes scroll-left {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+
+        @keyframes scroll-right {
+          0% {
+            transform: translateX(-50%);
+          }
+          100% {
+            transform: translateX(0);
+          }
+        }
+
+        .animate-scroll-left {
+          animation: scroll-left 30s linear infinite;
+        }
+
+        .animate-scroll-right {
+          animation: scroll-right 25s linear infinite;
+        }
+
+        .animate-scroll-left:hover,
+        .animate-scroll-right:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+    </section>
 
       {/* Collaborate With Us */}
       <section className="py-20 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-950/10 dark:to-background">
@@ -1104,5 +1454,7 @@ const Index = () => {
     </div>
   );
 };
+
+
 
 export default Index;
