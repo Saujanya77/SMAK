@@ -6,13 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  ArrowLeft, 
-  Plus, 
-  Upload, 
-  FileText, 
-  User, 
-  Settings, 
-  LogOut, 
+  ArrowLeft,
+  Plus,
+  Upload,
+  FileText,
+  User,
+  Settings,
+  LogOut,
   Search,
   Bell,
   ChevronDown,
@@ -27,7 +27,7 @@ import {
   X,
   Bookmark,
   TrendingUp,
-  Send
+  Send, GraduationCap
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -459,34 +459,46 @@ const Blog: React.FC<BlogProps> = ({ onBack }) => {
             </Button>
 
             <div className="relative">
-              <Button
-                variant="ghost"
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2"
+              <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
               >
-                <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full ring-2 ring-blue-500/20" />
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/50">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.college}</p>
-                  </div>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
-                  </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start text-red-600">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </Button>
+                <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-slate-600 flex items-center justify-center ring-2 ring-blue-100 dark:ring-slate-600">
+                <span className="text-sm font-semibold text-blue-800 dark:text-white">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
                 </div>
+
+                <div className="hidden sm:block text-left">
+                  <p className="text-sm font-semibold text-slate-800 dark:text-white">
+                    {user.name.split(' ')[0]}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center">
+                    <GraduationCap className="h-3 w-3 mr-1" />
+                    {user.year}
+                  </p>
+                </div>
+                <ChevronDown className="h-4 w-4 text-slate-500 transition-transform duration-200" />
+              </button>
+              {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+                    <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{user.college}</p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="w-full justify-start">
+                      <User className="h-4 w-4 mr-2" />
+                      Profile
+                    </Button>
+                    <Button variant="ghost" size="sm" className="w-full justify-start">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Settings
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start text-red-600">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
               )}
             </div>
           </div>

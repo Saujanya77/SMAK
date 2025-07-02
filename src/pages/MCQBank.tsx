@@ -1,15 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Bell, Search, Sun, Moon, Upload, Eye, Plus, Edit, Trash2, Play, BookOpen, Brain, Users, Clock, FileText, Download } from 'lucide-react';
+import {
+  ArrowLeft,
+  Bell,
+  Search,
+  Sun,
+  Moon,
+  Upload,
+  Eye,
+  Plus,
+  Edit,
+  Trash2,
+  Play,
+  BookOpen,
+  Brain,
+  Users,
+  Clock,
+  FileText,
+  Download,
+  ChevronDown,
+  GraduationCap, User, Settings, LogOut
+} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import { useNavigate } from 'react-router-dom';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import {db, storage} from "@/firebase.ts";
+import {useAuth} from "@/contexts/AuthContext.tsx";
 
 
 
@@ -57,11 +78,11 @@ const MCQQuestionBank = () => {
   const [answers, setAnswers] = useState<{[key: string]: number}>({});
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   // State for Firebase data
   const [questionBanks, setQuestionBanks] = useState<QuestionBank[]>([]);
   const [mcqTests, setMcqTests] = useState<MCQTest[]>([]);
-
+  const navigate = useNavigate();
   const [newQuestionBank, setNewQuestionBank] = useState({
     title: '',
     description: '',
@@ -84,6 +105,7 @@ const MCQQuestionBank = () => {
     correctAnswer: 0,
     marks: 1
   });
+  const { user, logout } = useAuth();
 
   // Load data from Firebase on component mount
   useEffect(() => {
@@ -147,7 +169,17 @@ const MCQQuestionBank = () => {
       throw error;
     }
   };
-
+  const handleLogout = async () => {
+    try {
+      console.log('Logging out...');
+      setProfileDropdownOpen(false);
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      navigate('/login');
+    }
+  };
   const handleAddQuestionBank = async () => {
     if (!newQuestionBank.title || !newQuestionBank.description) {
       alert('Please fill in all required fields');
@@ -566,18 +598,48 @@ const MCQQuestionBank = () => {
               </Button>
 
               {/* Enhanced Profile */}
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg">
-                  JD
-                </div>
-                <div className="hidden sm:block">
-                  <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    John Doe
-                  </span>
-                  <p className={`text-xs ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>
-                    Medical Student
-                  </p>
-                </div>
+              <div className="relative">
+                <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-slate-600 flex items-center justify-center ring-2 ring-blue-100 dark:ring-slate-600">
+                <span className="text-sm font-semibold text-blue-800 dark:text-white">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+                  </div>
+
+                  <div className="hidden sm:block text-left">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-white">
+                      {user.name.split(' ')[0]}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center">
+                      <GraduationCap className="h-3 w-3 mr-1" />
+                      {user.year}
+                    </p>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-slate-500 transition-transform duration-200" />
+                </button>
+                {profileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+                      <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{user.college}</p>
+                      </div>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        <User className="h-4 w-4 mr-2" />
+                        Profile
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Settings
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start text-red-600">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                      </Button>
+                    </div>
+                )}
               </div>
             </div>
           </div>

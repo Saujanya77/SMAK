@@ -27,11 +27,12 @@ import {
   Sun,
   Moon,
   X,
-  Calendar
+  Calendar, GraduationCap
 } from 'lucide-react';
 import { db, storage } from '../firebase';
 import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import {useAuth} from "@/contexts/AuthContext.tsx";
 
 const ClinicalCaseOfTheDay = () => {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -77,12 +78,8 @@ const ClinicalCaseOfTheDay = () => {
 
   const navigate = useNavigate();
 
-  const user = {
-    name: "Dr. John Doe",
-    year: "3rd Year MBBS",
-    college: "SMAK Medical College",
-    avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face"
-  };
+  const { user, logout } = useAuth();
+
 
   const fetchCasesFromFirebase = async () => {
     try {
@@ -148,10 +145,16 @@ const ClinicalCaseOfTheDay = () => {
     }
   };
 
-  const handleLogout = () => {
-    console.log('Logging out...');
-    setProfileDropdownOpen(false);
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      console.log('Logging out...');
+      setProfileDropdownOpen(false);
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      navigate('/login');
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -394,15 +397,27 @@ const ClinicalCaseOfTheDay = () => {
               </Button>
 
               <div className="relative">
-                <Button
-                    variant="ghost"
+                <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
                 >
-                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
+                  <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-slate-600 flex items-center justify-center ring-2 ring-blue-100 dark:ring-slate-600">
+                <span className="text-sm font-semibold text-blue-800 dark:text-white">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+                  </div>
 
+                  <div className="hidden sm:block text-left">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-white">
+                      {user.name.split(' ')[0]}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center">
+                      <GraduationCap className="h-3 w-3 mr-1" />
+                      {user.year}
+                    </p>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-slate-500 transition-transform duration-200" />
+                </button>
                 {profileDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
                       <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
