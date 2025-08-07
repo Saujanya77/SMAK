@@ -48,87 +48,34 @@ const Index = () => {
 
 // Updated pillars array with new items
 const pillars = [
-  {
-    icon: BookOpen,
-    title: 'Academics',
-    description: 'Excellence in medical education and learning resources',
-    color: 'from-blue-500 to-blue-600',
-    stats: 'Excellence'
-  },
+  
   {
     icon: Microscope,
-    title: 'Research & Journal',
-    description: 'Peer-reviewed research and academic publications',
+    title: 'Research & Mentorship',
+    description: 'Get mentored by top doctors .Research projects, publications, guidence and expert sessions',
     color: 'from-blue-600 to-blue-700',
     stats: 'Peer-Reviewed'
   },
-  {
-    icon: Brain,
-    title: 'Skill Development',
-    description: 'Clinical skills and professional competency building',
-    color: 'from-blue-500 to-blue-600',
-    stats: 'Clinical Skills'
-  },
-  {
-    icon: Globe,
-    title: 'Collaborations',
-    description: 'Global partnerships and knowledge exchange',
-    color: 'from-blue-600 to-blue-700',
-    stats: 'Global'
-  },
-  {
-    icon: Eye,
-    title: "National Visibility",
-    description: "Get your institution recognized across the country through our extensive network and platform reach.",
-    color: 'from-blue-500 to-blue-600',
-    stats: "Pan-India"
-  },
+  
   {
     icon: Users,
-    title: "Leadership Exposure", 
-    description: "Empower students with leadership opportunities and skill development through active participation.",
+    title: "Events & Leadership", 
+    description: "National Webinars, medical fests, Health camps , leadership roles and outreach programs",
     color: 'from-blue-600 to-blue-700',
     stats: "Student-Led"
   },
   {
-    icon: FileText,
-    title: "Free Research Publishing",
-    description: "Publish your research without any fees or barriers, making knowledge accessible to all.",
+    icon: BookOpen,
+    title: "Academic Resources",
+    description: "Access exclusive study materials, webinars, and journal archives",
     color: 'from-blue-500 to-blue-600',
     stats: "Open Access"
   },
-  {
-    icon: Network,
-    title: "Academic Collaboration",
-    description: "Connect and collaborate with medical colleges nationwide, fostering innovation and knowledge exchange.",
-    color: 'from-blue-600 to-blue-700',
-    stats: "Cross-College"
-  },
-  {
-    icon: DollarSign,
-    title: "No Fees",
-    description: "Join our community without any financial barriers or hidden conditions attached.",
-    color: 'from-blue-500 to-blue-600',
-    stats: "100% Free"
-  },
-  {
-    icon: Shield,
-    title: "Credibility",
-    description: "Build your reputation through our credible platform backed by academic excellence.",
-    color: 'from-blue-600 to-blue-700',
-    stats: "Trusted"
-  },
-  {
-    icon: Accessibility,
-    title: "Accessibility",
-    description: "Ensuring equal opportunities and access for all members regardless of background or location.",
-    color: 'from-blue-500 to-blue-600',
-    stats: "Universal"
-  },
+  
   {
     icon: Handshake,
-    title: "Collaboration",
-    description: "Foster meaningful partnerships and collaborative efforts across the medical education ecosystem.",
+    title: "Connectivity",
+    description: "Pan-India students & professionals connectivity, state heads, international liaisons",
     color: 'from-blue-600 to-blue-700',
     stats: "Together"
   }
@@ -340,15 +287,15 @@ const whyJoinFeatures = [
   },
   {
     icon: Users,
-    title: "Nationwide Network",
-    description: "Connect with medical students and professionals across India.",
+    title: "National Visibility",
+    description: "Get your institution recognized across the country through our extensive network and platform reach",
     stats: "1000+ Members",
     badge: "Community"
   },
   {
     icon: Award,
     title: "Recognition & Awards",
-    description: "Earn certificates, awards, and recognition for your contributions.",
+    description: "Earn certificates, awards, recognition and build your CV",
     stats: "30+ Awards",
     badge: "Recognition"
   },
