@@ -167,10 +167,10 @@ const Journal = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              📘 SMAK Journal
+              📘 SJMSR
             </h1>
             <p className="text-xl opacity-90 mb-8">
-              Peer-reviewed research and academic publications by medical students and professionals. Advancing medical knowledge through quality research.
+              SMAK JOURNAL OF MEDICAL SCIENCE & RESEARCH
             </p>
             <div className="flex justify-center">
               <Button 
