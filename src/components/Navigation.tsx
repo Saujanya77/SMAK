@@ -25,7 +25,7 @@ const Navigation = () => {
     { name: 'Events', path: '/events', icon: null },
     { name: 'Journal', path: '/journal', icon: FileText },
     { name: 'Clinical Corner', path: '/Homeclinicalcorner', icon: FileText },
-    { name: 'Research Hub', path: '/research-hub', icon: null },
+    { name: 'Research Club', path: '/research-hub', icon: null },
     { name: 'Members', path: '/members', icon: null },
     { name: 'Collaborate', path: '/collaborate', icon: null },
     { name: 'Contact Us', path: '/contact', icon: null },
