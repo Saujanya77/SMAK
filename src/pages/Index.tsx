@@ -442,6 +442,12 @@ return (
             Join SMAK Today
           </Link>
         </Button>
+        <Button size="lg" className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-lg px-10 py-5 rounded-full shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 animate-gentle-breathe" asChild>
+          <Link to="/research-hub">
+            <Rocket className="mr-3 h-5 w-5" />
+            Research Club
+          </Link>
+        </Button>
         <Button size="lg" variant="outline" className="text-lg px-10 py-5 rounded-full border-2 border-blue-200/60 hover:border-blue-300 hover:bg-blue-50/50 dark:border-blue-700/60 dark:hover:bg-blue-950/30 backdrop-blur-sm transition-all duration-300" asChild>
           <Link to="/journal">
             <FileText className="mr-3 h-5 w-5" />
