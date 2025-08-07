@@ -34,6 +34,9 @@ import Exploregallery from "./pages/exploregallery";
 import Clinicalcorner from "./pages/Clinicalcorner";
 import Contenthub from "./pages/Contenthub";
 import Homeclinicalcorner from "./pages/Homeclinicalcorner";
+import Emergency_Protocols from "./pages/Emergency_Protocols";
+import Lab_Imaging from "./pages/Lab_Imaging";
+import Guidelines from "./pages/Guidelines";
 
 
 const queryClient = new QueryClient();
@@ -67,6 +70,10 @@ const App = () => (
                 <Route path="/Clinicalcorner" element={<Clinicalcorner />} />
                 <Route path="/Contenthub" element={<Contenthub />} />
                 <Route path="/Homeclinicalcorner" element={<Homeclinicalcorner />} />
+                <Route path="/Emergency_Protocols" element={<Emergency_Protocols />} />
+                <Route path="/Lab_Imaging" element={<Lab_Imaging />} />
+                <Route path="/Guidelines" element={<Guidelines />} />
+
 
                 {/* Protected Routes */}
                 <Route
