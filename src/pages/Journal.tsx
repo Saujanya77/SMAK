@@ -24,7 +24,7 @@ const Journal = () => {
       title: "Submit Manuscript",
       description: "Unified portal for students and professionals to submit quality content",
       icon: FileText,
-      path: "/submit",
+      
       color: "bg-medical-green"
     },
     {
@@ -155,7 +155,7 @@ const Journal = () => {
 
   const handleViewGuidelines = () => {
     setShowPublishPopup(false);
-    navigate('/guidelines');
+    navigate('/Guidelines');
   };
 
   return (
@@ -704,9 +704,13 @@ const Journal = () => {
                   <li className="flex items-center"><span className="w-2 h-2 bg-medical-blue rounded-full mr-2"></span>Word count and structure</li>
                   <li className="flex items-center"><span className="w-2 h-2 bg-medical-blue rounded-full mr-2"></span>Upload portal instructions</li>
                 </ul>
-                <Button className="w-full mt-4 bg-[image:var(--medical-gradient)]">
-                  View Guidelines
-                </Button>
+                <Button 
+  onClick={() => window.open("/Guidelines", "_blank")} 
+  className="w-full mt-4 bg-[image:var(--medical-gradient)]"
+>
+  View Guidelines
+</Button>
+
               </CardContent>
             </Card>
 
@@ -732,10 +736,14 @@ const Journal = () => {
                     <div className="text-xs text-muted-foreground">Alternative submission method</div>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full mt-4">
-                  <PenTool className="mr-2 h-4 w-4" />
-                  Start Submission
-                </Button>
+                <Button 
+  variant="outline" 
+  className="w-full mt-4"
+  onClick={() => window.open("/login", "_blank")}
+>
+  <PenTool className="mr-2 h-4 w-4" />
+  Start Submission
+</Button>
               </CardContent>
             </Card>
           </div>
@@ -800,7 +808,7 @@ const Journal = () => {
           <div className="text-center mt-12">
             <Button 
               size="lg" 
-              onClick={() => navigate('/submit')}
+              onClick={handlePublishClick}
               className="bg-[image:var(--medical-gradient)] hover:opacity-90"
             >
               <FileText className="mr-2 h-5 w-5" />
@@ -913,7 +921,7 @@ const Journal = () => {
           <div className="text-center">
             <Button 
               size="lg" 
-              onClick={() => navigate('/about-sjmsr')}
+              onClick={() => navigate('/about')}
               className="bg-[image:var(--success-gradient)] hover:opacity-90"
             >
               <BookOpen className="mr-2 h-5 w-5" />
@@ -997,31 +1005,23 @@ const Journal = () => {
 
             <div className="flex space-x-2">
               <Button
-                onClick={() => navigate('/editorial-board')}
+                onClick={() => navigate('/Guidelines')}
                 className="flex-1 bg-[image:var(--medical-gradient)] hover:opacity-90"
                 size="lg"
               >
-                Editorial & Advisory Board
+                Submission Guidelines
               </Button>
-              <Button
-                onClick={() => navigate('/submit')}
-                variant="outline"
-                size="lg"
-                className="flex-1"
-              >
-                <PenTool className="mr-2 h-4 w-4" />
-                Submit Manuscript
-              </Button>
+              
             </div>
 
             <Button
-              onClick={() => navigate('/about-sjmsr')}
+              onClick={() => navigate('/login')}
               variant="outline"
               size="lg"
               className="w-full"
             >
               <BookOpen className="mr-2 h-4 w-4" />
-              About SJMSR
+              Get Started
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
