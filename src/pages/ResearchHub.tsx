@@ -10,7 +10,7 @@ const Index = () => {
     position: string; 
     institution: string; 
     batch: string;
-    imageUrl?: string; // Add space for image link here
+    imageUrl: string; // Image path is now required
   }) => (
     <Card className="h-full transition-all duration-300 hover:shadow-lg hover:scale-105">
       <CardContent className="p-6 text-center">
@@ -117,100 +117,141 @@ const Index = () => {
 
           {/* National Leadership */}
           <div className="mb-16">
-            <h3 className="text-2xl font-bold text-center mb-8 text-blue-600">National Leadership</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
               <TeamMemberCard
-                name="Mohammed Musa M. Bharmal"
-                position="National Co-Head"
-                institution=""
+                name="SAMUDRA CHAUDHARI "
+                position="FOUNDER"
+                institution="SMAK"
                 batch=""
+                imageUrl="https://i.postimg.cc/65tpg88S/Whats-App-Image-2025-08-13-at-13-39-13-32477921.jpg" // Add your image path here
               />
               <TeamMemberCard
-                name="Brishabh Raj Prajesh"
-                position="National Co-Head"
-                institution=""
+                name="KHUSHAL PAL"
+                position="CO-FOUNDER"
+                institution="SMAK"
                 batch=""
+                imageUrl="https://i.postimg.cc/DwYfS5xk/Whats-App-Image-2025-08-13-at-13-39-13-89a66ab2.jpg" // Add your image path here
               />
             </div>
           </div>
 
           {/* Committee Teams */}
           <div>
-            <h3 className="text-2xl font-bold text-center mb-8 text-blue-600">Committee Teams</h3>
             
             <div className="space-y-12">
               {/* Mentorship Program Committee */}
               <div>
-                <h4 className="text-xl font-semibold mb-6 text-center">Mentorship Program Committee</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                   <TeamMemberCard
-                    name="Aakanksha Nanda"
-                    position="Head"
-                    institution="VSSIMSAR, Burla"
-                    batch="MBBS 2021 batch"
+                  
+                    name="Brishabh Raj Prajesh"
+                    position="Co Head"
+                    institution="SMAK RESEARCH CLUB"
+                    batch="" 
+                    imageUrl="https://i.postimg.cc/L5ByYYTG/Whats-App-Image-2025-08-13-at-13-01-49-9d0aaa5d.jpg"
                   />
                   <TeamMemberCard
-                    name="Sanya Walia"
-                    position="Coordinator"
-                    institution="GIMS, Greater Noida"
-                    batch="MBBS 2022 batch"
+                    name="Musa M. Bharmal"
+                    position="Co Head"
+                    institution="SMAK RESEARCH CLUB"
+                    batch=" "
+                    imageUrl="https://i.postimg.cc/6pT0w1Dk/Whats-App-Image-2025-08-13-at-13-01-49-3b92b5a0.jpg"
                   />
                 </div>
               </div>
 
               {/* Outreach & Collaboration Committee */}
               <div>
-                <h4 className="text-xl font-semibold mb-6 text-center">Outreach & Collaboration Committee</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                   <TeamMemberCard
-                    name="Pratik Gupta"
-                    position="Head"
-                    institution="IMS & SUM Hospital, Campus 2"
-                    batch="MBBS 2024 batch"
+                    name="Disha Agrawala "
+                    position="Executive Board Member"
+                    institution="SMAK"
+                    batch=" "
+                    imageUrl="https://i.postimg.cc/VN8d4JBK/Whats-App-Image-2025-08-13-at-13-01-49-0a36118b.jpg"
                   />
                   <TeamMemberCard
-                    name="Madhav Tripathi"
-                    position="Coordinator"
-                    institution="VKS Government Medical College"
-                    batch="MBBS 2024 batch"
+                    name="Taniya Masud Temkar"
+                    position="Head Of Event & Content Committee"
+                    institution="DY Patil Medical College, Kolhapur"
+                    batch=" "
+                    imageUrl="https://i.postimg.cc/HsMYKpLR/Whats-App-Image-2025-08-13-at-13-01-49-6427a359.jpg"
                   />
                 </div>
               </div>
 
               {/* Journal Development Committee */}
               <div>
-                <h4 className="text-xl font-semibold mb-6 text-center">Journal Development Committee</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                   <TeamMemberCard
-                    name="Ananya"
+                    name="Uzair Pathan"
                     position="Head"
-                    institution="Maulana Azad Medical College"
-                    batch="MBBS 2022 batch"
+                    institution="Coordinator - Event and Content Committee"
+                    batch="GMC Alibag"
+                    imageUrl="https://i.postimg.cc/brcyYMC3/Whats-App-Image-2025-08-13-at-13-01-49-73477329.jpg"
                   />
                   <TeamMemberCard
-                    name="Ansharah Khan"
-                    position="Coordinator"
-                    institution="Grant Medical College"
-                    batch="MBBS 2023 batch"
+                    name="Aakanksha Nanda"
+                    position="Head of the Mentorship Program Committee"
+                    institution="Veer Surendra Sai Institute of Medical Science And Research, Burla, Odisha"
+                    batch=" "
+                    imageUrl="https://i.postimg.cc/0QG3mB5t/Whats-App-Image-2025-08-13-at-13-01-49-8c3c0677.jpg"
                   />
                 </div>
               </div>
 
               {/* Events & Content Committee */}
               <div>
-                <h4 className="text-xl font-semibold mb-6 text-center">Events & Content Committee</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                   <TeamMemberCard
-                    name="Taniya Masud Temkar"
-                    position="Head"
-                    institution="DY Patil Medical College, Kolhapur"
-                    batch="MBBS 2023 batch"
+                    name="Sanya Walia"
+                    position="Coordinator - Mentorship Program Committee"
+                    institution="Government Institute of Medical Sciences, Greater Noida "
+                    batch=" "
+                    imageUrl="https://i.postimg.cc/Gm0Fwhxy/Whats-App-Image-2025-08-13-at-13-01-49-c374962b.jpg"
+                  />
+                  <TeamMemberCard
+                    name="Ananya"
+                    position="Head Of Journal Development committee"
+                    institution="Maulana Azad Medical College Delhi,"
+                    batch=" "
+                    imageUrl="https://i.postimg.cc/vTkKfgxz/Whats-App-Image-2025-08-13-at-13-01-49-c8ba169c.jpg"
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                  <TeamMemberCard
+                    name="Ansharah Khan"
+                    position="Coordinator - Journal  Developme Committee"
+                    institution="Grant medical college Mumbai"
+                    batch=" "
+                    imageUrl="https://i.postimg.cc/ydPgDc5M/Whats-App-Image-2025-08-13-at-13-01-49-62c3e89c.jpg"
+                  />
+                  <TeamMemberCard
+                    name="Pratik Gupta"
+                    position="Head - Campus outreach and coordination Committee"
+                    institution="IMS and SUM campus 2"
+                    batch=" "
+                    imageUrl="https://i.postimg.cc/B6rSQ6Zr/Whats-App-Image-2025-08-13-at-13-01-49-eeb0d546.jpg"
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                  <TeamMemberCard
+                    name="Madhav Tripathi"
+                    position="Coordinator - Outreach & Collaboration Committee"
+                    institution="Virendra Kumar Sakhlecha Government Medical College, Neemuch ( MP)"
+                    batch=" "
+                    imageUrl="https://i.postimg.cc/50cTXFvS/Whats-App-Image-2025-08-13-at-13-01-49-7c1ed6e6.jpg"
                   />
                   <TeamMemberCard
                     name="Uzair Pathan"
                     position="Coordinator"
                     institution="Government Medical College, Alibag"
                     batch="MBBS 2023 batch"
+                    imageUrl="/Images/placeholder.jpg"
                   />
                 </div>
               </div>
