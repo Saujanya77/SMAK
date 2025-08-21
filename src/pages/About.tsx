@@ -158,7 +158,7 @@ const About = () => {
                 </h1>
                 <div className="relative">
                   <img 
-                    src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&h=400&fit=crop" 
+                    src="https://images.unsplash.com/photo-1659353889416-fab1265eaa7f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                     alt="Medical professionals collaborating" 
                     className={`rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-700 hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                     onLoad={() => setImageLoaded(true)}
@@ -190,7 +190,7 @@ const About = () => {
       <section className="py-20 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 dark:from-blue-800 dark:via-indigo-800 dark:to-blue-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <img 
-            src="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=1200&h=600&fit=crop" 
+            src="https://plus.unsplash.com/premium_photo-1729286323727-03ae1fdb054c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
             alt="Medical background"
             className="w-full h-full object-cover"
           />
@@ -212,11 +212,11 @@ const About = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-7xl mx-auto">
             <Card className="group border-0 shadow-2xl hover:shadow-3xl transition-all duration-700 hover:scale-105 overflow-hidden bg-gradient-to-br from-white to-blue-50/50 dark:from-gray-800 dark:to-blue-900/20">
               <div className="relative h-48 overflow-hidden">
-                <img 
-                  src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=600&h=300&fit=crop" 
-                  alt="Medical mission"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
+                  <img 
+                    src="https://images.unsplash.com/photo-1659353887907-000c9a92377d?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                    alt="Doctor with stethoscope, medical field"
+                    className="w-full h-full object-cover object-position-center group-hover:scale-110 transition-transform duration-700"
+                  />
                 <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent"></div>
                 <Microscope className="absolute top-4 right-4 h-8 w-8 text-white" />
               </div>
@@ -234,11 +234,11 @@ const About = () => {
 
             <Card className="group border-0 shadow-2xl hover:shadow-3xl transition-all duration-700 hover:scale-105 overflow-hidden bg-gradient-to-br from-white to-indigo-50/50 dark:from-gray-800 dark:to-indigo-900/20">
               <div className="relative h-48 overflow-hidden">
-                <img 
-                  src="https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=600&h=300&fit=crop" 
-                  alt="Medical vision"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
+                  <img 
+                    src="https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?auto=format&fit=crop&w=1170&q=80" 
+                    alt="Doctors and nurses in a clinical setting, teamwork"
+                    className="w-full h-full object-cover object-position-center group-hover:scale-110 transition-transform duration-700"
+                  />
                 <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 to-transparent"></div>
                 <Brain className="absolute top-4 right-4 h-8 w-8 text-white" />
               </div>
@@ -462,25 +462,32 @@ const About = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
-            {[
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+            {[ 
               {
-                name: "Dr. Arjun Patel",
-                role: "Founder & President",
-                college: "AIIMS Delhi",
-                image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop&crop=face"
+                name: "Samudra Chaudhari",
+                role: "Founder",
+                college: "SMAK",
+                image: "https://i.postimg.cc/65tpg88S/Whats-App-Image-2025-08-13-at-13-39-13-32477921.jpg",
+                objectPosition: "center 20%"
               },
               {
-                name: "Dr. Priya Sharma",
-                role: "Vice President - Research",
-                college: "JIPMER Puducherry",
-                image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face"
+                name: "Khushal Pal",
+                role: "Co-Founder",
+                college: "SMAK",
+                image: "https://i.postimg.cc/DwYfS5xk/Whats-App-Image-2025-08-13-at-13-39-13-89a66ab2.jpg"
               },
               {
-                name: "Dr. Rohit Kumar",
-                role: "Head of Operations",
-                college: "PGIMER Chandigarh",
-                image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=300&h=300&fit=crop&crop=face"
+                name: "Disha Agrawala",
+                role: "Executive Director",
+                college: "SMAK",
+                image: "https://i.postimg.cc/VN8d4JBK/Whats-App-Image-2025-08-13-at-13-01-49-0a36118b.jpg"
+              },
+              {
+                name: "Piyush Mishra",
+                role: "Director of Operations",
+                college: "SMAK",
+                image: " "
               }
             ].map((member, index) => (
               <Card key={index} className="group text-center hover:shadow-2xl transition-all duration-700 hover:scale-105 hover:-translate-y-6 cursor-pointer border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm overflow-hidden">
@@ -491,6 +498,7 @@ const About = () => {
                       src={member.image} 
                       alt={member.name}
                       className="w-40 h-40 rounded-full mx-auto object-cover group-hover:scale-110 transition-transform duration-500 shadow-xl border-4 border-blue-100 dark:border-blue-400 group-hover:border-blue-200 dark:group-hover:border-blue-300"
+                      style={member.name === "Samudra Chaudhari" ? { objectPosition: member.objectPosition || "center 20%", objectFit: 'cover', background: '#e8efff', padding: '4px' } : { background: '#e8efff' }}
                     />
                     <div className="absolute inset-0 rounded-full bg-gradient-to-t from-blue-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   </div>
