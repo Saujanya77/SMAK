@@ -379,36 +379,38 @@ return (
   
   <div className="container mx-auto px-4 text-center relative z-10">
     <div className="max-w-5xl mx-auto">
-      {/* Elegant Logo/Symbol */}
+      {/* Unique SMAK Logo Area */}
       <div className="mb-12 relative">
         <div className="relative inline-block">
-          <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full flex items-center justify-center backdrop-blur-sm border border-blue-200/30 dark:border-blue-700/30 shadow-lg">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center shadow-inner animate-gentle-pulse">
-              <Brain className="h-10 w-10 text-white drop-shadow-md" />
-            </div>
+          <div className="w-44 h-44 mx-auto mb-8 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full flex items-center justify-center backdrop-blur-sm border-4 border-blue-400 dark:border-blue-700 shadow-2xl">
+            <img
+              src="https://i.postimg.cc/LXmZbsWJ/Logo.jpg"
+              alt="SMAK Logo"
+              className="w-36 h-36 object-contain rounded-full shadow-xl border-4 border-white dark:border-blue-900 animate-gentle-pulse"
+              style={{ background: "#e8efff" }}
+            />
           </div>
-          
-          {/* Fixed Orbiting Elements */}
+          {/* Orbiting Elements for Uniqueness */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-1/2 left-1/2 w-40 h-40 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="absolute top-1/2 left-1/2 w-56 h-56 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-full flex items-center justify-center shadow-lg animate-orbit-slow">
-                  <Crown className="h-4 w-4" />
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-full flex items-center justify-center shadow-lg animate-orbit-slow">
+                  <Crown className="h-5 w-5" />
                 </div>
               </div>
               <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
-                <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-cyan-500 text-white rounded-full flex items-center justify-center shadow-lg animate-orbit-reverse">
-                  <Star className="h-4 w-4" />
+                <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-cyan-500 text-white rounded-full flex items-center justify-center shadow-lg animate-orbit-reverse">
+                  <Star className="h-5 w-5" />
                 </div>
               </div>
               <div className="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="w-6 h-6 bg-gradient-to-r from-sky-400 to-sky-500 text-white rounded-full flex items-center justify-center shadow-lg animate-orbit-side">
-                  <Zap className="h-3 w-3" />
+                <div className="w-8 h-8 bg-gradient-to-r from-sky-400 to-sky-500 text-white rounded-full flex items-center justify-center shadow-lg animate-orbit-side">
+                  <Zap className="h-4 w-4" />
                 </div>
               </div>
               <div className="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2">
-                <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full flex items-center justify-center shadow-lg animate-orbit-side-reverse">
-                  <Sparkles className="h-3 w-3" />
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full flex items-center justify-center shadow-lg animate-orbit-side-reverse">
+                  <Sparkles className="h-4 w-4" />
                 </div>
               </div>
             </div>
@@ -427,7 +429,7 @@ return (
       
       <div className="mb-12 animate-fade-in-up-slow">
         <p className="text-xl md:text-3xl text-slate-600 dark:text-slate-300 mb-6 max-w-4xl mx-auto leading-relaxed font-light">
-          Welcome to <span className="font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">The Society of Medical Academia and Knowledge</span>
+          Welcome to <span className="font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">The Society for Medical Academia and Knowledge</span>
         </p>
         <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
           A student-led nonprofit platform uniting future doctors through knowledge,  research, leadership andcollaboration
@@ -717,7 +719,7 @@ return (
               </div>
               <div className="relative">
                 <img 
-                  src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop&crop=center"
+                  src="https://plus.unsplash.com/premium_photo-1752073513197-0e69835878c5?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                   alt="Medical collaboration"
                   className="w-full rounded-3xl shadow-2xl"
                 />
