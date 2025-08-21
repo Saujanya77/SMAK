@@ -72,7 +72,7 @@ const Navigation = () => {
 <Link to="/" className="flex items-center space-x-3">
   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-gray-100">
     <img
-      src= {Logo}
+      src= "https://i.postimg.cc/LXmZbsWJ/Logo.jpg"
       alt="SMAK - Society For Medical Academia and Knowledge Logo" 
       className="w-10 h-10 object-contain"
     />
