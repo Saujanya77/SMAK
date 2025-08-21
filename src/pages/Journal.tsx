@@ -163,21 +163,37 @@ const Journal = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="py-16 bg-[image:var(--medical-gradient)] text-blue-600">
-        <div className="container mx-auto px-4">
+      <section className="py-16 relative text-blue-600">
+        <div className="absolute inset-0">
+          <img 
+            src="https://plus.unsplash.com/premium_photo-1661580252810-800f4bd0ee63?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+            alt="Vivid research background"
+            className="w-full h-full object-cover object-center opacity-60 dark:opacity-60"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-700/90 via-purple-700/80 to-pink-600/80 opacity-80"></div>
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              📘 SJMSR
+            <div className="flex justify-center mb-6">
+              <div className="w-24 h-24 rounded-full bg-white shadow-lg flex items-center justify-center border-4 border-blue-200 mx-auto">
+                <img src="https://i.postimg.cc/LXmZbsWJ/Logo.jpg" alt="SJMSR Logo" className="w-20 h-20 object-contain rounded-full" />
+              </div>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg">
+              SJMSR
             </h1>
-            <p className="text-xl opacity-90 mb-8">
+            <p className="text-xl mb-4 text-white drop-shadow-md">
               SMAK JOURNAL OF MEDICAL SCIENCE & RESEARCH
+            </p>
+            <p className="text-lg mb-8 max-w-2xl mx-auto text-white/90 drop-shadow-md">
+              "To build a national platform integrating student innovation with expert mentorship, enabling publication of high-impact clinical, academic, and research-based medical content."
             </p>
             <div className="flex justify-center">
               <Button 
                 size="lg" 
                 onClick={handlePublishClick}
                 variant="secondary"
-                className="bg-blue-950 text-medical-blue hover:bg-white/90 transition-smooth"
+                className="bg-blue-950 text-white hover:bg-white/90 hover:text-blue-900 transition-smooth font-bold shadow-lg"
               >
                 <PenTool className="mr-2 h-5 w-5" />
                 Submit Manuscript
@@ -437,14 +453,13 @@ const Journal = () => {
           </div>
 
           {/* Editor in Chief */}
-          <div className="mb-16">
-            <h3 className="text-2xl font-bold text-center mb-8 text-blue-600 drop-shadow-sm">Editor in Chief</h3>
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-center mb-6 text-blue-600 drop-shadow-sm">Editor in Chief</h3>
             <div className="max-w-md mx-auto">
-              <Card className="bg-profile-card border-profile-card-border hover:bg-white hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden group">
+              <Card className="bg-profile-card border-profile-card-border hover:bg-white dark:hover:bg-gray-900 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden group">
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                      {/* Image placeholder - replace src with actual image path */}
+                    <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                       <img 
                         src="/images/editors/dr-rajesh-kumar-sharma.jpg" 
                         alt="Dr. Rajesh Kumar Sharma"
@@ -456,21 +471,119 @@ const Journal = () => {
                       />
                       <User className="h-16 w-16 text-blue-500 hidden" />
                     </div>
-                    <h4 className="text-xl font-bold text-blue-700 mb-2 group-hover:text-blue-800 transition-colors">Dr. Rajesh Kumar Sharma</h4>
-                    <p className="text-profile-text-secondary font-medium mb-1">MD, MBBS, FRCS</p>
-                    <p className="text-sm text-profile-text-secondary mb-2">Professor & Head of Surgery</p>
-                    <p className="text-sm text-profile-text-secondary mb-4">AIIMS, New Delhi</p>
+                    <h4 className="text-xl font-bold text-blue-700 dark:text-blue-300 mb-2 group-hover:text-blue-800 dark:group-hover:text-blue-200 transition-colors">Dr. Rajesh Kumar Sharma</h4>
+                    <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1">MD, MBBS, FRCS</p>
+                    <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-2">Professor & Head of Surgery</p>
+                    <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-4">AIIMS, New Delhi</p>
                     <div className="space-y-2">
-                      <div className="text-xs text-profile-text-secondary bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
                         <strong>Specialization:</strong> Cardiovascular Surgery, Medical Research
                       </div>
-                      <div className="text-xs text-profile-text-secondary bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
                         <strong>Experience:</strong> 25+ years in medical education and research
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </div>
+
+          {/* Associate Editor */}
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-center mb-6 text-blue-600 drop-shadow-sm">Associate Editor</h3>
+            <div className="max-w-md mx-auto">
+              <Card className="bg-profile-card border-profile-card-border hover:bg-white dark:hover:bg-gray-900 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden group">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                      <img 
+                        src="/images/editors/ananya-krishnan.jpg" 
+                        alt="Ananya Krishnan"
+                        className="w-28 h-28 rounded-full object-cover border-4 border-green-200"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.display = 'flex';
+                        }}
+                      />
+                      <User className="h-16 w-16 text-green-500 hidden" />
+                    </div>
+                    <h4 className="text-xl font-bold text-green-700 dark:text-green-300 mb-2 group-hover:text-green-800 dark:group-hover:text-green-200 transition-colors">Ananya Krishnan</h4>
+                    <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1">MBBS Final Year</p>
+                    <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-2">KIMS, Bangalore</p>
+                    <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-4">Internal Medicine</p>
+                    <div className="space-y-2">
+                      <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
+                        <strong>Achievements:</strong> Published 3 research papers, Dean's List
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+           {/* Editorial Advisory Board */}
+          <div className="mb-16">
+            <h3 className="text-2xl font-bold text-center mb-8 text-blue-600 drop-shadow-sm">Editorial Advisory Board</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  name: "Dr. Sunita Rao",
+                  title: "Professor of Medicine",
+                  institution: "SGPGIMS, Lucknow",
+                  specialization: "Cardiology, Clinical Research",
+                  experience: "20+ years",
+                  imagePath: "/images/advisory/dr-sunita-rao.jpg"
+                },
+                {
+                  name: "Dr. Vikram Singh",
+                  title: "Head of Pediatrics",
+                  institution: "KIMS, Hyderabad",
+                  specialization: "Pediatric Surgery",
+                  experience: "18+ years",
+                  imagePath: "/images/advisory/dr-vikram-singh.jpg"
+                },
+                {
+                  name: "Dr. Kavita Patel",
+                  title: "Professor of Pathology",
+                  institution: "GMC, Mumbai",
+                  specialization: "Molecular Pathology",
+                  experience: "15+ years",
+                  imagePath: "/images/advisory/dr-kavita-patel.jpg"
+                }
+              ].map((member, index) => (
+                <Card key={index} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-white dark:hover:from-gray-900 hover:to-indigo-50 dark:hover:to-indigo-950 hover:shadow-xl hover:scale-105 hover:border-indigo-300 dark:hover:border-indigo-400 transition-all duration-300 ease-in-out overflow-hidden group">
+                  <CardContent className="p-5">
+                    <div className="text-center">
+                      <div className="w-24 h-24 mx-auto mb-3 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900 dark:to-indigo-800 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
+                        {/* Image placeholder - replace src with actual image path */}
+                        <img 
+                          src={member.imagePath} 
+                          alt={member.name}
+                          className="w-20 h-20 rounded-full object-cover border-3 border-indigo-200 dark:border-indigo-400"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.display = 'flex';
+                          }}
+                        />
+                        <BookOpen className="h-12 w-12 text-indigo-500 hidden" />
+                      </div>
+                      <h4 className="text-lg font-bold text-blue-700 dark:text-blue-300 mb-1 group-hover:text-blue-800 dark:group-hover:text-blue-200 transition-colors">{member.name}</h4>
+                      <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1 text-sm">{member.title}</p>
+                      <p className="text-xs text-profile-text-secondary dark:text-gray-300 mb-3">{member.institution}</p>
+                      <div className="space-y-2">
+                        <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-indigo-50 to-blue-100 dark:from-indigo-900 dark:to-blue-800 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
+                          <strong>Expertise:</strong> {member.specialization}
+                        </div>
+                        <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-indigo-50 to-blue-100 dark:from-indigo-900 dark:to-blue-800 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
+                          <strong>Experience:</strong> {member.experience}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
 
@@ -504,15 +617,15 @@ const Journal = () => {
                   imagePath: "/images/editors/priya-menon.jpg"
                 }
               ].map((editor, index) => (
-                <Card key={index} className="bg-white border border-gray-200 hover:bg-gradient-to-br hover:from-white hover:to-blue-50 hover:shadow-xl hover:scale-105 hover:border-blue-300 transition-all duration-300 ease-in-out overflow-hidden group">
+                <Card key={index} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-white dark:hover:from-gray-900 hover:to-blue-50 dark:hover:to-blue-950 hover:shadow-xl hover:scale-105 hover:border-blue-300 dark:hover:border-blue-400 transition-all duration-300 ease-in-out overflow-hidden group">
                   <CardContent className="p-5">
                     <div className="text-center">
-                      <div className="w-24 h-24 mx-auto mb-3 bg-gradient-to-br from-green-50 to-green-100 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
+                      <div className="w-24 h-24 mx-auto mb-3 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
                         {/* Image placeholder - replace src with actual image path */}
                         <img 
                           src={editor.imagePath} 
                           alt={editor.name}
-                          className="w-20 h-20 rounded-full object-cover border-3 border-green-200"
+                          className="w-20 h-20 rounded-full object-cover border-3 border-green-200 dark:border-green-400"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
                             ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.display = 'flex';
@@ -520,14 +633,14 @@ const Journal = () => {
                         />
                         <User className="h-12 w-12 text-green-500 hidden" />
                       </div>
-                      <h4 className="text-lg font-bold text-blue-700 mb-1 group-hover:text-blue-800 transition-colors">{editor.name}</h4>
-                      <p className="text-profile-text-secondary font-medium mb-1 text-sm">{editor.degree}</p>
-                      <p className="text-xs text-profile-text-secondary mb-3">{editor.institution}</p>
+                      <h4 className="text-lg font-bold text-blue-700 dark:text-blue-300 mb-1 group-hover:text-blue-800 dark:group-hover:text-blue-200 transition-colors">{editor.name}</h4>
+                      <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1 text-sm">{editor.degree}</p>
+                      <p className="text-xs text-profile-text-secondary dark:text-gray-300 mb-3">{editor.institution}</p>
                       <div className="space-y-2">
-                        <div className="text-xs text-profile-text-secondary bg-gradient-to-r from-green-50 to-emerald-100 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-green-50 to-emerald-100 dark:from-green-900 dark:to-green-800 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
                           <strong>Focus:</strong> {editor.specialization}
                         </div>
-                        <div className="text-xs text-profile-text-secondary bg-gradient-to-r from-green-50 to-emerald-100 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-green-50 to-emerald-100 dark:from-green-900 dark:to-green-800 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
                           <strong>Achievements:</strong> {editor.achievements}
                         </div>
                       </div>
@@ -538,73 +651,11 @@ const Journal = () => {
             </div>
           </div>
 
-          {/* Editorial Advisory Board */}
-          <div className="mb-16">
-            <h3 className="text-2xl font-bold text-center mb-8 text-blue-600 drop-shadow-sm">Editorial Advisory Board</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  name: "Dr. Sunita Rao",
-                  title: "Professor of Medicine",
-                  institution: "SGPGIMS, Lucknow",
-                  specialization: "Cardiology, Clinical Research",
-                  experience: "20+ years",
-                  imagePath: "/images/advisory/dr-sunita-rao.jpg"
-                },
-                {
-                  name: "Dr. Vikram Singh",
-                  title: "Head of Pediatrics",
-                  institution: "KIMS, Hyderabad",
-                  specialization: "Pediatric Surgery",
-                  experience: "18+ years",
-                  imagePath: "/images/advisory/dr-vikram-singh.jpg"
-                },
-                {
-                  name: "Dr. Kavita Patel",
-                  title: "Professor of Pathology",
-                  institution: "GMC, Mumbai",
-                  specialization: "Molecular Pathology",
-                  experience: "15+ years",
-                  imagePath: "/images/advisory/dr-kavita-patel.jpg"
-                }
-              ].map((member, index) => (
-                <Card key={index} className="bg-white border border-gray-200 hover:bg-gradient-to-br hover:from-white hover:to-indigo-50 hover:shadow-xl hover:scale-105 hover:border-indigo-300 transition-all duration-300 ease-in-out overflow-hidden group">
-                  <CardContent className="p-5">
-                    <div className="text-center">
-                      <div className="w-24 h-24 mx-auto mb-3 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                        {/* Image placeholder - replace src with actual image path */}
-                        <img 
-                          src={member.imagePath} 
-                          alt={member.name}
-                          className="w-20 h-20 rounded-full object-cover border-3 border-indigo-200"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.display = 'flex';
-                          }}
-                        />
-                        <BookOpen className="h-12 w-12 text-indigo-500 hidden" />
-                      </div>
-                      <h4 className="text-lg font-bold text-blue-700 mb-1 group-hover:text-blue-800 transition-colors">{member.name}</h4>
-                      <p className="text-profile-text-secondary font-medium mb-1 text-sm">{member.title}</p>
-                      <p className="text-xs text-profile-text-secondary mb-3">{member.institution}</p>
-                      <div className="space-y-2">
-                        <div className="text-xs text-profile-text-secondary bg-gradient-to-r from-indigo-50 to-blue-100 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
-                          <strong>Expertise:</strong> {member.specialization}
-                        </div>
-                        <div className="text-xs text-profile-text-secondary bg-gradient-to-r from-indigo-50 to-blue-100 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
-                          <strong>Experience:</strong> {member.experience}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+         
 
           {/* Patron / Honorary Mentors */}
           <div className="mb-12">
-            <h3 className="text-2xl font-bold text-center mb-8 text-blue-600 drop-shadow-sm">Patron / Honorary Mentors</h3>
+            <h3 className="text-2xl font-bold text-center mb-8 text-blue-600 drop-shadow-sm">Mentors</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {[
                 {
@@ -624,15 +675,15 @@ const Journal = () => {
                   imagePath: "/images/mentors/prof-meera-sharma.jpg"
                 }
               ].map((mentor, index) => (
-                <Card key={index} className="bg-white border border-gray-200 hover:bg-gradient-to-br hover:from-white hover:to-purple-50 hover:shadow-2xl hover:scale-105 hover:border-purple-300 transition-all duration-300 ease-in-out overflow-hidden group">
+                <Card key={index} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-white dark:hover:from-gray-900 hover:to-purple-50 dark:hover:to-purple-950 hover:shadow-2xl hover:scale-105 hover:border-purple-300 dark:hover:border-purple-400 transition-all duration-300 ease-in-out overflow-hidden group">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4">
-                      <div className="w-20 h-20 bg-gradient-to-br from-purple-50 to-blue-100 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300 flex-shrink-0">
+                      <div className="w-20 h-20 bg-gradient-to-br from-purple-50 to-blue-100 dark:from-purple-900 dark:to-blue-800 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300 flex-shrink-0">
                         {/* Image placeholder - replace src with actual image path */}
                         <img 
                           src={mentor.imagePath} 
                           alt={mentor.name}
-                          className="w-16 h-16 rounded-full object-cover border-3 border-purple-200"
+                          className="w-16 h-16 rounded-full object-cover border-3 border-purple-200 dark:border-purple-400"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
                             ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.display = 'flex';
@@ -641,14 +692,14 @@ const Journal = () => {
                         <Sparkles className="h-10 w-10 text-purple-500 hidden" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="text-xl font-bold text-blue-700 mb-1 group-hover:text-blue-800 transition-colors">{mentor.name}</h4>
-                        <p className="text-profile-text-secondary font-medium mb-1">{mentor.title}</p>
-                        <p className="text-sm text-profile-text-secondary mb-2">{mentor.institution}</p>
+                        <h4 className="text-xl font-bold text-blue-700 dark:text-blue-300 mb-1 group-hover:text-blue-800 dark:group-hover:text-blue-200 transition-colors">{mentor.name}</h4>
+                        <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1">{mentor.title}</p>
+                        <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-2">{mentor.institution}</p>
                         <div className="space-y-1">
-                          <div className="text-xs text-profile-text-secondary bg-gradient-to-r from-purple-50 to-blue-100 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-purple-50 to-blue-100 dark:from-purple-900 dark:to-blue-800 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
                             <strong>Role:</strong> {mentor.role}
                           </div>
-                          <div className="text-xs text-profile-text-secondary bg-gradient-to-r from-purple-50 to-blue-100 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-purple-50 to-blue-100 dark:from-purple-900 dark:to-blue-800 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
                             <strong>Expertise:</strong> {mentor.specialization}
                           </div>
                         </div>
