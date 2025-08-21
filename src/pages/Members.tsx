@@ -18,6 +18,7 @@ const Members = () => {
       specialization: "",
       position: "FOUNDER",
       image: "https://i.postimg.cc/65tpg88S/Whats-App-Image-2025-08-13-at-13-39-13-32477921.jpg",
+      objectPosition: "center 20%"
     },
     {
       name: "KHUSHAL PAL",
@@ -58,6 +59,7 @@ const Members = () => {
       specialization: "",
       position: "Head Of Event & Content Committee",
       image: "https://i.postimg.cc/HsMYKpLR/Whats-App-Image-2025-08-13-at-13-01-49-6427a359.jpg",
+      objectPosition: "center 35%"
     },
     {
       name: "Uzair Pathan",
@@ -115,14 +117,7 @@ const Members = () => {
       position: "Coordinator - Outreach & Collaboration Committee",
       image: "https://i.postimg.cc/50cTXFvS/Whats-App-Image-2025-08-13-at-13-01-49-7c1ed6e6.jpg",
     },
-    {
-      name: "Uzair Pathan",
-      college: "Government Medical College, Alibag",
-      year: "MBBS 2023 batch",
-      specialization: "",
-      position: "Coordinator",
-      image: "/Images/placeholder.jpg",
-    },
+    
   ];
 
   const [search, setSearch] = useState('');
@@ -179,7 +174,7 @@ const Members = () => {
                       src={member.image}
                       alt={member.name}
                       className="w-28 h-28 object-cover rounded-full border-4 border-white dark:border-background ring-2 ring-blue-400 dark:ring-blue-500 shadow-lg mx-auto"
-                      style={{ aspectRatio: "1/1", background: "#e8efff", objectPosition: "center" }}
+                      style={{ aspectRatio: "1/1", background: "#e8efff", objectPosition: member.objectPosition || "center top", objectFit: "cover" }}
                     />
                   </div>
                   <div className="flex flex-col items-center w-full">
