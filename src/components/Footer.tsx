@@ -10,8 +10,8 @@ const Footer = () => {
           {/* About SMAK */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-blue-300 rounded-lg flex items-center justify-center">
-                <span className="text-blue-900 font-bold">S</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-400 rounded-full flex items-center justify-center shadow-lg border-2 border-white overflow-hidden" style={{ boxShadow: '0 0 0 4px #3b82f6, 0 0 12px 2px #2563eb' }}>
+                <img src="https://i.postimg.cc/LXmZbsWJ/Logo.jpg" alt="SMAK Logo" className="w-10 h-10 object-cover rounded-full" />
               </div>
               <span className="text-xl font-bold">SMAK</span>
             </div>
