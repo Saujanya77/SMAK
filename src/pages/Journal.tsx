@@ -176,7 +176,7 @@ const Journal = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-6">
               <div className="w-24 h-24 rounded-full bg-white shadow-lg flex items-center justify-center border-4 border-blue-200 mx-auto">
-                <img src="https://i.postimg.cc/LXmZbsWJ/Logo.jpg" alt="SJMSR Logo" className="w-20 h-20 object-contain rounded-full" />
+                <img src="https://i.postimg.cc/s2szLDtn/Whats-App-Image-2025-08-22-at-03-58-52-f0a3f2ba.jpg" alt="SJMSR Logo" className="w-20 h-20 object-contain rounded-full" />
               </div>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg">
@@ -461,9 +461,10 @@ const Journal = () => {
                   <div className="text-center">
                     <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                       <img 
-                        src="/images/editors/dr-rajesh-kumar-sharma.jpg" 
+                        src="https://i.postimg.cc/4yq7vh22/Whats-App-Image-2025-08-22-at-04-06-37-afe21f71.jpg" 
                         alt="Dr. Rajesh Kumar Sharma"
                         className="w-28 h-28 rounded-full object-cover border-4 border-blue-200"
+                        style={{ objectPosition: 'center 20%' }}
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
                           ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.display = 'flex';
@@ -471,16 +472,17 @@ const Journal = () => {
                       />
                       <User className="h-16 w-16 text-blue-500 hidden" />
                     </div>
-                    <h4 className="text-xl font-bold text-blue-700 dark:text-blue-300 mb-2 group-hover:text-blue-800 dark:group-hover:text-blue-200 transition-colors">Dr. Rajesh Kumar Sharma</h4>
-                    <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1">MD, MBBS, FRCS</p>
-                    <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-2">Professor & Head of Surgery</p>
+                    <h4 className="text-xl font-bold text-blue-700 dark:text-blue-300 mb-2 group-hover:text-blue-800 dark:group-hover:text-blue-200 transition-colors">Prof. (Dr.) Ashok Kumar Mahapatra</h4>
+                    <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1">Padma Shri MBBS, MS (General Surgery), M.Ch. (Neurosurgery), DNB (Neurosurgery)</p>
+                    <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-2">Former Head, Department of Neurosurgery</p>
                     <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-4">AIIMS, New Delhi</p>
                     <div className="space-y-2">
                       <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
-                        <strong>Specialization:</strong> Cardiovascular Surgery, Medical Research
+                        <strong>Founding Director : </strong> AIIMS, Bhubaneswar
+
                       </div>
                       <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
-                        <strong>Experience:</strong> 25+ years in medical education and research
+                        <strong>Former Vice-Chancellor : </strong> SOA University
                       </div>
                     </div>
                   </div>
@@ -498,9 +500,10 @@ const Journal = () => {
                   <div className="text-center">
                     <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                       <img 
-                        src="/images/editors/ananya-krishnan.jpg" 
+                        src="https://i.postimg.cc/kGbXmYww/Whats-App-Image-2025-08-22-at-04-33-08-3e56a060.jpg" 
                         alt="Ananya Krishnan"
                         className="w-28 h-28 rounded-full object-cover border-4 border-green-200"
+                        style={{ objectPosition: 'center 20%' }}
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
                           ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).style.display = 'flex';
@@ -508,13 +511,12 @@ const Journal = () => {
                       />
                       <User className="h-16 w-16 text-green-500 hidden" />
                     </div>
-                    <h4 className="text-xl font-bold text-green-700 dark:text-green-300 mb-2 group-hover:text-green-800 dark:group-hover:text-green-200 transition-colors">Ananya Krishnan</h4>
-                    <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1">MBBS Final Year</p>
-                    <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-2">KIMS, Bangalore</p>
-                    <p className="text-sm text-profile-text-secondary dark:text-gray-300 mb-4">Internal Medicine</p>
+                    <h4 className="text-xl font-bold text-green-700 dark:text-green-300 mb-2 group-hover:text-green-800 dark:group-hover:text-green-200 transition-colors">Prof. Dr. Asaranti Kar</h4>
+                    <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1">MBBS, MD, FICP</p>
+                    
                     <div className="space-y-2">
                       <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
-                        <strong>Achievements:</strong> Published 3 research papers, Dean's List
+                        <strong>Head Of Department Pathology : </strong> SCB CUTTACK
                       </div>
                     </div>
                   </div>
