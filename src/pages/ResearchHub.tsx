@@ -98,6 +98,16 @@ const Index = () => {
       <section id="about" className="py-16 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
+            <div className="flex flex-col items-center justify-center mb-4">
+              <div className="rounded-full border-4 border-blue-500 shadow-lg p-2 bg-white relative" style={{ boxShadow: '0 0 32px 8px #3b82f6, 0 0 8px 2px #60a5fa' }}>
+                <img
+                  src="https://i.postimg.cc/SQMyj57f/Whats-App-Image-2025-08-22-at-03-58-53-bf435fbe.jpg"
+                  alt="SMAK Research Club Logo"
+                  className="w-24 h-24 rounded-full object-cover"
+                  style={{ boxShadow: '0 0 32px 8px #3b82f6' }}
+                />
+              </div>
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
                 🔬 SMAK Research Club
@@ -233,7 +243,7 @@ const Index = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             <TeamMemberCard
               name="Brishabh Raj Prajesh"
-              position="Co Head"
+              position="Head"
               institution="SMAK RESEARCH CLUB"
               batch=""
               imageUrl="https://i.postimg.cc/L5ByYYTG/Whats-App-Image-2025-08-13-at-13-01-49-9d0aaa5d.jpg"
