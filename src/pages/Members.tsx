@@ -33,7 +33,7 @@ const Members = () => {
       college: "SMAK RESEARCH CLUB",
       year: "",
       specialization: "",
-      position: "Co Head",
+      position: "Head",
       image: "https://i.postimg.cc/L5ByYYTG/Whats-App-Image-2025-08-13-at-13-01-49-9d0aaa5d.jpg",
     },
     {
