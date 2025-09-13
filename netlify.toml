@@ -2,8 +2,18 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  # Optional: just to be explicit about your env vars
+  VITE_FIREBASE_API_KEY="dummy"
+  VITE_FIREBASE_APP_ID="dummy"
+  VITE_FIREBASE_AUTH_DOMAIN="dummy"
+  VITE_FIREBASE_MEASUREMENT_ID="dummy"
+  VITE_FIREBASE_MESSAGING_SENDER_ID="dummy"
+  VITE_FIREBASE_PROJECT_ID="dummy"
+  VITE_FIREBASE_STORAGE_BUCKET="dummy"
+
 [secrets]
-  # Ignore Firebase config keys (safe to expose in client-side apps)
+  # Tell Netlify to ignore these keys
   omit_keys = [
     "VITE_FIREBASE_API_KEY",
     "VITE_FIREBASE_APP_ID",
@@ -14,5 +24,5 @@
     "VITE_FIREBASE_STORAGE_BUCKET"
   ]
 
-  # Optional: ignore .firebaserc so it doesn’t trigger scans
+  # Ignore Firebase config files too
   omit_paths = [".firebaserc"]
