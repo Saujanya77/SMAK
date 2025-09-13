@@ -3,7 +3,7 @@
   publish = "dist"
 
 [secrets]
-  # Ignore these since they are public Firebase config values
+  # Ignore Firebase config keys (safe to expose in client-side apps)
   omit_keys = [
     "VITE_FIREBASE_API_KEY",
     "VITE_FIREBASE_APP_ID",
@@ -13,3 +13,6 @@
     "VITE_FIREBASE_PROJECT_ID",
     "VITE_FIREBASE_STORAGE_BUCKET"
   ]
+
+  # Optional: ignore .firebaserc so it doesn’t trigger scans
+  omit_paths = [".firebaserc"]
