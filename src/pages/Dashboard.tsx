@@ -4,16 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Toggle } from '@/components/ui/toggle';
-import { 
-  BookOpen, 
-  Video, 
-  FileText, 
-  Bookmark, 
-  User, 
-  Settings, 
-  LogOut, 
-  Calendar, 
-  Users, 
+import {
+  BookOpen,
+  Video,
+  FileText,
+  Bookmark,
+  User,
+  Settings,
+  LogOut,
+  Calendar,
+  Users,
   Mail,
   TrendingUp,
   Clock,
@@ -108,15 +108,15 @@ const MedicalDashboard = () => {
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { 
-      id: 'content-hub', 
-      label: 'Content Hub', 
+    {
+      id: 'content-hub',
+      label: 'Content Hub',
       icon: LibraryBig,
       route: '/Contenthub',
-      
+
       subItems: [
         { id: 'video-lectures', label: 'Video Lectures', icon: Video, route: '/video-lectures' },
-        { id: 'subject-notes', label: 'Subject-wise Notes', icon: BookOpen , route: '/SubjectNotes' },
+        { id: 'subject-notes', label: 'Subject-wise Notes', icon: BookOpen, route: '/SubjectNotes' },
         { id: 'mcq-bank', label: 'MCQ & Q-Bank', icon: HelpCircle, route: '/mcq-bank' },
       ]
     },
@@ -128,7 +128,7 @@ const MedicalDashboard = () => {
       subItems: [
         { id: 'clinical-cases', label: 'Clinical Cases', icon: Clipboard, route: '/clinical-cases' },
         { id: 'emergency-protocols', label: 'Emergency Protocols', icon: Zap, route: '/Emergency_Protocols' },
-        { id: 'lab-imaging', label: 'Lab & Imaging Interpretation', icon: TestTube , route: '/Lab_Imaging' },
+        { id: 'lab-imaging', label: 'Lab & Imaging Interpretation', icon: TestTube, route: '/Lab_Imaging' },
       ]
     },
     { id: 'journals', label: 'Journals', icon: FileText, route: '/journals' },
@@ -178,21 +178,25 @@ const MedicalDashboard = () => {
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex items-center space-x-3">
-  <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm overflow-hidden">
-    <img 
-      src={Logo}
-      alt="SMAK Logo" 
-      className="w-full h-full object-cover rounded-full"
-    />
-  </div>
-  <div className="hidden sm:block">
-    <h1 className="text-xl font-bold text-slate-800 dark:text-white">
-      SMAK
-    </h1>
-    <p className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</p>
-  </div>
-</div>
+            <a href="/" className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <img
+                src={Logo}
+                alt="SMAK Logo"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </a>
+            <a href="/">
+            <div className="hidden sm:block">
+              <h1 className="text-xl font-bold text-slate-800 dark:text-white">
+                SMAK
+              </h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</p>
+            </div>
+            </a>
+          </div>
+          
         </div>
+        
 
         <div className="flex items-center space-x-3">
           <div className="relative hidden md:block">
@@ -203,17 +207,16 @@ const MedicalDashboard = () => {
               className="w-72 pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
             />
           </div>
-          
+
           {/* Professional Theme Toggle */}
           <div className="relative">
             <Toggle
               pressed={darkMode}
               onPressedChange={toggleTheme}
-              className={`relative p-2.5 rounded-lg transition-all duration-300 border ${
-                darkMode 
-                  ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600' 
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-blue-50'
-              }`}
+              className={`relative p-2.5 rounded-lg transition-all duration-300 border ${darkMode
+                ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-blue-50'
+                }`}
               title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               <div className="flex items-center space-x-2">
@@ -231,7 +234,7 @@ const MedicalDashboard = () => {
               </div>
             </Toggle>
           </div>
-          
+
           <button className="relative p-2.5 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
             <Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
@@ -245,9 +248,9 @@ const MedicalDashboard = () => {
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
             >
               <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-slate-600 flex items-center justify-center ring-2 ring-blue-100 dark:ring-slate-600">
-  <span className="text-sm font-semibold text-blue-800 dark:text-white">
-    {user.name.charAt(0).toUpperCase()}
-  </span>
+                <span className="text-sm font-semibold text-blue-800 dark:text-white">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
               </div>
 
               <div className="hidden sm:block text-left">
@@ -271,6 +274,16 @@ const MedicalDashboard = () => {
                     {user.college}
                   </p>
                 </div>
+                {/* Admin Panel link for admin users only */}
+                {['admin@example.com', 'anotheradmin@example.com'].includes(user?.email) && (
+                  <button
+                    className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
+                    onClick={() => { setProfileDropdownOpen(false); navigate('/adminpanel'); }}
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Admin Panel</span>
+                  </button>
+                )}
                 <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
                   <User className="h-4 w-4" />
                   <span>View Profile</span>
@@ -284,13 +297,13 @@ const MedicalDashboard = () => {
                   <span>Study Mode</span>
                 </button>
                 <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2">
-                  <button 
-  onClick={handleLogout}  // ✅ This will redirect to login
-  className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
->
-  <LogOut className="h-4 w-4" />
-  <span>Sign Out</span>
-</button>
+                  <button
+                    onClick={handleLogout}  // ✅ This will redirect to login
+                    className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -305,15 +318,14 @@ const MedicalDashboard = () => {
     <>
       {/* Overlay for mobile */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
-      <aside className={`fixed left-0 top-0 h-full w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-all duration-300 z-50 lg:translate-x-0 shadow-lg ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+
+      <aside className={`fixed left-0 top-0 h-full w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-all duration-300 z-50 lg:translate-x-0 shadow-lg ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 lg:hidden">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
@@ -337,32 +349,29 @@ const MedicalDashboard = () => {
             <div key={item.id}>
               <button
                 onClick={() => handleNavigation(item.id, item.route)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                  currentPage === item.id || currentPage.startsWith(item.id)
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700'
-                }`}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${currentPage === item.id || currentPage.startsWith(item.id)
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700'
+                  }`}
               >
                 <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
                 {item.subItems && (
-                  <ChevronRight className={`h-4 w-4 ml-auto transition-transform duration-200 ${
-                    (currentPage === item.id || item.subItems.some(sub => currentPage === sub.id)) ? 'rotate-90' : ''
-                  }`} />
+                  <ChevronRight className={`h-4 w-4 ml-auto transition-transform duration-200 ${(currentPage === item.id || item.subItems.some(sub => currentPage === sub.id)) ? 'rotate-90' : ''
+                    }`} />
                 )}
               </button>
-              
+
               {item.subItems && (currentPage === item.id || item.subItems.some(sub => currentPage === sub.id)) && (
                 <div className="ml-6 mt-2 space-y-1">
                   {item.subItems.map((subItem) => (
                     <button
                       key={subItem.id}
                       onClick={() => handleNavigation(subItem.id, subItem.route)}
-                      className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-left text-sm transition-all duration-200 ${
-                        currentPage === subItem.id
-                          ? 'bg-blue-500 text-white shadow-sm'
-                          : 'text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-700'
-                      }`}
+                      className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-left text-sm transition-all duration-200 ${currentPage === subItem.id
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-700'
+                        }`}
                     >
                       <subItem.icon className="h-4 w-4" />
                       <span>{subItem.label}</span>
@@ -380,39 +389,39 @@ const MedicalDashboard = () => {
   // Enhanced Dashboard Page
   const DashboardPage = () => {
     const dashboardStats = [
-      { 
-        title: "Total Articles Read", 
-        value: "127", 
-        icon: BookOpen, 
-        trend: "+12 this week", 
-        color: "text-blue-600", 
+      {
+        title: "Total Articles Read",
+        value: "127",
+        icon: BookOpen,
+        trend: "+12 this week",
+        color: "text-blue-600",
         bgColor: "bg-blue-50 dark:bg-blue-900/20",
         image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=200&h=100&fit=crop"
       },
-      { 
-        title: "Research Papers", 
-        value: "23", 
-        icon: FileText, 
-        trend: "+3 new", 
-        color: "text-blue-600", 
+      {
+        title: "Research Papers",
+        value: "23",
+        icon: FileText,
+        trend: "+3 new",
+        color: "text-blue-600",
         bgColor: "bg-blue-50 dark:bg-blue-900/20",
         image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=200&h=100&fit=crop"
       },
-      { 
-        title: "Videos Watched", 
-        value: "45", 
-        icon: Video, 
-        trend: "8.5h this month", 
-        color: "text-blue-600", 
+      {
+        title: "Videos Watched",
+        value: "45",
+        icon: Video,
+        trend: "8.5h this month",
+        color: "text-blue-600",
         bgColor: "bg-blue-50 dark:bg-blue-900/20",
         image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=200&h=100&fit=crop"
       },
-      { 
-        title: "Notes Saved", 
-        value: "89", 
-        icon: Bookmark, 
-        trend: "+15 recently", 
-        color: "text-blue-600", 
+      {
+        title: "Notes Saved",
+        value: "89",
+        icon: Bookmark,
+        trend: "+15 recently",
+        color: "text-blue-600",
         bgColor: "bg-blue-50 dark:bg-blue-900/20",
         image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=200&h=100&fit=crop"
       }
@@ -509,7 +518,7 @@ const MedicalDashboard = () => {
         <div className="relative bg-blue-600 dark:bg-blue-700 rounded-2xl p-8 text-white overflow-hidden">
           <div className="absolute -top-4 -right-4 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
           <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-          
+
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-4">
@@ -540,7 +549,7 @@ const MedicalDashboard = () => {
             </div>
             <div className="hidden lg:block">
               <div className="relative">
-                <img 
+                <img
                   src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=220&h=160&fit=crop&crop=center"
                   alt="Medical illustration"
                   className="w-52 h-40 object-cover rounded-2xl shadow-2xl border-4 border-white/20"
@@ -558,8 +567,8 @@ const MedicalDashboard = () => {
           {dashboardStats.map((stat, index) => (
             <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden">
               <div className="relative h-24 overflow-hidden">
-                <img 
-                  src={stat.image} 
+                <img
+                  src={stat.image}
                   alt={stat.title}
                   className="w-full h-full object-cover"
                 />
@@ -594,14 +603,14 @@ const MedicalDashboard = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickAccessItems.map((item, index) => (
-              <Card 
+              <Card
                 key={index}
                 className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 shadow-md overflow-hidden"
                 onClick={() => navigate(item.route)}
               >
                 <div className="relative h-40 overflow-hidden">
-                  <img 
-                    src={item.image} 
+                  <img
+                    src={item.image}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
@@ -657,8 +666,8 @@ const MedicalDashboard = () => {
               {recentActivities.map((activity, index) => (
                 <div key={index} className="flex items-center space-x-4 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl hover:shadow-md transition-all duration-200 group">
                   <div className="relative flex-shrink-0">
-                    <img 
-                      src={activity.image} 
+                    <img
+                      src={activity.image}
                       alt={activity.title}
                       className="w-12 h-12 rounded-lg object-cover"
                     />
@@ -771,8 +780,8 @@ const MedicalDashboard = () => {
               ].map((content, index) => (
                 <div key={index} className="group cursor-pointer bg-white dark:bg-slate-700 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-600 hover:shadow-xl transition-all duration-300 hover:scale-105">
                   <div className="relative h-40 overflow-hidden">
-                    <img 
-                      src={content.image} 
+                    <img
+                      src={content.image}
                       alt={content.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
@@ -819,7 +828,7 @@ const MedicalDashboard = () => {
     switch (currentPage) {
       case 'dashboard':
         return <DashboardPage />;
-      
+
       default:
         // Professional placeholder for other pages
         return (
@@ -858,10 +867,10 @@ const MedicalDashboard = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
       <Sidebar />
-      
+
       <div className="flex-1 lg:ml-72">
         <NavigationHeader />
-        
+
         <main className="p-6">
           {renderPage()}
         </main>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # 🧠 SMAK – Society of Medical Academia and Knowledge
 
@@ -75,3 +76,6 @@ Pull requests are welcome! If you want to collaborate, feel free to open issues 
 
 MIT License – Free to use, modify, and share with attribution.
 
+=======
+# SMAK
+>>>>>>> 57aa870ef0b9ea08009d7888e7d900ab6320d604

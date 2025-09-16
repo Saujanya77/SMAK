@@ -68,19 +68,19 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          
-<Link to="/" className="flex items-center space-x-3">
-  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-gray-100">
-    <img
-      src= "https://i.postimg.cc/LXmZbsWJ/Logo.jpg"
-      alt="SMAK - Society For Medical Academia and Knowledge Logo" 
-      className="w-10 h-10 object-contain"
-    />
-  </div>
-  <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-    SMAK
-  </span>
-</Link>
+
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-gray-100">
+              <img
+                src="https://i.postimg.cc/LXmZbsWJ/Logo.jpg"
+                alt="SMAK - Society For Medical Academia and Knowledge Logo"
+                className="w-10 h-10 object-contain"
+              />
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+              SMAK
+            </span>
+          </Link>
 
           {/* Desktop Navigation - Using enhanced button style from second component */}
           <div className="hidden lg:flex items-center space-x-1">
@@ -90,11 +90,10 @@ const Navigation = () => {
                 <Button
                   key={item.name}
                   variant={isActive(item.path) ? "default" : "ghost"}
-                  className={`flex items-center space-x-2 ${
-                    isActive(item.path)
+                  className={`flex items-center space-x-2 ${isActive(item.path)
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent hover:bg-blue-50 dark:hover:bg-blue-950/20"
-                  }`}
+                    }`}
                   asChild
                 >
                   <Link to={item.path}>
@@ -135,6 +134,12 @@ const Navigation = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {/* Show Admin Panel link only for admin users */}
+                  {['admin@example.com', 'anotheradmin@example.com'].includes(user?.email) && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/adminpanel">Admin Panel</Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard">Dashboard</Link>
                   </DropdownMenuItem>
@@ -176,11 +181,10 @@ const Navigation = () => {
                   <Button
                     key={item.name}
                     variant={isActive(item.path) ? "default" : "ghost"}
-                    className={`w-full justify-start space-x-2 ${
-                      isActive(item.path)
+                    className={`w-full justify-start space-x-2 ${isActive(item.path)
                         ? "bg-blue-600 text-white hover:bg-blue-700"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent hover:bg-blue-50 dark:hover:bg-blue-950/20"
-                    }`}
+                      }`}
                     asChild
                     onClick={() => setIsOpen(false)}
                   >
@@ -191,7 +195,7 @@ const Navigation = () => {
                   </Button>
                 );
               })}
-              
+
               {!isAuthenticated && (
                 <div className="flex flex-col space-y-2 pt-2 border-t border-border mt-2">
                   <Button variant="ghost" asChild onClick={() => setIsOpen(false)}>

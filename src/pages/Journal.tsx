@@ -1,4 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+interface Journal {
+  id: string;
+  title: string;
+  author: string;
+  date: string;
+  category: string;
+  status: string;
+  abstract: string;
+  image?: string;
+  views?: string;
+  downloads?: string;
+}
+import { db } from '../firebase';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,7 +39,7 @@ const Journal = () => {
       title: "Submit Manuscript",
       description: "Unified portal for students and professionals to submit quality content",
       icon: FileText,
-      
+
       color: "bg-medical-green"
     },
     {
@@ -36,41 +51,30 @@ const Journal = () => {
     }
   ];
 
-  const highlightedJournals = [
-    {
-      title: "Breakthrough in Diabetes Management Using IoT Devices",
-      author: "Dr. Ananya Krishnan",
-      date: "December 2024",
-      category: "Endocrinology",
-      status: "Featured",
-      abstract: "This study demonstrates how Internet of Things (IoT) devices can revolutionize diabetes monitoring and management, providing real-time glucose tracking and automated insulin delivery systems.",
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop&crop=center",
-      views: "5,234",
-      downloads: "2,891"
-    },
-    {
-      title: "Community-Based Mental Health Programs: A Success Story",
-      author: "Dr. Rahul Mehta",
-      date: "November 2024",
-      category: "Psychiatry",
-      status: "Popular",
-      abstract: "Analysis of community-driven mental health initiatives in rural India and their impact on reducing stigma while improving access to psychological care.",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=250&fit=crop&crop=center",
-      views: "4,567",
-      downloads: "2,234"
-    },
-    {
-      title: "Minimally Invasive Cardiac Surgery: Patient Outcomes Study",
-      author: "Dr. Sanjay Gupta",
-      date: "October 2024",
-      category: "Cardiothoracic Surgery",
-      status: "Trending",
-      abstract: "Comprehensive analysis of patient recovery times, complications, and long-term outcomes in minimally invasive cardiac procedures compared to traditional approaches.",
-      image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=250&fit=crop&crop=center",
-      views: "6,123",
-      downloads: "3,456"
-    }
-  ];
+  const [highlightedJournals, setHighlightedJournals] = useState<Journal[]>([]);
+  const [loadingJournals, setLoadingJournals] = useState(true);
+
+  useEffect(() => {
+    const fetchApprovedJournals = async () => {
+      setLoadingJournals(true);
+      const querySnapshot = await getDocs(collection(db, "journals"));
+      const approved = querySnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() } as Journal))
+        .filter((journal) => journal.status === "approved");
+      setHighlightedJournals(approved);
+      setLoadingJournals(false);
+    };
+    fetchApprovedJournals();
+  }, []);
+
+  // Example function to submit a new journal (status: 'pending')
+  const submitJournal = async (journalData: any) => {
+    await addDoc(collection(db, "journals"), {
+      ...journalData,
+      status: "pending"
+    });
+    // Optionally show a message to the user
+  };
 
   const featuredArticles = [
     {
@@ -161,12 +165,12 @@ const Journal = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       {/* Hero Section */}
       <section className="py-16 relative text-blue-600">
         <div className="absolute inset-0">
-          <img 
-            src="https://plus.unsplash.com/premium_photo-1661580252810-800f4bd0ee63?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+          <img
+            src="https://plus.unsplash.com/premium_photo-1661580252810-800f4bd0ee63?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Vivid research background"
             className="w-full h-full object-cover object-center opacity-60 dark:opacity-60"
           />
@@ -189,8 +193,8 @@ const Journal = () => {
               "To build a national platform integrating student innovation with expert mentorship, enabling publication of high-impact clinical, academic, and research-based medical content."
             </p>
             <div className="flex justify-center">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 onClick={handlePublishClick}
                 variant="secondary"
                 className="bg-blue-950 text-white hover:bg-white/90 hover:text-blue-900 transition-smooth font-bold shadow-lg"
@@ -214,25 +218,23 @@ const Journal = () => {
               Discover our editorial excellence, submission process, and mission
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {mainButtons.map((button, index) => (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className="overflow-hidden hover:shadow-[var(--shadow-elegant)] transition-all duration-300 cursor-pointer group border-2 hover:border-medical-blue/50"
                 onClick={() => navigate(button.path)}
               >
                 <CardHeader className="text-center pb-4">
-                  <div className={`w-20 h-20 mx-auto mb-4 ${
-                    button.color.includes('green') ? 'bg-medical-green/10' : 
-                    button.color.includes('light') ? 'bg-medical-blue-light/10' : 
-                    'bg-medical-blue/10'
-                  } rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                    <button.icon className={`h-10 w-10 ${
-                      button.color.includes('green') ? 'text-medical-green' : 
-                      button.color.includes('light') ? 'text-medical-blue-light' : 
-                      'text-medical-blue'
-                    }`} />
+                  <div className={`w-20 h-20 mx-auto mb-4 ${button.color.includes('green') ? 'bg-medical-green/10' :
+                    button.color.includes('light') ? 'bg-medical-blue-light/10' :
+                      'bg-medical-blue/10'
+                    } rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <button.icon className={`h-10 w-10 ${button.color.includes('green') ? 'text-medical-green' :
+                      button.color.includes('light') ? 'text-medical-blue-light' :
+                        'text-medical-blue'
+                      }`} />
                   </div>
                   <CardTitle className="text-xl">{button.title}</CardTitle>
                 </CardHeader>
@@ -259,56 +261,61 @@ const Journal = () => {
               Exceptional research making a difference in healthcare
             </p>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {highlightedJournals.map((journal, index) => (
-              <Card key={index} className="overflow-hidden hover:shadow-[var(--shadow-elegant)] transition-all duration-300 border-2 hover:border-medical-green/30">
-                <div className="relative">
-                  <img 
-                    src={journal.image} 
-                    alt={journal.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <Badge 
-                    className="absolute top-3 right-3 bg-[image:var(--success-gradient)] text-white"
-                  >
-                    {journal.status}
-                  </Badge>
-                </div>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">{journal.category}</Badge>
-                    <span className="text-sm text-muted-foreground">{journal.date}</span>
+            {loadingJournals ? (
+              <p>Loading journals...</p>
+            ) : highlightedJournals.length === 0 ? (
+              <p>No approved journals available.</p>
+            ) : (
+              highlightedJournals.map((journal, index) => (
+                <Card key={journal.id || index} className="overflow-hidden hover:shadow-[var(--shadow-elegant)] transition-all duration-300 border-2 hover:border-medical-green/30">
+                  <div className="relative">
+                    <img
+                      src={journal.image}
+                      alt={journal.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <Badge
+                      className="absolute top-3 right-3 bg-[image:var(--success-gradient)] text-white"
+                    >
+                      Approved
+                    </Badge>
                   </div>
-                  <CardTitle className="text-lg line-clamp-2">{journal.title}</CardTitle>
-                  <CardDescription className="flex items-center text-sm">
-                    <User className="h-4 w-4 mr-1" />
-                    {journal.author}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{journal.abstract}</p>
-                  <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
-                    <div className="flex items-center">
-                      <Eye className="h-4 w-4 mr-1" />
-                      {journal.views}
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline">{journal.category}</Badge>
+                      <span className="text-sm text-muted-foreground">{journal.date}</span>
                     </div>
-                    <div className="flex items-center">
-                      <Download className="h-4 w-4 mr-1" />
-                      {journal.downloads}
+                    <CardTitle className="text-lg line-clamp-2">{journal.title}</CardTitle>
+                    <CardDescription className="flex items-center text-sm">
+                      <User className="h-4 w-4 mr-1" />
+                      {journal.author}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{journal.abstract}</p>
+                    <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
+                      <div className="flex items-center">
+                        <Eye className="h-4 w-4 mr-1" />
+                        {journal.views}
+                      </div>
+                      <div className="flex items-center">
+                        <Download className="h-4 w-4 mr-1" />
+                        {journal.downloads}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="default" size="sm" className="flex-1 bg-[image:var(--medical-gradient)]">
-                      Read Full
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    <div className="flex space-x-2">
+                      <Button variant="default" size="sm" className="flex-1 bg-[image:var(--medical-gradient)]">
+                        Read Full
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -324,14 +331,14 @@ const Journal = () => {
               Highlighting groundbreaking research from our community
             </p>
           </div>
-          
+
           <div className="space-y-8">
             {featuredArticles.map((article, index) => (
               <Card key={index} className="overflow-hidden hover:shadow-[var(--shadow-elegant)] transition-shadow duration-300">
                 <div className="md:flex">
                   <div className="md:w-1/3">
-                    <img 
-                      src={article.image} 
+                    <img
+                      src={article.image}
                       alt={article.title}
                       className="w-full h-64 md:h-full object-cover"
                     />
@@ -386,12 +393,12 @@ const Journal = () => {
               Browse by Category
             </h2>
           </div>
-          
+
           <div className="flex flex-wrap justify-center gap-2 mb-8">
             {categories.map((category, index) => (
-              <Button 
-                key={index} 
-                variant={index === 0 ? "default" : "outline"} 
+              <Button
+                key={index}
+                variant={index === 0 ? "default" : "outline"}
                 size="sm"
                 className={index === 0 ? "bg-[image:var(--medical-gradient)]" : ""}
               >
@@ -410,7 +417,7 @@ const Journal = () => {
               Recent Publications
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {recentPublications.map((article, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
@@ -460,8 +467,8 @@ const Journal = () => {
                 <CardContent className="p-6">
                   <div className="text-center">
                     <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                      <img 
-                        src="https://i.postimg.cc/4yq7vh22/Whats-App-Image-2025-08-22-at-04-06-37-afe21f71.jpg" 
+                      <img
+                        src="https://i.postimg.cc/4yq7vh22/Whats-App-Image-2025-08-22-at-04-06-37-afe21f71.jpg"
                         alt="Dr. Rajesh Kumar Sharma"
                         className="w-28 h-28 rounded-full object-cover border-4 border-blue-200"
                         style={{ objectPosition: 'center 20%' }}
@@ -499,8 +506,8 @@ const Journal = () => {
                 <CardContent className="p-6">
                   <div className="text-center">
                     <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                      <img 
-                        src="https://i.postimg.cc/kGbXmYww/Whats-App-Image-2025-08-22-at-04-33-08-3e56a060.jpg" 
+                      <img
+                        src="https://i.postimg.cc/kGbXmYww/Whats-App-Image-2025-08-22-at-04-33-08-3e56a060.jpg"
                         alt="Ananya Krishnan"
                         className="w-28 h-28 rounded-full object-cover border-4 border-green-200"
                         style={{ objectPosition: 'center 20%' }}
@@ -513,7 +520,7 @@ const Journal = () => {
                     </div>
                     <h4 className="text-xl font-bold text-green-700 dark:text-green-300 mb-2 group-hover:text-green-800 dark:group-hover:text-green-200 transition-colors">Prof. Dr. Asaranti Kar</h4>
                     <p className="text-profile-text-secondary dark:text-gray-300 font-medium mb-1">MBBS, MD, FICP</p>
-                    
+
                     <div className="space-y-2">
                       <div className="text-xs text-profile-text-secondary dark:text-gray-300 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
                         <strong>Head Of Department Pathology : </strong> SCB CUTTACK
@@ -525,7 +532,7 @@ const Journal = () => {
             </div>
           </div>
 
-           {/* Editorial Advisory Board */}
+          {/* Editorial Advisory Board */}
           <div className="mb-16">
             <h3 className="text-2xl font-bold text-center mb-8 text-blue-600 drop-shadow-sm">Editorial Advisory Board</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -560,8 +567,8 @@ const Journal = () => {
                     <div className="text-center">
                       <div className="w-24 h-24 mx-auto mb-3 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900 dark:to-indigo-800 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
                         {/* Image placeholder - replace src with actual image path */}
-                        <img 
-                          src={member.imagePath} 
+                        <img
+                          src={member.imagePath}
                           alt={member.name}
                           className="w-20 h-20 rounded-full object-cover border-3 border-indigo-200 dark:border-indigo-400"
                           onError={(e) => {
@@ -624,8 +631,8 @@ const Journal = () => {
                     <div className="text-center">
                       <div className="w-24 h-24 mx-auto mb-3 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
                         {/* Image placeholder - replace src with actual image path */}
-                        <img 
-                          src={editor.imagePath} 
+                        <img
+                          src={editor.imagePath}
                           alt={editor.name}
                           className="w-20 h-20 rounded-full object-cover border-3 border-green-200 dark:border-green-400"
                           onError={(e) => {
@@ -653,7 +660,7 @@ const Journal = () => {
             </div>
           </div>
 
-         
+
 
           {/* Patron / Honorary Mentors */}
           <div className="mb-12">
@@ -682,8 +689,8 @@ const Journal = () => {
                     <div className="flex items-center space-x-4">
                       <div className="w-20 h-20 bg-gradient-to-br from-purple-50 to-blue-100 dark:from-purple-900 dark:to-blue-800 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300 flex-shrink-0">
                         {/* Image placeholder - replace src with actual image path */}
-                        <img 
-                          src={mentor.imagePath} 
+                        <img
+                          src={mentor.imagePath}
                           alt={mentor.name}
                           className="w-16 h-16 rounded-full object-cover border-3 border-purple-200 dark:border-purple-400"
                           onError={(e) => {
@@ -714,8 +721,8 @@ const Journal = () => {
           </div>
 
           <div className="text-center">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               onClick={() => navigate('/editorial-board')}
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 px-8 py-3 rounded-lg font-semibold"
             >
@@ -757,12 +764,12 @@ const Journal = () => {
                   <li className="flex items-center"><span className="w-2 h-2 bg-medical-blue rounded-full mr-2"></span>Word count and structure</li>
                   <li className="flex items-center"><span className="w-2 h-2 bg-medical-blue rounded-full mr-2"></span>Upload portal instructions</li>
                 </ul>
-                <Button 
-  onClick={() => window.open("/Guidelines", "_blank")} 
-  className="w-full mt-4 bg-[image:var(--medical-gradient)]"
->
-  View Guidelines
-</Button>
+                <Button
+                  onClick={() => window.open("/Guidelines", "_blank")}
+                  className="w-full mt-4 bg-[image:var(--medical-gradient)]"
+                >
+                  View Guidelines
+                </Button>
 
               </CardContent>
             </Card>
@@ -789,14 +796,14 @@ const Journal = () => {
                     <div className="text-xs text-muted-foreground">Alternative submission method</div>
                   </div>
                 </div>
-                <Button 
-  variant="outline" 
-  className="w-full mt-4"
-  onClick={() => window.open("/login", "_blank")}
->
-  <PenTool className="mr-2 h-4 w-4" />
-  Start Submission
-</Button>
+                <Button
+                  variant="outline"
+                  className="w-full mt-4"
+                  onClick={() => window.open("/login", "_blank")}
+                >
+                  <PenTool className="mr-2 h-4 w-4" />
+                  Start Submission
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -859,8 +866,8 @@ const Journal = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               onClick={handlePublishClick}
               className="bg-[image:var(--medical-gradient)] hover:opacity-90"
             >
@@ -972,8 +979,8 @@ const Journal = () => {
           </div>
 
           <div className="text-center">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               onClick={() => navigate('/about')}
               className="bg-[image:var(--success-gradient)] hover:opacity-90"
             >
@@ -1064,7 +1071,7 @@ const Journal = () => {
               >
                 Submission Guidelines
               </Button>
-              
+
             </div>
 
             <Button

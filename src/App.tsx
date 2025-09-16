@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import AdminPanel from './pages/AdminPanel';
+// ...existing code...
+
 
 
 import Index from "./pages/Index";
@@ -73,6 +76,7 @@ const App = () => (
                 <Route path="/Emergency_Protocols" element={<Emergency_Protocols />} />
                 <Route path="/Lab_Imaging" element={<Lab_Imaging />} />
                 <Route path="/Guidelines" element={<Guidelines />} />
+                <Route path="/adminpanel" element={<AdminPanel />} />
 
 
                 {/* Protected Routes */}
