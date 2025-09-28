@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { getDocs, collection } from "firebase/firestore";
-import { db } from "../firebase";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Input } from "../components/ui/input";
@@ -47,19 +45,9 @@ const Members = () => {
     : [];
 
   const [search, setSearch] = useState("");
-  const [firestoreMembers, setFirestoreMembers] = useState([]);
 
-  useEffect(() => {
-    const fetchMembers = async () => {
-      const querySnapshot = await getDocs(collection(db, "members"));
-      const membersList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setFirestoreMembers(membersList);
-    };
-    fetchMembers();
-  }, []);
-
-  // Combine hardcoded and imported members, then Firestore
-  const members = [...importedMembers, ...firestoreMembers];
+  // Only use imported members from JSON
+  const members = importedMembers;
   const filteredMembers = members.filter((member) =>
     member.name && member.name.toLowerCase().includes(search.toLowerCase().trim())
   );
@@ -105,10 +93,10 @@ const Members = () => {
                   {/* Large circular photo area */}
                   <div className="relative w-32 h-32 mb-6 rounded-full bg-gradient-to-br from-blue-100 via-blue-300 to-blue-400 dark:from-blue-900 dark:via-blue-700 dark:to-blue-400 shadow-lg flex items-center justify-center mx-auto">
                     <img
-                        src={member.pictureUrl || member.image || ""}
+                        src={member.pictureUrl || ""}
                         alt={member.name}
                         className="w-28 h-28 object-cover rounded-full border-4 border-white dark:border-background ring-2 ring-blue-400 dark:ring-blue-500 shadow-lg mx-auto"
-                        style={{ aspectRatio: "1/1", background: "#e8efff", objectPosition: member.objectPosition || "center top", objectFit: "cover" }}
+                        style={{ aspectRatio: "1/1", background: "#e8efff", objectFit: "cover" }}
                       />
                   </div>
                   <div className="flex flex-col items-center w-full">
