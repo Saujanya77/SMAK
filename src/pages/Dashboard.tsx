@@ -107,6 +107,14 @@ const MedicalDashboard = () => {
 
 
   const sidebarItems = [
+    {
+      id: 'home',
+      label: 'Home',
+      icon: () => (
+        <img src={Logo} alt="Home" className="h-5 w-5 rounded" style={{ objectFit: 'cover' }} />
+      ),
+      route: '/',
+    },
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     {
       id: 'content-hub',
@@ -186,17 +194,17 @@ const MedicalDashboard = () => {
               />
             </a>
             <a href="/">
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-slate-800 dark:text-white">
-                SMAK
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</p>
-            </div>
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold text-slate-800 dark:text-white">
+                  SMAK
+                </h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</p>
+              </div>
             </a>
           </div>
-          
+
         </div>
-        
+
 
         <div className="flex items-center space-x-3">
           <div className="relative hidden md:block">

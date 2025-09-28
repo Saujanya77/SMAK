@@ -15,8 +15,9 @@ interface Journal {
     downloadCount?: number;
 }
 import React, { useEffect, useState } from "react";
-import { db } from "../firebase";
-import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
+import { db, storage } from "../firebase";
+import { collection, getDocs, updateDoc, doc, addDoc, deleteDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -47,7 +48,36 @@ const AdminPanel: React.FC = () => {
     const [pendingBlogs, setPendingBlogs] = useState<Blog[]>([]);
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs'>('journals');
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members'>('journals');
+    // Static members array
+    const [staticMembers, setStaticMembers] = useState([
+        { name: "SAMUDRA CHAUDHARI ", institution: "SMAK", designation: "FOUNDER", pictureUrl: "https://i.postimg.cc/65tpg88S/Whats-App-Image-2025-08-13-at-13-39-13-32477921.jpg", phone: "", objectPosition: "center 20%" },
+        { name: "KHUSHAL PAL", institution: "SMAK", designation: "CO-FOUNDER", pictureUrl: "https://i.postimg.cc/DwYfS5xk/Whats-App-Image-2025-08-13-at-13-39-13-89a66ab2.jpg", phone: "" },
+        { name: "Brishabh Raj Prajesh", institution: "SMAK RESEARCH CLUB", designation: "Head", pictureUrl: "https://i.postimg.cc/L5ByYYTG/Whats-App-Image-2025-08-13-at-13-01-49-9d0aaa5d.jpg", phone: "" },
+        { name: "Musa M. Bharmal", institution: "SMAK RESEARCH CLUB", designation: "Co Head", pictureUrl: "https://i.postimg.cc/6pT0w1Dk/Whats-App-Image-2025-08-13-at-13-01-49-3b92b5a0.jpg", phone: "" },
+        { name: "Disha Agrawala ", institution: "SMAK", designation: "Executive Board Member", pictureUrl: "https://i.postimg.cc/VN8d4JBK/Whats-App-Image-2025-08-13-at-13-01-49-0a36118b.jpg", phone: "" },
+        { name: "Taniya Masud Temkar", institution: "DY Patil Medical College, Kolhapur", designation: "Head Of Event & Content Committee", pictureUrl: "https://i.postimg.cc/HsMYKpLR/Whats-App-Image-2025-08-13-at-13-01-49-6427a359.jpg", phone: "" },
+        { name: "Uzair Pathan", institution: "Coordinator - Event and Content Committee", designation: "Head", pictureUrl: "https://i.postimg.cc/brcyYMC3/Whats-App-Image-2025-08-13-at-13-01-49-73477329.jpg", phone: "GMC Alibag" },
+        { name: "Aakanksha Nanda", institution: "Veer Surendra Sai Institute of Medical Science And Research, Burla, Odisha", designation: "Head of the Mentorship Program Committee", pictureUrl: "https://i.postimg.cc/0QG3mB5t/Whats-App-Image-2025-08-13-at-13-01-49-8c3c0677.jpg", phone: "" },
+        { name: "Sanya Walia", institution: "Government Institute of Medical Sciences, Greater Noida", designation: "Coordinator - Mentorship Program Committee", pictureUrl: "https://i.postimg.cc/Gm0Fwhxy/Whats-App-Image-2025-08-13-at-13-01-49-c374962b.jpg", phone: "" },
+        { name: "Ananya", institution: "Maulana Azad Medical College Delhi", designation: "Head Of Journal Development committee", pictureUrl: "https://i.postimg.cc/vTkKfgxz/Whats-App-Image-2025-08-13-at-13-01-49-c8ba169c.jpg", phone: "" },
+        { name: "Ansharah Khan", institution: "Grant medical college Mumbai", designation: "Coordinator - Journal Development Committee", pictureUrl: "https://i.postimg.cc/ydPgDc5M/Whats-App-Image-2025-08-13-at-13-01-49-62c3e89c.jpg", phone: "" },
+        { name: "Pratik Gupta", institution: "IMS and SUM campus 2", designation: "Head - Campus outreach and coordination Committee", pictureUrl: "https://i.postimg.cc/B6rSQ6Zr/Whats-App-Image-2025-08-13-at-13-01-49-eeb0d546.jpg", phone: "" },
+        { name: "Madhav Tripathi", institution: "Virendra Kumar Sakhlecha Government Medical College, Neemuch (MP)", designation: "Coordinator - Outreach & Collaboration Committee", pictureUrl: "https://i.postimg.cc/50cTXFvS/Whats-App-Image-2025-08-13-at-13-01-49-7c1ed6e6.jpg", phone: "" },
+    ]);
+    // Members state
+    const [members, setMembers] = useState([]);
+    const [memberForm, setMemberForm] = useState({
+        name: '',
+        institution: '',
+        email: '',
+        designation: '',
+        phone: '',
+        picture: null,
+        isStatic: false,
+        staticIndex: null,
+    });
+    const [editingMemberId, setEditingMemberId] = useState(null);
 
     useEffect(() => {
         const fetchPendingJournals = async () => {
@@ -60,6 +90,14 @@ const AdminPanel: React.FC = () => {
             setLoadingJournals(false);
         };
         fetchPendingJournals();
+
+        // Fetch members from Firestore
+        const fetchMembers = async () => {
+            const querySnapshot = await getDocs(collection(db, "members"));
+            const membersList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            setMembers(membersList);
+        };
+        fetchMembers();
     }, []);
 
     useEffect(() => {
@@ -123,15 +161,18 @@ const AdminPanel: React.FC = () => {
                     >
                         Blogs
                     </Button>
+                    <Button
+                        variant={activeTab === 'members' ? 'default' : 'outline'}
+                        onClick={() => setActiveTab('members')}
+                        className={activeTab === 'members' ? 'bg-blue-600 text-white' : ''}
+                    >
+                        Members
+                    </Button>
                 </div>
             </div>
             <div className="grid gap-6">
                 {activeTab === 'journals' ? (
-                    loadingJournals ? (
-                        <p>Loading pending journals...</p>
-                    ) : pendingJournals.length === 0 ? (
-                        <p>No pending journals for approval.</p>
-                    ) : (
+                    loadingJournals ? (<p>Loading pending journals...</p>) : pendingJournals.length === 0 ? (<p>No pending journals for approval.</p>) : (
                         pendingJournals.map((journal) => (
                             <Card key={journal.id} className="bg-gray-800 text-white p-6">
                                 {journal.imageUrl && (
@@ -185,12 +226,8 @@ const AdminPanel: React.FC = () => {
                             </Card>
                         ))
                     )
-                ) : (
-                    loadingBlogs ? (
-                        <p>Loading pending blogs...</p>
-                    ) : pendingBlogs.length === 0 ? (
-                        <p>No pending blogs for approval.</p>
-                    ) : (
+                ) : activeTab === 'blogs' ? (
+                    loadingBlogs ? (<p>Loading pending blogs...</p>) : pendingBlogs.length === 0 ? (<p>No pending blogs for approval.</p>) : (
                         pendingBlogs.map((blog) => (
                             <Card key={blog.id} className="bg-gray-800 text-white p-6">
                                 {blog.image && (
@@ -219,6 +256,152 @@ const AdminPanel: React.FC = () => {
                             </Card>
                         ))
                     )
+                ) : (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">Manage Members</h2>
+                        <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl max-w-xl">
+                            <form className="p-6 space-y-4" onSubmit={async e => {
+                                e.preventDefault();
+                                let pictureUrl = '';
+                                if (memberForm.picture) {
+                                    const fileRef = ref(storage, `members/${Date.now()}_${memberForm.picture.name}`);
+                                    await uploadBytes(fileRef, memberForm.picture);
+                                    pictureUrl = await getDownloadURL(fileRef);
+                                }
+                                if (memberForm.isStatic) {
+                                    // Update static member
+                                    setStaticMembers(prev => prev.map((m, idx) => idx === memberForm.staticIndex ? {
+                                        ...m,
+                                        name: memberForm.name,
+                                        institution: memberForm.institution,
+                                        designation: memberForm.designation,
+                                        phone: memberForm.phone,
+                                        pictureUrl: pictureUrl || m.pictureUrl,
+                                    } : m));
+                                } else if (editingMemberId) {
+                                    // Update Firestore member
+                                    const memberDoc = doc(db, "members", editingMemberId);
+                                    await updateDoc(memberDoc, {
+                                        name: memberForm.name,
+                                        institution: memberForm.institution,
+                                        email: memberForm.email,
+                                        designation: memberForm.designation,
+                                        phone: memberForm.phone,
+                                        ...(pictureUrl ? { pictureUrl } : {}),
+                                    });
+                                    setEditingMemberId(null);
+                                } else {
+                                    // Add Firestore member
+                                    const membersCol = collection(db, "members");
+                                    const newMember = {
+                                        name: memberForm.name,
+                                        institution: memberForm.institution,
+                                        email: memberForm.email,
+                                        designation: memberForm.designation,
+                                        phone: memberForm.phone,
+                                        pictureUrl,
+                                    };
+                                    await addDoc(membersCol, newMember);
+                                }
+                                setMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null, isStatic: false, staticIndex: null });
+                                // Refresh members list
+                                const membersCol = collection(db, "members");
+                                const querySnapshot = await getDocs(membersCol);
+                                setMembers(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+                            }}>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name <span className="text-red-500">*</span></label>
+                                    <input type="text" required placeholder="Full name" className="p-2 rounded w-full text-black" value={memberForm.name} onChange={e => setMemberForm(f => ({ ...f, name: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Institution/College <span className="text-red-500">*</span></label>
+                                    <input type="text" required placeholder="Institution/College" className="p-2 rounded w-full text-black" value={memberForm.institution} onChange={e => setMemberForm(f => ({ ...f, institution: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Profile Picture <span className="text-red-500">*</span></label>
+                                    <input type="file" required accept="image/*" className="p-2 rounded w-full text-black" onChange={e => setMemberForm(f => ({ ...f, picture: e.target.files[0] }))} />
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                                        <input type="email" placeholder="Email address" className="p-2 rounded w-full text-black" value={memberForm.email} onChange={e => setMemberForm(f => ({ ...f, email: e.target.value }))} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone (with country code)</label>
+                                        <input type="tel" placeholder="+91 9876543210" className="p-2 rounded w-full text-black" value={memberForm.phone || ''} onChange={e => setMemberForm(f => ({ ...f, phone: e.target.value }))} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Designation</label>
+                                    <input type="text" placeholder="Designation/Role" className="p-2 rounded w-full text-black" value={memberForm.designation} onChange={e => setMemberForm(f => ({ ...f, designation: e.target.value }))} />
+                                </div>
+                                <div className="flex space-x-4">
+                                    <Button type="submit" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg">{editingMemberId ? 'Update Member' : 'Add Member'}</Button>
+                                    <Button type="button" variant="outline" onClick={() => { setEditingMemberId(null); setMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null, isStatic: false, staticIndex: null }); }}>Cancel</Button>
+                                </div>
+                            </form>
+                        </Card>
+                        <div className="grid gap-4">
+                            {[...staticMembers.map((m, idx) => (
+                                <Card key={"static-" + idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
+                                    <img src={m.pictureUrl} alt={m.name} className="h-16 w-16 rounded-full object-cover" />
+                                    <div className="flex-1">
+                                        <div className="font-bold text-lg">{m.name}</div>
+                                        <div className="text-sm">{m.institution}</div>
+                                        <div className="text-sm">{m.designation}</div>
+                                    </div>
+                                    <Button className="bg-yellow-600 text-white mr-2" onClick={() => {
+                                        setMemberForm({
+                                            name: m.name,
+                                            institution: m.institution,
+                                            email: '',
+                                            designation: m.designation,
+                                            phone: m.phone || '',
+                                            picture: null,
+                                            isStatic: true,
+                                            staticIndex: idx,
+                                        });
+                                        setEditingMemberId(null);
+                                    }}>Edit</Button>
+                                    <Button className="bg-red-600 text-white" onClick={() => {
+                                        if (window.confirm('Delete this static member?')) {
+                                            setStaticMembers(prev => prev.filter((_, i) => i !== idx));
+                                        }
+                                    }}>Delete</Button>
+                                </Card>
+                            )),
+                            ...members.map((m, idx) => (
+                                <Card key={m.id || idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
+                                    <img src={m.pictureUrl || m.picture} alt={m.name} className="h-16 w-16 rounded-full object-cover" />
+                                    <div className="flex-1">
+                                        <div className="font-bold text-lg">{m.name}</div>
+                                        <div className="text-sm">{m.institution}</div>
+                                        <div className="text-sm">{m.email}</div>
+                                        <div className="text-sm">{m.designation}</div>
+                                    </div>
+                                    <Button className="bg-yellow-600 text-white mr-2" onClick={() => {
+                                        setEditingMemberId(m.id);
+                                        setMemberForm({
+                                            name: m.name,
+                                            institution: m.institution,
+                                            email: m.email,
+                                            designation: m.designation,
+                                            phone: m.phone || '',
+                                            picture: null,
+                                            isStatic: false,
+                                            staticIndex: null,
+                                        });
+                                    }}>Edit</Button>
+                                    <Button className="bg-red-600 text-white" onClick={async () => {
+                                        if (window.confirm('Delete this member?')) {
+                                            await deleteDoc(doc(db, "members", m.id));
+                                            setMembers(members.filter(mem => mem.id !== m.id));
+                                        }
+                                    }}>Delete</Button>
+                                </Card>
+                            ))]}
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
