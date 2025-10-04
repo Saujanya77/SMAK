@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getDocs, collection } from "firebase/firestore";
-import { db } from "../firebase";
+// ...existing code...
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Input } from "../components/ui/input";
@@ -32,10 +31,6 @@ const Members = () => {
   // Helper to convert Google Drive links to direct image links
   function getDirectImageUrl(url) {
     if (!url) return "";
-    const match = url.match(/id=([\w-]+)/);
-    if (match) {
-      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-    // Match id=... or /d/.../
     let id = "";
     const idMatch = url.match(/id=([\w-]+)/);
     if (idMatch) {
@@ -47,7 +42,6 @@ const Members = () => {
       }
     }
     if (id) {
-      console.log("Converted Google Drive URL to direct link:", url, "->", `https://drive.google.com/uc?export=view&id=${id}`);
       return `https://drive.google.com/uc?export=view&id=${id}`;
     }
     return url;
@@ -56,37 +50,36 @@ const Members = () => {
   // Map imported JSON members to match the display structure and fix image links
   const importedMembers = Array.isArray(membersData)
     ? membersData
-      .filter(item => !!item.image && item.image.includes('drive.google.com/open?id='))
-      .map((item) => ({
-        name: item["Name "]?.trim() || "",
-        institution: item.college?.trim() || "",
-        designation: "Member",
-        pictureUrl: getDirectImageUrl(item.image),
-        phone: "",
-      }))
+        .filter(item => !!item.image)
+        .map((item) => {
+          let pictureUrl = "";
+          if (item.image.includes("drive.google.com")) {
+            pictureUrl = getDirectImageUrl(item.image);
+          } else {
+            pictureUrl = item.image;
+          }
+          return {
+            name: item["Name "]?.trim() || "",
+            institution: item.college?.trim() || "",
+            designation: "Member",
+            pictureUrl,
+            phone: "",
+          };
+        })
     : [];
 
   const [search, setSearch] = useState("");
   const [modalSearch, setModalSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [firestoreMembers, setFirestoreMembers] = useState([]);
-
-  useEffect(() => {
-    const fetchMembers = async () => {
-      const querySnapshot = await getDocs(collection(db, "members"));
-      const membersList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setFirestoreMembers(membersList);
-    };
-    fetchMembers();
-  }, []);
+  // ...existing code...
 
   // Filter hardcoded members for main display
   const filteredHardcodedMembers = hardcodedMembers.filter((member) =>
     member.name && member.name.toLowerCase().includes(search.toLowerCase().trim())
   );
 
-  // Filter JSON + Firestore members for modal
-  const allOtherMembers = [...importedMembers, ...firestoreMembers];
+  // Filter JSON members for modal
+  const allOtherMembers = [...importedMembers];
   const filteredModalMembers = allOtherMembers.filter((member) =>
     member.name && member.name.toLowerCase().includes(modalSearch.toLowerCase().trim())
   );
@@ -421,3 +414,4 @@ export default Members;
 // };
 
 // export default Members;
+
