@@ -15,6 +15,9 @@ interface Journal {
     downloadCount?: number;
 }
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { LogOut, User, ArrowLeft, LayoutDashboard } from "lucide-react";
+import { Menu, MenuItem } from "@mui/material";
 import { db, storage } from "../firebase";
 import { collection, getDocs, updateDoc, doc, addDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -56,6 +59,20 @@ interface VideoLectureAdmin {
 }
 
 const AdminPanel: React.FC = () => {
+    const navigate = useNavigate();
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleUserMenuClose = () => {
+        setAnchorEl(null);
+    };
+    const handleSignOut = () => {
+        // Add your sign out logic here
+        if (window.confirm("Sign out?")) {
+            window.location.href = "/login";
+        }
+    };
     const { user } = useAuth();
     const [pendingJournals, setPendingJournals] = useState<Journal[]>([]);
     const [pendingBlogs, setPendingBlogs] = useState<Blog[]>([]);
@@ -267,9 +284,42 @@ const AdminPanel: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white p-8">
-            <h1 className="text-3xl font-bold mb-8 text-center">Admin Panel</h1>
-            <div className="flex justify-center mb-8">
+        <div className="min-h-screen bg-gradient-to-br from-[rgb(15,23,42)] via-blue-900 to-[rgb(15,23,42)] bg-grid-pattern text-white p-0">
+            {/* Navbar */}
+            <nav className="w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 shadow-lg border-b border-blue-300/20">
+                <button
+                    className="flex items-center gap-2 text-white hover:text-blue-200 font-semibold text-lg focus-ring px-3 py-2 rounded-full btn-medical"
+                    onClick={() => navigate("/dashboard")}
+                >
+                    <ArrowLeft size={22} />
+                    Back
+                </button>
+                <span className="text-2xl font-bold tracking-wide text-white">Admin Panel</span>
+                <div>
+                    <button
+                        className="flex items-center gap-2 text-white hover:text-blue-200 font-semibold text-lg px-3 py-2 rounded-full btn-medical"
+                        onClick={handleUserMenuOpen}
+                    >
+                        <User size={22} />
+                        {user?.email?.split("@")[0] || "User"}
+                    </button>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleUserMenuClose}
+                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                        transformOrigin={{ vertical: "top", horizontal: "right" }}
+                    >
+                        <MenuItem onClick={() => { handleUserMenuClose(); navigate("/dashboard"); }}>
+                            <LayoutDashboard size={18} className="mr-2" /> Dashboard
+                        </MenuItem>
+                        <MenuItem onClick={() => { handleUserMenuClose(); handleSignOut(); }}>
+                            <LogOut size={18} className="mr-2" /> Sign Out
+                        </MenuItem>
+                    </Menu>
+                </div>
+            </nav>
+            <div className="flex justify-center mb-8 mt-8 animate-fade-in">
                 <div className="flex gap-4">
                     <Button
                         variant={activeTab === 'journals' ? 'default' : 'outline'}
@@ -312,7 +362,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'videos' && (
                     loadingVideos ? (<p>Loading pending video lectures...</p>) : pendingVideos.length === 0 ? (<p>No pending video lectures for approval.</p>) : (
                         pendingVideos.map((video) => (
-                            <Card key={video.id} className="bg-gray-800 text-white p-6">
+                            <Card key={video.id} className="medical-card text-blue-900 dark:text-white p-6 card-hover">
                                 {video.thumbnail && (
                                     <img
                                         src={video.thumbnail}
@@ -353,7 +403,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'journals' && (
                     loadingJournals ? (<p>Loading pending journals...</p>) : pendingJournals.length === 0 ? (<p>No pending journals for approval.</p>) : (
                         pendingJournals.map((journal) => (
-                            <Card key={journal.id} className="bg-gray-800 text-white p-6">
+                            <Card key={journal.id} className="medical-card text-blue-900 dark:text-white p-6 card-hover">
                                 {journal.imageUrl && (
                                     <img
                                         src={journal.imageUrl}
@@ -409,7 +459,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'blogs' && (
                     loadingBlogs ? (<p>Loading pending blogs...</p>) : pendingBlogs.length === 0 ? (<p>No pending blogs for approval.</p>) : (
                         pendingBlogs.map((blog) => (
-                            <Card key={blog.id} className="bg-gray-800 text-white p-6">
+                            <Card key={blog.id} className="medical-card text-blue-900 dark:text-white p-6 card-hover">
                                 {blog.image && (
                                     <img
                                         src={blog.image}
@@ -440,7 +490,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'achievements' && (
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Manage Achievements (Homepage Stats)</h2>
-                        <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl max-w-xl">
+                        <Card className="mb-8 medical-card shadow-xl max-w-xl">
                             <form className="p-6 space-y-4" onSubmit={handleAchievementSubmit}>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Icon <span className="text-red-500">*</span></label>
@@ -458,14 +508,14 @@ const AdminPanel: React.FC = () => {
                                     <input type="text" required placeholder="Achievement Label" className="p-2 rounded w-full text-black" value={achievementForm.label} onChange={e => setAchievementForm(f => ({ ...f, label: e.target.value }))} />
                                 </div>
                                 <div className="flex space-x-4">
-                                    <Button type="submit" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg">{editingAchievementId ? 'Update' : 'Add'} Achievement</Button>
+                                    <Button type="submit" className="btn-medical shadow-lg">{editingAchievementId ? 'Update' : 'Add'} Achievement</Button>
                                     <Button type="button" variant="outline" onClick={() => { setEditingAchievementId(null); setAchievementForm({ icon: '', value: '', label: '', isStatic: false, staticIndex: null }); }}>Cancel</Button>
                                 </div>
                             </form>
                         </Card>
                         <div className="grid gap-4">
                             {staticAchievements.map((a, idx) => (
-                                <Card key={"static-" + idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
+                                <Card key={"static-" + idx} className="medical-card text-blue-900 dark:text-white p-4 flex items-center gap-4 card-hover">
                                     <div className="h-12 w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 mr-4">
                                         <span className="text-lg font-bold">{a.icon}</span>
                                     </div>
@@ -473,12 +523,12 @@ const AdminPanel: React.FC = () => {
                                         <div className="font-bold text-lg">{a.value}</div>
                                         <div className="text-sm">{a.label}</div>
                                     </div>
-                                    <Button className="bg-yellow-600 text-white mr-2" onClick={() => handleEditAchievement(a, idx, true)}>Edit</Button>
+                                    <Button className="btn-medical mr-2" onClick={() => handleEditAchievement(a, idx, true)}>Edit</Button>
                                     <Button className="bg-red-600 text-white" onClick={() => handleDeleteAchievement(null, idx, true)}>Delete</Button>
                                 </Card>
                             ))}
                             {achievements.map((a, idx) => (
-                                <Card key={a.id || idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
+                                <Card key={a.id || idx} className="medical-card text-blue-900 dark:text-white p-4 flex items-center gap-4 card-hover">
                                     <div className="h-12 w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 mr-4">
                                         <span className="text-lg font-bold">{a.icon}</span>
                                     </div>
@@ -486,7 +536,7 @@ const AdminPanel: React.FC = () => {
                                         <div className="font-bold text-lg">{a.value}</div>
                                         <div className="text-sm">{a.label}</div>
                                     </div>
-                                    <Button className="bg-yellow-600 text-white mr-2" onClick={() => handleEditAchievement(a)}>Edit</Button>
+                                    <Button className="btn-medical mr-2" onClick={() => handleEditAchievement(a)}>Edit</Button>
                                     <Button className="bg-red-600 text-white" onClick={() => handleDeleteAchievement(a.id)}>Delete</Button>
                                 </Card>
                             ))}
@@ -496,7 +546,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'members' && (
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Manage Members</h2>
-                        <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl max-w-xl">
+                        <Card className="mb-8 medical-card shadow-xl max-w-xl">
                             <form className="p-6 space-y-4" onSubmit={async e => {
                                 e.preventDefault();
                                 let pictureUrl = '';
@@ -573,21 +623,21 @@ const AdminPanel: React.FC = () => {
                                     <input type="text" placeholder="Designation/Role" className="p-2 rounded w-full text-black" value={memberForm.designation} onChange={e => setMemberForm(f => ({ ...f, designation: e.target.value }))} />
                                 </div>
                                 <div className="flex space-x-4">
-                                    <Button type="submit" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg">{editingMemberId ? 'Update Member' : 'Add Member'}</Button>
+                                    <Button type="submit" className="btn-medical shadow-lg">{editingMemberId ? 'Update Member' : 'Add Member'}</Button>
                                     <Button type="button" variant="outline" onClick={() => { setEditingMemberId(null); setMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null, isStatic: false, staticIndex: null }); }}>Cancel</Button>
                                 </div>
                             </form>
                         </Card>
                         <div className="grid gap-4">
                             {staticMembers.map((m, idx) => (
-                                <Card key={"static-" + idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
+                                <Card key={"static-" + idx} className="medical-card text-blue-900 dark:text-white p-4 flex items-center gap-4 card-hover">
                                     <img src={m.pictureUrl} alt={m.name} className="h-16 w-16 rounded-full object-cover" />
                                     <div className="flex-1">
                                         <div className="font-bold text-lg">{m.name}</div>
                                         <div className="text-sm">{m.institution}</div>
                                         <div className="text-sm">{m.designation}</div>
                                     </div>
-                                    <Button className="bg-yellow-600 text-white mr-2" onClick={() => {
+                                    <Button className="btn-medical mr-2" onClick={() => {
                                         setMemberForm({
                                             name: m.name,
                                             institution: m.institution,
@@ -608,7 +658,7 @@ const AdminPanel: React.FC = () => {
                                 </Card>
                             ))}
                             {members.map((m, idx) => (
-                                <Card key={m.id || idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
+                                <Card key={m.id || idx} className="medical-card text-blue-900 dark:text-white p-4 flex items-center gap-4 card-hover">
                                     <img src={m.pictureUrl || m.picture} alt={m.name} className="h-16 w-16 rounded-full object-cover" />
                                     <div className="flex-1">
                                         <div className="font-bold text-lg">{m.name}</div>
@@ -616,7 +666,7 @@ const AdminPanel: React.FC = () => {
                                         <div className="text-sm">{m.email}</div>
                                         <div className="text-sm">{m.designation}</div>
                                     </div>
-                                    <Button className="bg-yellow-600 text-white mr-2" onClick={() => {
+                                    <Button className="btn-medical mr-2" onClick={() => {
                                         setEditingMemberId(m.id);
                                         setMemberForm({
                                             name: m.name,
