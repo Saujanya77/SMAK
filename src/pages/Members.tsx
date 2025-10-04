@@ -26,6 +26,7 @@ const Members = () => {
       }
     }
     if (id) {
+      console.log("Converted Google Drive URL to direct link:", url, "->", `https://drive.google.com/uc?export=view&id=${id}`);
       return `https://drive.google.com/uc?export=view&id=${id}`;
     }
     return url;
