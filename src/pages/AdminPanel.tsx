@@ -42,13 +42,58 @@ interface Blog {
     createdAt?: any;
 }
 
+interface VideoLectureAdmin {
+    id: string;
+    title: string;
+    instructor?: string;
+    description?: string;
+    subject?: string;
+    videoUrl?: string;
+    thumbnail?: string;
+    status: string;
+    uploadedBy?: string;
+    createdAt?: any;
+}
+
 const AdminPanel: React.FC = () => {
     const { user } = useAuth();
     const [pendingJournals, setPendingJournals] = useState<Journal[]>([]);
     const [pendingBlogs, setPendingBlogs] = useState<Blog[]>([]);
+    const [pendingVideos, setPendingVideos] = useState<VideoLectureAdmin[]>([]);
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members'>('journals');
+    const [loadingVideos, setLoadingVideos] = useState(true);
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos'>('journals');
+
+    // Achievements state
+    const defaultAchievements = [
+        { icon: 'Trophy', value: '2024', label: 'Established' },
+        { icon: 'Users', value: '1000+', label: 'Active Members' },
+        { icon: 'BookOpen', value: '200+', label: 'Research Papers' },
+        { icon: 'Globe', value: '50+', label: 'Partner Colleges' }
+    ];
+    const [staticAchievements, setStaticAchievements] = useState(() => {
+        // Try to load from localStorage first
+        const local = localStorage.getItem('staticAchievements');
+        if (local) {
+            try {
+                return JSON.parse(local);
+            } catch { }
+        }
+        return defaultAchievements;
+    });
+    const [achievements, setAchievements] = useState([]);
+    const [achievementForm, setAchievementForm] = useState({
+        icon: '',
+        value: '',
+        label: '',
+        isStatic: false,
+        staticIndex: null,
+    });
+    const [editingAchievementId, setEditingAchievementId] = useState(null);
+    const achievementIcons = [
+        'Trophy', 'Users', 'BookOpen', 'Globe', 'Star', 'Award', 'Calendar', 'FileText', 'Heart', 'Activity', 'Shield', 'Microscope', 'Crown', 'Zap', 'Sparkles'
+    ];
     // Static members array
     const [staticMembers, setStaticMembers] = useState([
         { name: "SAMUDRA CHAUDHARI ", institution: "SMAK", designation: "FOUNDER", pictureUrl: "https://i.postimg.cc/65tpg88S/Whats-App-Image-2025-08-13-at-13-39-13-32477921.jpg", phone: "", objectPosition: "center 20%" },
@@ -79,6 +124,70 @@ const AdminPanel: React.FC = () => {
     });
     const [editingMemberId, setEditingMemberId] = useState(null);
 
+    // Achievement CRUD handlers
+    const handleAchievementSubmit = async (e) => {
+        e.preventDefault();
+        if (achievementForm.isStatic) {
+            // Update static achievement
+            setStaticAchievements(prev => {
+                const updated = prev.map((a, idx) => idx === achievementForm.staticIndex ? {
+                    icon: achievementForm.icon,
+                    value: achievementForm.value,
+                    label: achievementForm.label
+                } : a);
+                localStorage.setItem('staticAchievements', JSON.stringify(updated));
+                return updated;
+            });
+        } else if (editingAchievementId) {
+            // Update Firestore achievement
+            const achievementDoc = doc(db, "achievements", editingAchievementId);
+            await updateDoc(achievementDoc, {
+                icon: achievementForm.icon,
+                value: achievementForm.value,
+                label: achievementForm.label
+            });
+            setEditingAchievementId(null);
+        } else {
+            // Add Firestore achievement
+            await addDoc(collection(db, "achievements"), {
+                icon: achievementForm.icon,
+                value: achievementForm.value,
+                label: achievementForm.label
+            });
+        }
+        setAchievementForm({ icon: '', value: '', label: '', isStatic: false, staticIndex: null });
+        // Refresh Firestore achievements
+        const querySnapshot = await getDocs(collection(db, "achievements"));
+        setAchievements(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    };
+
+    const handleEditAchievement = (ach, idx = null, isStatic = false) => {
+        if (isStatic) {
+            setAchievementForm({ icon: ach.icon, value: ach.value, label: ach.label, isStatic: true, staticIndex: idx });
+            setEditingAchievementId(null);
+        } else {
+            setEditingAchievementId(ach.id);
+            setAchievementForm({ icon: ach.icon, value: ach.value, label: ach.label, isStatic: false, staticIndex: null });
+        }
+    };
+
+    const handleDeleteAchievement = async (id, idx = null, isStatic = false) => {
+        if (isStatic) {
+            if (window.confirm('Delete this static achievement?')) {
+                setStaticAchievements(prev => {
+                    const updated = prev.filter((_, i) => i !== idx);
+                    localStorage.setItem('staticAchievements', JSON.stringify(updated));
+                    return updated;
+                });
+            }
+        } else {
+            if (window.confirm('Delete this achievement?')) {
+                await deleteDoc(doc(db, "achievements", id));
+                setAchievements(achievements.filter(a => a.id !== id));
+            }
+        }
+    };
+
     useEffect(() => {
         const fetchPendingJournals = async () => {
             setLoadingJournals(true);
@@ -91,6 +200,18 @@ const AdminPanel: React.FC = () => {
         };
         fetchPendingJournals();
 
+        // Fetch pending video lectures
+        const fetchPendingVideos = async () => {
+            setLoadingVideos(true);
+            const querySnapshot = await getDocs(collection(db, "videoLectures"));
+            const pending = querySnapshot.docs
+                .map((doc) => ({ id: doc.id, ...doc.data() } as VideoLectureAdmin))
+                .filter((video) => video.status === "pending");
+            setPendingVideos(pending);
+            setLoadingVideos(false);
+        };
+        fetchPendingVideos();
+
         // Fetch members from Firestore
         const fetchMembers = async () => {
             const querySnapshot = await getDocs(collection(db, "members"));
@@ -98,21 +219,25 @@ const AdminPanel: React.FC = () => {
             setMembers(membersList);
         };
         fetchMembers();
-    }, []);
-
-    useEffect(() => {
-        const fetchPendingBlogs = async () => {
-            setLoadingBlogs(true);
-            const querySnapshot = await getDocs(collection(db, "blogs"));
-            const pending = querySnapshot.docs
-                .map((doc) => ({ id: doc.id, ...doc.data() } as Blog))
-                .filter((blog) => blog.status === "pending");
-            setPendingBlogs(pending);
-            setLoadingBlogs(false);
+        // Fetch achievements from Firestore
+        const fetchAchievements = async () => {
+            const querySnapshot = await getDocs(collection(db, "achievements"));
+            const achievementsList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            setAchievements(achievementsList);
         };
-        fetchPendingBlogs();
+        fetchAchievements();
     }, []);
 
+    // Blog/Journals/Video approval handlers
+    const handleApproveVideo = async (id: string) => {
+        await updateDoc(doc(db, "videoLectures", id), { status: "approved" });
+        setPendingVideos((prev) => prev.filter((v) => v.id !== id));
+    };
+
+    const handleRejectVideo = async (id: string) => {
+        await updateDoc(doc(db, "videoLectures", id), { status: "rejected" });
+        setPendingVideos((prev) => prev.filter((v) => v.id !== id));
+    };
     const handleApproveJournal = async (id: string) => {
         await updateDoc(doc(db, "journals", id), { status: "approved" });
         setPendingJournals((prev) => prev.filter((j) => j.id !== id));
@@ -132,7 +257,6 @@ const AdminPanel: React.FC = () => {
         await updateDoc(doc(db, "blogs", id), { status: "rejected" });
         setPendingBlogs((prev) => prev.filter((b) => b.id !== id));
     };
-
     if (!user || !ADMIN_EMAILS.includes(user.email)) {
         return (
             <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
@@ -168,10 +292,65 @@ const AdminPanel: React.FC = () => {
                     >
                         Members
                     </Button>
+                    <Button
+                        variant={activeTab === 'achievements' ? 'default' : 'outline'}
+                        onClick={() => setActiveTab('achievements')}
+                        className={activeTab === 'achievements' ? 'bg-blue-600 text-white' : ''}
+                    >
+                        Achievements
+                    </Button>
+                    <Button
+                        variant={activeTab === 'videos' ? 'default' : 'outline'}
+                        onClick={() => setActiveTab('videos')}
+                        className={activeTab === 'videos' ? 'bg-blue-600 text-white' : ''}
+                    >
+                        Video Lectures
+                    </Button>
                 </div>
             </div>
             <div className="grid gap-6">
-                {activeTab === 'journals' ? (
+                {activeTab === 'videos' && (
+                    loadingVideos ? (<p>Loading pending video lectures...</p>) : pendingVideos.length === 0 ? (<p>No pending video lectures for approval.</p>) : (
+                        pendingVideos.map((video) => (
+                            <Card key={video.id} className="bg-gray-800 text-white p-6">
+                                {video.thumbnail && (
+                                    <img
+                                        src={video.thumbnail}
+                                        alt={video.title}
+                                        className="w-full h-48 object-cover rounded-lg mb-4"
+                                        onError={e => (e.currentTarget.src = "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop")}
+                                    />
+                                )}
+                                <h2 className="text-xl font-semibold mb-2">{video.title}</h2>
+                                <div className="mb-2 text-sm text-gray-300">
+                                    <span className="font-semibold">Instructor:</span> {video.instructor}<br />
+                                    <span className="font-semibold">Subject:</span> {video.subject}<br />
+                                    <span className="font-semibold">Uploaded By:</span> {video.uploadedBy}<br />
+                                </div>
+                                <div className="mb-2">
+                                    <span className="font-semibold">Description:</span>
+                                    <p className="text-gray-200 mt-1">{video.description}</p>
+                                </div>
+                                <Badge className="mb-2">Pending</Badge>
+                                <div className="flex gap-2 mb-2">
+                                    {video.videoUrl && (
+                                        <Button
+                                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                                            onClick={() => window.open(video.videoUrl, '_blank', 'noopener,noreferrer')}
+                                        >
+                                            View Video
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button onClick={() => handleApproveVideo(video.id)} className="bg-green-600 hover:bg-green-700 text-white">Approve</Button>
+                                    <Button onClick={() => handleRejectVideo(video.id)} className="bg-red-600 hover:bg-red-700 text-white">Reject</Button>
+                                </div>
+                            </Card>
+                        ))
+                    )
+                )}
+                {activeTab === 'journals' && (
                     loadingJournals ? (<p>Loading pending journals...</p>) : pendingJournals.length === 0 ? (<p>No pending journals for approval.</p>) : (
                         pendingJournals.map((journal) => (
                             <Card key={journal.id} className="bg-gray-800 text-white p-6">
@@ -226,7 +405,8 @@ const AdminPanel: React.FC = () => {
                             </Card>
                         ))
                     )
-                ) : activeTab === 'blogs' ? (
+                )}
+                {activeTab === 'blogs' && (
                     loadingBlogs ? (<p>Loading pending blogs...</p>) : pendingBlogs.length === 0 ? (<p>No pending blogs for approval.</p>) : (
                         pendingBlogs.map((blog) => (
                             <Card key={blog.id} className="bg-gray-800 text-white p-6">
@@ -256,7 +436,64 @@ const AdminPanel: React.FC = () => {
                             </Card>
                         ))
                     )
-                ) : (
+                )}
+                {activeTab === 'achievements' && (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">Manage Achievements (Homepage Stats)</h2>
+                        <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl max-w-xl">
+                            <form className="p-6 space-y-4" onSubmit={handleAchievementSubmit}>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Icon <span className="text-red-500">*</span></label>
+                                    <select required className="p-2 rounded w-full text-black" value={achievementForm.icon} onChange={e => setAchievementForm(f => ({ ...f, icon: e.target.value }))}>
+                                        <option value="">Select Icon</option>
+                                        {achievementIcons.map(icon => <option key={icon} value={icon}>{icon}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Value <span className="text-red-500">*</span></label>
+                                    <input type="text" required placeholder="Achievement Value" className="p-2 rounded w-full text-black" value={achievementForm.value} onChange={e => setAchievementForm(f => ({ ...f, value: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Label <span className="text-red-500">*</span></label>
+                                    <input type="text" required placeholder="Achievement Label" className="p-2 rounded w-full text-black" value={achievementForm.label} onChange={e => setAchievementForm(f => ({ ...f, label: e.target.value }))} />
+                                </div>
+                                <div className="flex space-x-4">
+                                    <Button type="submit" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg">{editingAchievementId ? 'Update' : 'Add'} Achievement</Button>
+                                    <Button type="button" variant="outline" onClick={() => { setEditingAchievementId(null); setAchievementForm({ icon: '', value: '', label: '', isStatic: false, staticIndex: null }); }}>Cancel</Button>
+                                </div>
+                            </form>
+                        </Card>
+                        <div className="grid gap-4">
+                            {staticAchievements.map((a, idx) => (
+                                <Card key={"static-" + idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
+                                    <div className="h-12 w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 mr-4">
+                                        <span className="text-lg font-bold">{a.icon}</span>
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="font-bold text-lg">{a.value}</div>
+                                        <div className="text-sm">{a.label}</div>
+                                    </div>
+                                    <Button className="bg-yellow-600 text-white mr-2" onClick={() => handleEditAchievement(a, idx, true)}>Edit</Button>
+                                    <Button className="bg-red-600 text-white" onClick={() => handleDeleteAchievement(null, idx, true)}>Delete</Button>
+                                </Card>
+                            ))}
+                            {achievements.map((a, idx) => (
+                                <Card key={a.id || idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
+                                    <div className="h-12 w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 mr-4">
+                                        <span className="text-lg font-bold">{a.icon}</span>
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="font-bold text-lg">{a.value}</div>
+                                        <div className="text-sm">{a.label}</div>
+                                    </div>
+                                    <Button className="bg-yellow-600 text-white mr-2" onClick={() => handleEditAchievement(a)}>Edit</Button>
+                                    <Button className="bg-red-600 text-white" onClick={() => handleDeleteAchievement(a.id)}>Delete</Button>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                {activeTab === 'members' && (
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Manage Members</h2>
                         <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl max-w-xl">
@@ -342,7 +579,7 @@ const AdminPanel: React.FC = () => {
                             </form>
                         </Card>
                         <div className="grid gap-4">
-                            {[...staticMembers.map((m, idx) => (
+                            {staticMembers.map((m, idx) => (
                                 <Card key={"static-" + idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
                                     <img src={m.pictureUrl} alt={m.name} className="h-16 w-16 rounded-full object-cover" />
                                     <div className="flex-1">
@@ -369,8 +606,8 @@ const AdminPanel: React.FC = () => {
                                         }
                                     }}>Delete</Button>
                                 </Card>
-                            )),
-                            ...members.map((m, idx) => (
+                            ))}
+                            {members.map((m, idx) => (
                                 <Card key={m.id || idx} className="bg-gray-700 text-white p-4 flex items-center gap-4">
                                     <img src={m.pictureUrl || m.picture} alt={m.name} className="h-16 w-16 rounded-full object-cover" />
                                     <div className="flex-1">
@@ -399,13 +636,13 @@ const AdminPanel: React.FC = () => {
                                         }
                                     }}>Delete</Button>
                                 </Card>
-                            ))]}
+                            ))}
                         </div>
                     </div>
                 )}
             </div>
         </div>
     );
-};
+}
 
 export default AdminPanel;
