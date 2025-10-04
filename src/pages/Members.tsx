@@ -4,10 +4,10 @@ import { db } from "../firebase";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Input } from "../components/ui/input";
-//import { Search } from "../components/ui/search";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { MapPin, GraduationCap } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
+import { MapPin, GraduationCap, X, Users } from "lucide-react";
 import membersData from '../data/members.json';
 
 
@@ -42,17 +42,19 @@ const Members = () => {
   // Map imported JSON members to match the display structure and fix image links
   const importedMembers = Array.isArray(membersData)
     ? membersData
-        .filter(item => !!item.image && item.image.includes('drive.google.com/open?id='))
-        .map((item) => ({
-          name: item["Name "]?.trim() || "",
-          institution: item.college?.trim() || "",
-          designation: "",
-          pictureUrl: getDirectImageUrl(item.image),
-          phone: "",
-        }))
+      .filter(item => !!item.image && item.image.includes('drive.google.com/open?id='))
+      .map((item) => ({
+        name: item["Name "]?.trim() || "",
+        institution: item.college?.trim() || "",
+        designation: "Member",
+        pictureUrl: getDirectImageUrl(item.image),
+        phone: "",
+      }))
     : [];
 
   const [search, setSearch] = useState("");
+  const [modalSearch, setModalSearch] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [firestoreMembers, setFirestoreMembers] = useState([]);
 
   useEffect(() => {
@@ -64,10 +66,15 @@ const Members = () => {
     fetchMembers();
   }, []);
 
-  // Combine hardcoded and imported members, then Firestore
-  const members = [...hardcodedMembers, ...importedMembers, ...firestoreMembers];
-  const filteredMembers = members.filter((member) =>
+  // Filter hardcoded members for main display
+  const filteredHardcodedMembers = hardcodedMembers.filter((member) =>
     member.name && member.name.toLowerCase().includes(search.toLowerCase().trim())
+  );
+
+  // Filter JSON + Firestore members for modal
+  const allOtherMembers = [...importedMembers, ...firestoreMembers];
+  const filteredModalMembers = allOtherMembers.filter((member) =>
+    member.name && member.name.toLowerCase().includes(modalSearch.toLowerCase().trim())
   );
 
   return (
@@ -101,8 +108,14 @@ const Members = () => {
 
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredMembers.length > 0 ? filteredMembers.map((member, index) => (
+          {/* Core Team Members */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-4">Core Team Members</h2>
+            <p className="text-muted-foreground mb-8">Meet our dedicated leadership team</p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-12">
+            {filteredHardcodedMembers.length > 0 ? filteredHardcodedMembers.map((member, index) => (
               <Card
                 key={index}
                 className="p-0 bg-white/80 dark:bg-background/80 border-0 shadow-[0_6px_32px_-8px_rgba(0,80,195,0.08)] hover:shadow-xl transition-shadow duration-300 rounded-3xl flex flex-col items-center"
@@ -111,7 +124,7 @@ const Members = () => {
                   {/* Large circular photo area */}
                   <div className="relative w-32 h-32 mb-6 rounded-full bg-gradient-to-br from-blue-100 via-blue-300 to-blue-400 dark:from-blue-900 dark:via-blue-700 dark:to-blue-400 shadow-lg flex items-center justify-center mx-auto">
                     <img
-                      src={member.pictureUrl || member.image || ""}
+                      src={member.pictureUrl || ""}
                       alt={member.name}
                       className="w-28 h-28 object-cover rounded-full border-4 border-white dark:border-background ring-2 ring-blue-400 dark:ring-blue-500 shadow-lg mx-auto"
                       style={{ aspectRatio: "1/1", background: "#e8efff", objectPosition: member.objectPosition || "center top", objectFit: "cover" }}
@@ -145,9 +158,94 @@ const Members = () => {
               </Card>
             )) : (
               <div className="col-span-full text-center text-muted-foreground py-16">
-                No members found.
+                No core team members found.
               </div>
             )}
+          </div>
+
+          {/* See More Members Button */}
+          <div className="text-center">
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  size="lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
+                >
+                  <Users className="h-5 w-5 mr-2" />
+                  See More Members ({allOtherMembers.length})
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+                <DialogHeader className="sticky top-0 bg-white dark:bg-background z-10 pb-4">
+                  <DialogTitle className="text-2xl font-bold text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                    <Users className="h-6 w-6" />
+                    All SMAK Members
+                  </DialogTitle>
+                  <div className="max-w-md mx-auto relative mt-4">
+                    <Input
+                      className="pl-4"
+                      placeholder="Search members..."
+                      value={modalSearch}
+                      onChange={e => setModalSearch(e.target.value)}
+                      aria-label="Search members in modal"
+                    />
+                  </div>
+                </DialogHeader>
+
+                <div className="overflow-y-auto max-h-[70vh] pr-2">
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filteredModalMembers.length > 0 ? filteredModalMembers.map((member, index) => (
+                      <Card
+                        key={index}
+                        className="p-0 bg-white/80 dark:bg-background/80 border-0 shadow-md hover:shadow-lg transition-shadow duration-300 rounded-2xl flex flex-col items-center"
+                      >
+                        <CardContent className="flex flex-col items-center px-4 pt-6 pb-4 w-full">
+                          {/* Smaller circular photo for modal (commented out as requested) */}
+                          {/**
+                          <div className="relative w-20 h-20 mb-4 rounded-full bg-gradient-to-br from-blue-100 via-blue-300 to-blue-400 dark:from-blue-900 dark:via-blue-700 dark:to-blue-400 shadow-lg flex items-center justify-center mx-auto">
+                            <img
+                              src={member.pictureUrl || ""}
+                              alt={member.name}
+                              className="w-18 h-18 object-cover rounded-full border-2 border-white dark:border-background ring-1 ring-blue-400 dark:ring-blue-500 shadow-lg mx-auto"
+                              style={{ aspectRatio: "1/1", background: "#e8efff", objectPosition: "center top", objectFit: "cover" }}
+                            />
+                          </div>
+                          */}
+                          <div className="flex flex-col items-center w-full">
+                            <h3 className="font-bold text-lg mb-1 text-blue-700 dark:text-blue-300 text-center w-full break-words">
+                              {member.name}
+                            </h3>
+                            <div className="text-xs bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 dark:from-blue-950/40 dark:to-blue-900/70 px-3 py-1 rounded-lg shadow-inner font-medium mb-2 text-blue-700/90 dark:text-blue-200">
+                              {member.designation}
+                            </div>
+                            {/* College block */}
+                            <div className="flex flex-col items-center gap-1 mb-3 w-full text-center">
+                              {member.institution && (
+                                <div className="flex items-center justify-center gap-1 text-muted-foreground text-sm">
+                                  <MapPin className="h-4 w-4 text-blue-400" />
+                                  <span className="text-xs">{member.institution}</span>
+                                </div>
+                              )}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full mt-1 text-sm font-medium shadow-sm"
+                            >
+                              Connect
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) : (
+                      <div className="col-span-full text-center text-muted-foreground py-16">
+                        No members found.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </section>
