@@ -84,6 +84,8 @@ const mockUser = {
 };
 
 const VideoLectures = () => {
+  // State for video progress bar
+  const [videoProgress, setVideoProgress] = useState(0); // percent watched
   const navigate = useNavigate();
   const [showAddForm, setShowAddForm] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -108,6 +110,9 @@ const VideoLectures = () => {
     thumbnailFile: null as File | null,
     notesFile: null as File | null,
   });
+  // Modal state for video popup
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [activeVideo, setActiveVideo] = useState<VideoLecture | null>(null);
 
   // Placeholder for user context
   const user = mockUser;
@@ -279,17 +284,9 @@ const VideoLectures = () => {
     } catch (error) {
       console.error('Error updating view count:', error);
     }
-
-    // Open video in new tab/window
-    if (video.videoUrl) {
-      if (video.isLink || video.externalLink) {
-        // For external links, open the external URL or video URL
-        window.open(video.externalLink || video.videoUrl, '_blank');
-      } else {
-        // For local videos, open the video URL directly
-        window.open(video.videoUrl, '_blank');
-      }
-    }
+    // Show video in modal popup
+    setActiveVideo(video);
+    setShowVideoModal(true);
   };
 
   const handleLike = async (videoId: string) => {
@@ -336,6 +333,12 @@ const VideoLectures = () => {
           controls
           className="w-full h-full rounded-t-lg"
           poster={video.thumbnail}
+          onTimeUpdate={e => {
+            const target = e.target as HTMLVideoElement;
+            if (target.duration > 0) {
+              setVideoProgress((target.currentTime / target.duration) * 100);
+            }
+          }}
         >
           <source src={video.videoUrl} type="video/mp4" />
           <source src={video.videoUrl} type="video/webm" />
@@ -345,7 +348,7 @@ const VideoLectures = () => {
       );
     }
 
-    // Return iframe for external videos
+    // For external videos, we can't track progress directly, but we can show a static bar or try with YouTube API (not implemented here)
     if (video.videoUrl) {
       const embedUrl = getEmbedUrl(video.videoUrl);
       return (
@@ -392,6 +395,40 @@ const VideoLectures = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Video Modal Popup */}
+      {showVideoModal && activeVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-5xl w-full relative" style={{ minWidth: '700px', minHeight: '500px' }}>
+            <button
+              className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-red-600"
+              onClick={() => { setShowVideoModal(false); setActiveVideo(null); setVideoProgress(0); }}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <div className="p-8">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{activeVideo.title}</h2>
+              <p className="text-base mb-6 text-gray-600 dark:text-gray-400">{activeVideo.description}</p>
+              <div className="mb-6" style={{ height: '350px' }}>
+                {renderVideoPlayer(activeVideo)}
+                {/* Progress Bar for local video */}
+                {activeVideo.isLocalVideo && (
+                  <div className="w-full h-2 bg-gray-200 rounded-full mt-2">
+                    <div
+                      className="h-2 bg-blue-600 rounded-full transition-all duration-300"
+                      style={{ width: `${videoProgress}%` }}
+                    ></div>
+                  </div>
+                )}
+                {/* For external videos, progress bar not shown (YouTube API required for tracking) */}
+              </div>
+              <div className="flex items-center justify-between text-base text-gray-500">
+                <span>By {activeVideo.instructor}</span>
+                <span>{activeVideo.publishedDate}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="flex items-center justify-between px-6 py-4">
@@ -408,7 +445,6 @@ const VideoLectures = () => {
             <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Video Lectures</h1>
           </div>
-
           <div className="flex items-center space-x-4">
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -418,7 +454,6 @@ const VideoLectures = () => {
                 className="w-64 pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
-
             <Button
               variant="ghost"
               size="sm"
@@ -427,12 +462,10 @@ const VideoLectures = () => {
             >
               {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
-
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="h-5 w-5 text-gray-600" />
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full"></span>
             </Button>
-
             <div className="relative">
               <Button
                 variant="ghost"
@@ -442,7 +475,6 @@ const VideoLectures = () => {
                 <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
                 <ChevronDown className="h-4 w-4" />
               </Button>
-
               {profileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
                   <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
@@ -467,7 +499,6 @@ const VideoLectures = () => {
           </div>
         </div>
       </header>
-
       {/* Main Content */}
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
@@ -486,7 +517,6 @@ const VideoLectures = () => {
               Upload Video
             </Button>
           </div>
-
           {/* Add New Video Form */}
           {showAddForm && (
             <Card className="mb-8 border-blue-200 bg-blue-50 dark:bg-blue-900/10">
@@ -494,7 +524,6 @@ const VideoLectures = () => {
                 <CardTitle className="text-blue-800 dark:text-blue-300">Upload New Video Lecture</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-
                 {uploading && (
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
@@ -509,175 +538,10 @@ const VideoLectures = () => {
                     </div>
                   </div>
                 )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video Title *</label>
-                    <Input
-                      placeholder="Enter video title"
-                      value={formData.title}
-                      onChange={(e) => handleInputChange('title', e.target.value)}
-                      disabled={uploading}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject *</label>
-                    <Input
-                      placeholder="e.g., Anatomy, Physiology"
-                      value={formData.subject}
-                      onChange={(e) => handleInputChange('subject', e.target.value)}
-                      disabled={uploading}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Instructor</label>
-                    <Input
-                      placeholder="Instructor name"
-                      value={formData.instructor}
-                      onChange={(e) => handleInputChange('instructor', e.target.value)}
-                      disabled={uploading}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Duration</label>
-                    <Input
-                      placeholder="e.g., 1h 30m"
-                      value={formData.duration}
-                      onChange={(e) => handleInputChange('duration', e.target.value)}
-                      disabled={uploading}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Level</label>
-                    <Input
-                      placeholder="Beginner/Intermediate/Advanced"
-                      value={formData.level}
-                      onChange={(e) => handleInputChange('level', e.target.value)}
-                      disabled={uploading}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
-                  <Textarea
-                    placeholder="Video description and learning objectives..."
-                    rows={4}
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    disabled={uploading}
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2 mb-4">
-                  <input
-                    type="checkbox"
-                    id="isVideoLink"
-                    checked={formData.isLink}
-                    onChange={(e) => handleInputChange('isLink', e.target.checked)}
-                    className="rounded"
-                  />
-                  <label htmlFor="isVideoLink" className="text-sm text-gray-700 dark:text-gray-300">
-                    External Video Link (YouTube, Vimeo, etc.)
-                  </label>
-                </div>
-
-                {formData.isLink ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL (for embedding)</label>
-                      <Input
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        value={formData.videoUrl}
-                        onChange={(e) => handleInputChange('videoUrl', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">External Link (optional - same as video URL if not provided)</label>
-                      <Input
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        value={formData.externalLink}
-                        onChange={(e) => handleInputChange('externalLink', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL</label>
-                    <Input
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      value={formData.videoUrl}
-                      onChange={(e) => handleInputChange('videoUrl', e.target.value)}
-                    />
-                  </div>
-                )}
-
-                <div className="flex space-x-4">
-                  <Button
-                    variant="outline"
-                    className="flex items-center"
-                    onClick={() => handleFileUpload('video')}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Video File
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex items-center"
-                    onClick={() => handleFileUpload('thumbnail')}
-                  >
-                    <Image className="h-4 w-4 mr-2" />
-                    Upload Thumbnail
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex items-center"
-                    onClick={() => handleFileUpload('notes')}
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Upload Notes
-                  </Button>
-                </div>
-
-                {(formData.thumbnail || formData.notes || formData.videoFile) && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {formData.thumbnail && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Thumbnail:</p>
-                        <img src={formData.thumbnail} alt="Preview" className="w-full h-20 object-cover rounded" />
-                      </div>
-                    )}
-                    {formData.notes && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Notes:</p>
-                        <p className="text-sm bg-gray-100 p-2 rounded">{formData.notes}</p>
-                      </div>
-                    )}
-                    {formData.videoFile && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Video File:</p>
-                        <p className="text-sm bg-green-100 p-2 rounded text-green-800">{formData.videoFile.name}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex space-x-4">
-                  <Button
-                    className="bg-blue-600 hover:bg-blue-700"
-                    onClick={handleSubmit}
-                  >
-                    Upload Video
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
-                </div>
+                ...existing code...
               </CardContent>
             </Card>
           )}
-
           {/* Video Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {videoLectures.map((video) => (
