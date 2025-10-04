@@ -538,7 +538,176 @@ const VideoLectures = () => {
                     </div>
                   </div>
                 )}
-                ...existing code...
+                <form onSubmit={e => { e.preventDefault(); handleSubmit(); }}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video Title *</label>
+                      <Input
+                        placeholder="Enter video title"
+                        value={formData.title}
+                        onChange={e => handleInputChange('title', e.target.value)}
+                        disabled={uploading}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject *</label>
+                      <Input
+                        placeholder="e.g., Anatomy, Physiology"
+                        value={formData.subject}
+                        onChange={e => handleInputChange('subject', e.target.value)}
+                        disabled={uploading}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Instructor</label>
+                      <Input
+                        placeholder="Instructor name"
+                        value={formData.instructor}
+                        onChange={e => handleInputChange('instructor', e.target.value)}
+                        disabled={uploading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Duration</label>
+                      <Input
+                        placeholder="e.g., 1h 30m"
+                        value={formData.duration}
+                        onChange={e => handleInputChange('duration', e.target.value)}
+                        disabled={uploading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Level</label>
+                      <Input
+                        placeholder="Beginner/Intermediate/Advanced"
+                        value={formData.level}
+                        onChange={e => handleInputChange('level', e.target.value)}
+                        disabled={uploading}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                    <Textarea
+                      placeholder="Video description and learning objectives..."
+                      rows={4}
+                      value={formData.description}
+                      onChange={e => handleInputChange('description', e.target.value)}
+                      disabled={uploading}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <input
+                      type="checkbox"
+                      id="isVideoLink"
+                      checked={formData.isLink}
+                      onChange={e => handleInputChange('isLink', e.target.checked)}
+                      className="rounded"
+                    />
+                    <label htmlFor="isVideoLink" className="text-sm text-gray-700 dark:text-gray-300">
+                      External Video Link (YouTube, Vimeo, etc.)
+                    </label>
+                  </div>
+                  {formData.isLink ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL (for embedding)</label>
+                        <Input
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          value={formData.videoUrl}
+                          onChange={e => handleInputChange('videoUrl', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">External Link (optional - same as video URL if not provided)</label>
+                        <Input
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          value={formData.externalLink}
+                          onChange={e => handleInputChange('externalLink', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL</label>
+                      <Input
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        value={formData.videoUrl}
+                        onChange={e => handleInputChange('videoUrl', e.target.value)}
+                      />
+                    </div>
+                  )}
+                  {/* File Inputs for video, thumbnail, notes */}
+                  <div className="flex space-x-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Video File</label>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={e => {
+                          if (e.target.files && e.target.files[0]) {
+                            handleInputChange('videoFile', e.target.files[0]);
+                          }
+                        }}
+                        disabled={uploading}
+                      />
+                      {formData.videoFile && (
+                        <p className="text-xs mt-1 text-green-700">Selected: {formData.videoFile.name}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Thumbnail</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => {
+                          if (e.target.files && e.target.files[0]) {
+                            handleInputChange('thumbnailFile', e.target.files[0]);
+                            // Show preview
+                            const reader = new FileReader();
+                            reader.onload = ev => handleInputChange('thumbnail', ev.target?.result);
+                            reader.readAsDataURL(e.target.files[0]);
+                          }
+                        }}
+                        disabled={uploading}
+                      />
+                      {formData.thumbnail && (
+                        <img src={formData.thumbnail} alt="Preview" className="w-20 h-12 object-cover mt-1 rounded" />
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Notes (PDF)</label>
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={e => {
+                          if (e.target.files && e.target.files[0]) {
+                            handleInputChange('notesFile', e.target.files[0]);
+                            handleInputChange('notes', e.target.files[0].name);
+                          }
+                        }}
+                        disabled={uploading}
+                      />
+                      {formData.notes && (
+                        <p className="text-xs mt-1 text-blue-700">Selected: {formData.notes}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex space-x-4 mt-6">
+                    <Button
+                      type="submit"
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      disabled={uploading}
+                    >
+                      Upload Video
+                    </Button>
+                    <Button variant="outline" type="button" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                  </div>
+                </form>
               </CardContent>
             </Card>
           )}
