@@ -42,13 +42,28 @@ interface Blog {
     createdAt?: any;
 }
 
+interface VideoLectureAdmin {
+    id: string;
+    title: string;
+    instructor?: string;
+    description?: string;
+    subject?: string;
+    videoUrl?: string;
+    thumbnail?: string;
+    status: string;
+    uploadedBy?: string;
+    createdAt?: any;
+}
+
 const AdminPanel: React.FC = () => {
     const { user } = useAuth();
     const [pendingJournals, setPendingJournals] = useState<Journal[]>([]);
     const [pendingBlogs, setPendingBlogs] = useState<Blog[]>([]);
+    const [pendingVideos, setPendingVideos] = useState<VideoLectureAdmin[]>([]);
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements'>('journals');
+    const [loadingVideos, setLoadingVideos] = useState(true);
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos'>('journals');
 
     // Achievements state
     const defaultAchievements = [
@@ -185,6 +200,18 @@ const AdminPanel: React.FC = () => {
         };
         fetchPendingJournals();
 
+        // Fetch pending video lectures
+        const fetchPendingVideos = async () => {
+            setLoadingVideos(true);
+            const querySnapshot = await getDocs(collection(db, "videoLectures"));
+            const pending = querySnapshot.docs
+                .map((doc) => ({ id: doc.id, ...doc.data() } as VideoLectureAdmin))
+                .filter((video) => video.status === "pending");
+            setPendingVideos(pending);
+            setLoadingVideos(false);
+        };
+        fetchPendingVideos();
+
         // Fetch members from Firestore
         const fetchMembers = async () => {
             const querySnapshot = await getDocs(collection(db, "members"));
@@ -201,7 +228,16 @@ const AdminPanel: React.FC = () => {
         fetchAchievements();
     }, []);
 
-    // Blog/Journals approval handlers
+    // Blog/Journals/Video approval handlers
+    const handleApproveVideo = async (id: string) => {
+        await updateDoc(doc(db, "videoLectures", id), { status: "approved" });
+        setPendingVideos((prev) => prev.filter((v) => v.id !== id));
+    };
+
+    const handleRejectVideo = async (id: string) => {
+        await updateDoc(doc(db, "videoLectures", id), { status: "rejected" });
+        setPendingVideos((prev) => prev.filter((v) => v.id !== id));
+    };
     const handleApproveJournal = async (id: string) => {
         await updateDoc(doc(db, "journals", id), { status: "approved" });
         setPendingJournals((prev) => prev.filter((j) => j.id !== id));
@@ -263,9 +299,57 @@ const AdminPanel: React.FC = () => {
                     >
                         Achievements
                     </Button>
+                    <Button
+                        variant={activeTab === 'videos' ? 'default' : 'outline'}
+                        onClick={() => setActiveTab('videos')}
+                        className={activeTab === 'videos' ? 'bg-blue-600 text-white' : ''}
+                    >
+                        Video Lectures
+                    </Button>
                 </div>
             </div>
             <div className="grid gap-6">
+                {activeTab === 'videos' && (
+                    loadingVideos ? (<p>Loading pending video lectures...</p>) : pendingVideos.length === 0 ? (<p>No pending video lectures for approval.</p>) : (
+                        pendingVideos.map((video) => (
+                            <Card key={video.id} className="bg-gray-800 text-white p-6">
+                                {video.thumbnail && (
+                                    <img
+                                        src={video.thumbnail}
+                                        alt={video.title}
+                                        className="w-full h-48 object-cover rounded-lg mb-4"
+                                        onError={e => (e.currentTarget.src = "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop")}
+                                    />
+                                )}
+                                <h2 className="text-xl font-semibold mb-2">{video.title}</h2>
+                                <div className="mb-2 text-sm text-gray-300">
+                                    <span className="font-semibold">Instructor:</span> {video.instructor}<br />
+                                    <span className="font-semibold">Subject:</span> {video.subject}<br />
+                                    <span className="font-semibold">Uploaded By:</span> {video.uploadedBy}<br />
+                                </div>
+                                <div className="mb-2">
+                                    <span className="font-semibold">Description:</span>
+                                    <p className="text-gray-200 mt-1">{video.description}</p>
+                                </div>
+                                <Badge className="mb-2">Pending</Badge>
+                                <div className="flex gap-2 mb-2">
+                                    {video.videoUrl && (
+                                        <Button
+                                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                                            onClick={() => window.open(video.videoUrl, '_blank', 'noopener,noreferrer')}
+                                        >
+                                            View Video
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button onClick={() => handleApproveVideo(video.id)} className="bg-green-600 hover:bg-green-700 text-white">Approve</Button>
+                                    <Button onClick={() => handleRejectVideo(video.id)} className="bg-red-600 hover:bg-red-700 text-white">Reject</Button>
+                                </div>
+                            </Card>
+                        ))
+                    )
+                )}
                 {activeTab === 'journals' && (
                     loadingJournals ? (<p>Loading pending journals...</p>) : pendingJournals.length === 0 ? (<p>No pending journals for approval.</p>) : (
                         pendingJournals.map((journal) => (
