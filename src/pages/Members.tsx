@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 // ...existing code...
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
@@ -11,6 +13,20 @@ import membersData from '../data/members.json';
 
 
 const Members = () => {
+  // Firestore members state
+  const [firestoreMembers, setFirestoreMembers] = useState([]);
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "members"));
+        const membersList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setFirestoreMembers(membersList);
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
+    fetchMembers();
+  }, []);
   // Hardcoded members array
   const hardcodedMembers = [
     { name: "SAMUDRA CHAUDHARI ", institution: "SMAK", designation: "FOUNDER", pictureUrl: "https://i.postimg.cc/65tpg88S/Whats-App-Image-2025-08-13-at-13-39-13-32477921.jpg", phone: "", objectPosition: "center 20%" },
@@ -50,22 +66,22 @@ const Members = () => {
   // Map imported JSON members to match the display structure and fix image links
   const importedMembers = Array.isArray(membersData)
     ? membersData
-        .filter(item => !!item.image)
-        .map((item) => {
-          let pictureUrl = "";
-          if (item.image.includes("drive.google.com")) {
-            pictureUrl = getDirectImageUrl(item.image);
-          } else {
-            pictureUrl = item.image;
-          }
-          return {
-            name: item["Name "]?.trim() || "",
-            institution: item.college?.trim() || "",
-            designation: "Member",
-            pictureUrl,
-            phone: "",
-          };
-        })
+      .filter(item => !!item.image)
+      .map((item) => {
+        let pictureUrl = "";
+        if (item.image.includes("drive.google.com")) {
+          pictureUrl = getDirectImageUrl(item.image);
+        } else {
+          pictureUrl = item.image;
+        }
+        return {
+          name: item["Name "]?.trim() || "",
+          institution: item.college?.trim() || "",
+          designation: "Member",
+          pictureUrl,
+          phone: "",
+        };
+      })
     : [];
 
   const [search, setSearch] = useState("");
@@ -74,12 +90,34 @@ const Members = () => {
   // ...existing code...
 
   // Filter hardcoded members for main display
-  const filteredHardcodedMembers = hardcodedMembers.filter((member) =>
+  // Combine hardcoded and Firestore members for main display
+  const allMainMembers = [
+    ...hardcodedMembers,
+    ...firestoreMembers.map((member) => ({
+      name: member.name,
+      institution: member.institution,
+      designation: member.designation || "Member",
+      pictureUrl: member.pictureUrl || member.picture || "",
+      phone: member.phone || "",
+      objectPosition: "center top"
+    }))
+  ];
+  const filteredMainMembers = allMainMembers.filter((member) =>
     member.name && member.name.toLowerCase().includes(search.toLowerCase().trim())
   );
 
   // Filter JSON members for modal
-  const allOtherMembers = [...importedMembers];
+  // Combine imported JSON and Firestore members for modal
+  const allOtherMembers = [
+    ...importedMembers,
+    ...firestoreMembers.map((member) => ({
+      name: member.name,
+      institution: member.institution,
+      designation: member.designation || "Member",
+      pictureUrl: member.pictureUrl || member.picture || "",
+      phone: member.phone || "",
+    }))
+  ];
   const filteredModalMembers = allOtherMembers.filter((member) =>
     member.name && member.name.toLowerCase().includes(modalSearch.toLowerCase().trim())
   );
@@ -122,7 +160,7 @@ const Members = () => {
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-12">
-            {filteredHardcodedMembers.length > 0 ? filteredHardcodedMembers.map((member, index) => (
+            {filteredMainMembers.length > 0 ? filteredMainMembers.map((member, index) => (
               <Card
                 key={index}
                 className="p-0 bg-white/80 dark:bg-background/80 border-0 shadow-[0_6px_32px_-8px_rgba(0,80,195,0.08)] hover:shadow-xl transition-shadow duration-300 rounded-3xl flex flex-col items-center"
