@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../Images/Logo.jpg';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Toggle } from '@/components/ui/toggle';
-import { 
-  BookOpen, 
-  Video, 
-  FileText, 
-  Bookmark, 
-  User, 
-  Settings, 
-  LogOut, 
-  Calendar, 
-  Users, 
+import {
+  BookOpen,
+  Video,
+  FileText,
+  Bookmark,
+  User,
+  Settings,
+  LogOut,
+  Calendar,
+  Users,
   Mail,
   TrendingUp,
   Clock,
@@ -97,9 +98,9 @@ const ClinicalCorner = () => {
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, route: '/dashboard' },
-    { 
-      id: 'content-hub', 
-      label: 'Content Hub', 
+    {
+      id: 'content-hub',
+      label: 'Content Hub',
       icon: LibraryBig,
       route: '/Contenthub',
       subItems: [
@@ -158,35 +159,45 @@ const ClinicalCorner = () => {
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm overflow-hidden bg-blue-600">
-              <Stethoscope className="h-6 w-6 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-slate-800 dark:text-white">SMAK</h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</p>
-            </div>
+            <a href="/" className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <img
+                src={Logo}
+                alt="SMAK Logo"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </a>
+            <a href="/">
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold text-slate-800 dark:text-white">
+                  SMAK
+                </h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</p>
+              </div>
+            </a>
           </div>
+
         </div>
+
 
         <div className="flex items-center space-x-3">
           <div className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search clinical content..."
+              placeholder="Search medical content..."
               className="w-72 pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
             />
           </div>
-          
+
+          {/* Professional Theme Toggle */}
           <div className="relative">
             <Toggle
               pressed={darkMode}
               onPressedChange={toggleTheme}
-              className={`relative p-2.5 rounded-lg transition-all duration-300 border ${
-                darkMode 
-                  ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600' 
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-blue-50'
-              }`}
+              className={`relative p-2.5 rounded-lg transition-all duration-300 border ${darkMode
+                ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-blue-50'
+                }`}
               title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               <div className="flex items-center space-x-2">
@@ -204,7 +215,7 @@ const ClinicalCorner = () => {
               </div>
             </Toggle>
           </div>
-          
+
           <button className="relative p-2.5 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
             <Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
@@ -222,6 +233,7 @@ const ClinicalCorner = () => {
                   {user.name.charAt(0).toUpperCase()}
                 </span>
               </div>
+
               <div className="hidden sm:block text-left">
                 <p className="text-sm font-semibold text-slate-800 dark:text-white">
                   {user.name.split(' ')[0]}
@@ -243,6 +255,16 @@ const ClinicalCorner = () => {
                     {user.college}
                   </p>
                 </div>
+                {/* Admin Panel link for admin users only */}
+                {['admin@example.com', 'anotheradmin@example.com'].includes(user?.email) && (
+                  <button
+                    className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
+                    onClick={() => { setProfileDropdownOpen(false); navigate('/adminpanel'); }}
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Admin Panel</span>
+                  </button>
+                )}
                 <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
                   <User className="h-4 w-4" />
                   <span>View Profile</span>
@@ -256,8 +278,8 @@ const ClinicalCorner = () => {
                   <span>Study Mode</span>
                 </button>
                 <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2">
-                  <button 
-                    onClick={handleLogout}
+                  <button
+                    onClick={handleLogout}  // ✅ This will redirect to login
                     className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
                   >
                     <LogOut className="h-4 w-4" />
@@ -276,15 +298,14 @@ const ClinicalCorner = () => {
   const Sidebar = () => (
     <>
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
-      <aside className={`fixed left-0 top-0 h-full w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-all duration-300 z-50 lg:translate-x-0 shadow-lg ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+
+      <aside className={`fixed left-0 top-0 h-full w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-all duration-300 z-50 lg:translate-x-0 shadow-lg ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 lg:hidden">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
@@ -308,32 +329,29 @@ const ClinicalCorner = () => {
             <div key={item.id}>
               <button
                 onClick={() => handleNavigation(item.id, item.route)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                  currentPage === item.id || currentPage.startsWith(item.id)
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700'
-                }`}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${currentPage === item.id || currentPage.startsWith(item.id)
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700'
+                  }`}
               >
                 <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
                 {item.subItems && (
-                  <ChevronRight className={`h-4 w-4 ml-auto transition-transform duration-200 ${
-                    (currentPage === item.id || item.subItems.some(sub => currentPage === sub.id)) ? 'rotate-90' : ''
-                  }`} />
+                  <ChevronRight className={`h-4 w-4 ml-auto transition-transform duration-200 ${(currentPage === item.id || item.subItems.some(sub => currentPage === sub.id)) ? 'rotate-90' : ''
+                    }`} />
                 )}
               </button>
-              
+
               {item.subItems && (currentPage === item.id || item.subItems.some(sub => currentPage === sub.id)) && (
                 <div className="ml-6 mt-2 space-y-1">
                   {item.subItems.map((subItem) => (
                     <button
                       key={subItem.id}
                       onClick={() => handleNavigation(subItem.id, subItem.route)}
-                      className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-left text-sm transition-all duration-200 ${
-                        currentPage === subItem.id
-                          ? 'bg-blue-500 text-white shadow-sm'
-                          : 'text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-700'
-                      }`}
+                      className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-left text-sm transition-all duration-200 ${currentPage === subItem.id
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-700'
+                        }`}
                     >
                       <subItem.icon className="h-4 w-4" />
                       <span>{subItem.label}</span>
@@ -351,17 +369,17 @@ const ClinicalCorner = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
       <Sidebar />
-      
+
       <div className="flex-1 lg:ml-72">
         <NavigationHeader />
-        
+
         <main className="p-6">
           <div className="space-y-8">
             {/* Hero Section */}
             <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 dark:from-blue-700 dark:via-blue-800 dark:to-blue-900 rounded-2xl p-8 text-white overflow-hidden">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
               <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-              
+
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-4">
@@ -373,7 +391,7 @@ const ClinicalCorner = () => {
                     Clinical Corner 🏥
                   </h1>
                   <p className="text-blue-100 mb-6 text-lg leading-relaxed">
-                    Your comprehensive clinical learning hub. Explore real-world medical scenarios, emergency protocols, 
+                    Your comprehensive clinical learning hub. Explore real-world medical scenarios, emergency protocols,
                     and master the art of clinical interpretation.
                   </p>
                   <div className="flex items-center space-x-6 text-sm">
@@ -393,7 +411,7 @@ const ClinicalCorner = () => {
                 </div>
                 <div className="hidden lg:block">
                   <div className="relative">
-                    <img 
+                    <img
                       src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=280&h=200&fit=crop&crop=center"
                       alt="Clinical Corner"
                       className="w-64 h-48 object-cover rounded-2xl shadow-2xl border-4 border-white/20"
@@ -411,7 +429,7 @@ const ClinicalCorner = () => {
               {/* Clinical Cases */}
               <Card className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 shadow-md overflow-hidden">
                 <div className="relative h-56 overflow-hidden">
-                  <img 
+                  <img
                     src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop"
                     alt="Clinical Cases"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
@@ -436,7 +454,7 @@ const ClinicalCorner = () => {
                     Clinical Cases
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                    Explore real patient scenarios with detailed case presentations, differential diagnoses, 
+                    Explore real patient scenarios with detailed case presentations, differential diagnoses,
                     and treatment plans. New cases added daily.
                   </p>
                   <div className="space-y-3 mb-6">
@@ -453,7 +471,7 @@ const ClinicalCorner = () => {
                       <span className="text-slate-700 dark:text-slate-300">Expert analysis & insights</span>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => navigate('/clinical-cases')}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   >
@@ -466,7 +484,7 @@ const ClinicalCorner = () => {
               {/* Emergency Protocols */}
               <Card className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 shadow-md overflow-hidden">
                 <div className="relative h-56 overflow-hidden">
-                  <img 
+                  <img
                     src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop"
                     alt="Emergency Protocols"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
@@ -491,7 +509,7 @@ const ClinicalCorner = () => {
                     Emergency Protocols
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                    Master critical emergency situations with step-by-step protocols, 
+                    Master critical emergency situations with step-by-step protocols,
                     ACLS guidelines, and life-saving procedures.
                   </p>
                   <div className="space-y-3 mb-6">
@@ -508,7 +526,7 @@ const ClinicalCorner = () => {
                       <span className="text-slate-700 dark:text-slate-300">Quick reference cards</span>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => navigate('/Emergency_Protocols')}
                     className="w-full bg-red-600 hover:bg-red-700 text-white"
                   >
@@ -521,7 +539,7 @@ const ClinicalCorner = () => {
               {/* Lab & Imaging Interpretation */}
               <Card className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 shadow-md overflow-hidden">
                 <div className="relative h-56 overflow-hidden">
-                  <img 
+                  <img
                     src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=300&fit=crop"
                     alt="Lab & Imaging"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
@@ -546,7 +564,7 @@ const ClinicalCorner = () => {
                     Lab & Imaging Interpretation
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                    Master the art of interpreting X-rays, ECGs, blood work, and other 
+                    Master the art of interpreting X-rays, ECGs, blood work, and other
                     diagnostic studies with expert guidance.
                   </p>
                   <div className="space-y-3 mb-6">
@@ -563,7 +581,7 @@ const ClinicalCorner = () => {
                       <span className="text-slate-700 dark:text-slate-300">Lab values reference</span>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => navigate('/Lab_Imaging')}
                     className="w-full bg-green-600 hover:bg-green-700 text-white"
                   >
@@ -635,8 +653,8 @@ const ClinicalCorner = () => {
                   ].map((content, index) => (
                     <div key={index} className="group cursor-pointer bg-white dark:bg-slate-700 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-600 hover:shadow-xl transition-all duration-300 hover:scale-105">
                       <div className="relative h-40 overflow-hidden">
-                        <img 
-                          src={content.image} 
+                        <img
+                          src={content.image}
                           alt={content.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />

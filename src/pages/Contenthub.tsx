@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../Images/Logo.jpg';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -158,17 +159,25 @@ const ContentHub = () => {
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm overflow-hidden bg-blue-600">
-              <Stethoscope className="h-6 w-6 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-slate-800 dark:text-white">
-                SMAK
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</p>
-            </div>
+            <a href="/" className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <img
+                src={Logo}
+                alt="SMAK Logo"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </a>
+            <a href="/">
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold text-slate-800 dark:text-white">
+                  SMAK
+                </h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</p>
+              </div>
+            </a>
           </div>
+
         </div>
+
 
         <div className="flex items-center space-x-3">
           <div className="relative hidden md:block">
@@ -179,17 +188,16 @@ const ContentHub = () => {
               className="w-72 pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
             />
           </div>
-          
+
           {/* Professional Theme Toggle */}
           <div className="relative">
             <Toggle
               pressed={darkMode}
               onPressedChange={toggleTheme}
-              className={`relative p-2.5 rounded-lg transition-all duration-300 border ${
-                darkMode 
-                  ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600' 
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-blue-50'
-              }`}
+              className={`relative p-2.5 rounded-lg transition-all duration-300 border ${darkMode
+                ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-blue-50'
+                }`}
               title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               <div className="flex items-center space-x-2">
@@ -207,7 +215,7 @@ const ContentHub = () => {
               </div>
             </Toggle>
           </div>
-          
+
           <button className="relative p-2.5 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
             <Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
@@ -247,6 +255,16 @@ const ContentHub = () => {
                     {user.college}
                   </p>
                 </div>
+                {/* Admin Panel link for admin users only */}
+                {['admin@example.com', 'anotheradmin@example.com'].includes(user?.email) && (
+                  <button
+                    className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
+                    onClick={() => { setProfileDropdownOpen(false); navigate('/adminpanel'); }}
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Admin Panel</span>
+                  </button>
+                )}
                 <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
                   <User className="h-4 w-4" />
                   <span>View Profile</span>
@@ -260,8 +278,8 @@ const ContentHub = () => {
                   <span>Study Mode</span>
                 </button>
                 <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2">
-                  <button 
-                    onClick={handleLogout}
+                  <button
+                    onClick={handleLogout}  // ✅ This will redirect to login
                     className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
                   >
                     <LogOut className="h-4 w-4" />
