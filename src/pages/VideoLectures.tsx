@@ -84,8 +84,10 @@ const mockUser = {
 };
 
 const VideoLectures = () => {
-  // State for video progress bar
-  const [videoProgress, setVideoProgress] = useState(0); // percent watched
+  // State for video progress bar (modal)
+  const [videoProgress, setVideoProgress] = useState(0); // percent watched (modal)
+  // Track progress for all videos (card display)
+  const [videoProgressMap, setVideoProgressMap] = useState<{ [id: string]: number }>({});
   const navigate = useNavigate();
   const [showAddForm, setShowAddForm] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -284,7 +286,9 @@ const VideoLectures = () => {
     } catch (error) {
       console.error('Error updating view count:', error);
     }
-    // Show video in modal popup
+    // Load progress from localStorage
+    const stored = localStorage.getItem(`video-progress-${video.id}`);
+    setVideoProgress(stored ? Number(stored) : 0);
     setActiveVideo(video);
     setShowVideoModal(true);
   };
@@ -336,7 +340,22 @@ const VideoLectures = () => {
           onTimeUpdate={e => {
             const target = e.target as HTMLVideoElement;
             if (target.duration > 0) {
-              setVideoProgress((target.currentTime / target.duration) * 100);
+              const percent = (target.currentTime / target.duration) * 100;
+              setVideoProgress(percent);
+              // Save progress to localStorage
+              localStorage.setItem(`video-progress-${video.id}`, String(percent));
+              // Only update card progress for local videos
+              setVideoProgressMap(prev => ({ ...prev, [video.id]: percent }));
+            }
+          }}
+          onLoadedMetadata={e => {
+            // Restore progress on load
+            const target = e.target as HTMLVideoElement;
+            const stored = localStorage.getItem(`video-progress-${video.id}`);
+            if (stored && target.duration > 0) {
+              const percent = Number(stored);
+              target.currentTime = (percent / 100) * target.duration;
+              setVideoProgress(percent);
             }
           }}
         >
@@ -348,7 +367,7 @@ const VideoLectures = () => {
       );
     }
 
-    // For external videos, we can't track progress directly, but we can show a static bar or try with YouTube API (not implemented here)
+    // For external videos, do not show progress bar
     if (video.videoUrl) {
       const embedUrl = getEmbedUrl(video.videoUrl);
       return (
@@ -382,6 +401,13 @@ const VideoLectures = () => {
           } as VideoLecture;
         }).filter(video => video.status === 'approved'); // Only show approved videos
 
+        // Load progress for all videos from localStorage
+        const progressMap: { [id: string]: number } = {};
+        videos.forEach(video => {
+          const stored = localStorage.getItem(`video-progress-${video.id}`);
+          progressMap[video.id] = stored ? Number(stored) : 0;
+        });
+        setVideoProgressMap(progressMap);
         setVideoLectures(videos);
       } catch (error) {
         console.error('Error loading videos:', error);
@@ -742,6 +768,16 @@ const VideoLectures = () => {
                   )}
                   <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
                     {video.duration}
+                  </div>
+                  {/* Progress Bar for video (card) */}
+                  <div className="absolute bottom-0 left-0 w-full h-2 bg-gray-200 rounded-b-lg">
+                    {/* Only show progress bar for local videos */}
+                    {video.isLocalVideo && (
+                      <div
+                        className="h-2 bg-blue-600 rounded-b-lg transition-all duration-300"
+                        style={{ width: `${videoProgressMap[video.id] || 0}%` }}
+                      ></div>
+                    )}
                   </div>
                 </div>
                 <CardContent className="p-6">
