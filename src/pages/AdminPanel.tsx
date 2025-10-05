@@ -25,6 +25,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
+import BulkMemberUpload from "../components/BulkMemberUpload";
 //import { Tabs, Tab } from "@/components/ui/tabs";
 
 // Example admin email list
@@ -80,7 +81,7 @@ const AdminPanel: React.FC = () => {
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
     const [loadingVideos, setLoadingVideos] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos'>('journals');
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers'>('journals');
 
     // Achievements state
     const defaultAchievements = [
@@ -343,6 +344,13 @@ const AdminPanel: React.FC = () => {
                         Members
                     </Button>
                     <Button
+                        variant={activeTab === 'bulkmembers' ? 'default' : 'outline'}
+                        onClick={() => setActiveTab('bulkmembers')}
+                        className={activeTab === 'bulkmembers' ? 'bg-blue-600 text-white' : ''}
+                    >
+                        Bulk Members
+                    </Button>
+                    <Button
                         variant={activeTab === 'achievements' ? 'default' : 'outline'}
                         onClick={() => setActiveTab('achievements')}
                         className={activeTab === 'achievements' ? 'bg-blue-600 text-white' : ''}
@@ -359,6 +367,12 @@ const AdminPanel: React.FC = () => {
                 </div>
             </div>
             <div className="grid gap-6">
+                {activeTab === 'bulkmembers' && (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">Bulk Members Upload</h2>
+                        <BulkMemberUpload />
+                    </div>
+                )}
                 {activeTab === 'videos' && (
                     loadingVideos ? (<p>Loading pending video lectures...</p>) : pendingVideos.length === 0 ? (<p>No pending video lectures for approval.</p>) : (
                         pendingVideos.map((video) => (

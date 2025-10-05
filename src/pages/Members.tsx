@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
+import { deleteDoc, doc } from "firebase/firestore";
+import { useAuth } from "../contexts/AuthContext";
 // ...existing code...
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
@@ -13,6 +15,8 @@ import membersData from '../data/members.json';
 
 
 const Members = () => {
+  const { user } = useAuth();
+  const ADMIN_EMAILS = ["admin@example.com", "anotheradmin@example.com"];
   // Firestore members state
   const [firestoreMembers, setFirestoreMembers] = useState([]);
   useEffect(() => {
@@ -90,35 +94,14 @@ const Members = () => {
   // ...existing code...
 
   // Filter hardcoded members for main display
-  // Combine hardcoded and Firestore members for main display
-  const allMainMembers = [
-    ...hardcodedMembers,
-    ...firestoreMembers.map((member) => ({
-      name: member.name,
-      institution: member.institution,
-      designation: member.designation || "Member",
-      pictureUrl: member.pictureUrl || member.picture || "",
-      phone: member.phone || "",
-      objectPosition: "center top"
-    }))
-  ];
-  const filteredMainMembers = allMainMembers.filter((member) =>
+  // Only show hardcoded members in main grid
+  const filteredMainMembers = hardcodedMembers.filter((member) =>
     member.name && member.name.toLowerCase().includes(search.toLowerCase().trim())
   );
 
   // Filter JSON members for modal
-  // Combine imported JSON and Firestore members for modal
-  const allOtherMembers = [
-    ...importedMembers,
-    ...firestoreMembers.map((member) => ({
-      name: member.name,
-      institution: member.institution,
-      designation: member.designation || "Member",
-      pictureUrl: member.pictureUrl || member.picture || "",
-      phone: member.phone || "",
-    }))
-  ];
-  const filteredModalMembers = allOtherMembers.filter((member) =>
+  // Only show Firestore members in modal
+  const filteredModalMembers = firestoreMembers.filter((member) =>
     member.name && member.name.toLowerCase().includes(modalSearch.toLowerCase().trim())
   );
 
@@ -217,7 +200,7 @@ const Members = () => {
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
                 >
                   <Users className="h-5 w-5 mr-2" />
-                  See More Members ({allOtherMembers.length})
+                  See More Members ({filteredModalMembers.length})
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
@@ -241,21 +224,10 @@ const Members = () => {
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredModalMembers.length > 0 ? filteredModalMembers.map((member, index) => (
                       <Card
-                        key={index}
+                        key={member.id || index}
                         className="p-0 bg-white/80 dark:bg-background/80 border-0 shadow-md hover:shadow-lg transition-shadow duration-300 rounded-2xl flex flex-col items-center"
                       >
                         <CardContent className="flex flex-col items-center px-4 pt-6 pb-4 w-full">
-                          {/* Smaller circular photo for modal (commented out as requested) */}
-                          {/**
-                          <div className="relative w-20 h-20 mb-4 rounded-full bg-gradient-to-br from-blue-100 via-blue-300 to-blue-400 dark:from-blue-900 dark:via-blue-700 dark:to-blue-400 shadow-lg flex items-center justify-center mx-auto">
-                            <img
-                              src={member.pictureUrl || ""}
-                              alt={member.name}
-                              className="w-18 h-18 object-cover rounded-full border-2 border-white dark:border-background ring-1 ring-blue-400 dark:ring-blue-500 shadow-lg mx-auto"
-                              style={{ aspectRatio: "1/1", background: "#e8efff", objectPosition: "center top", objectFit: "cover" }}
-                            />
-                          </div>
-                          */}
                           <div className="flex flex-col items-center w-full">
                             <h3 className="font-bold text-lg mb-1 text-blue-700 dark:text-blue-300 text-center w-full break-words">
                               {member.name}
@@ -272,13 +244,30 @@ const Members = () => {
                                 </div>
                               )}
                             </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full mt-1 text-sm font-medium shadow-sm"
-                            >
-                              Connect
-                            </Button>
+                            <div className="flex w-full gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full mt-1 text-sm font-medium shadow-sm"
+                              >
+                                Connect
+                              </Button>
+                              {user && ADMIN_EMAILS.includes(user.email) && (
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  className="w-full mt-1 text-sm font-medium shadow-sm"
+                                  onClick={async () => {
+                                    if (window.confirm(`Delete member ${member.name}?`)) {
+                                      await deleteDoc(doc(db, "members", member.id));
+                                      setFirestoreMembers(firestoreMembers.filter(m => m.id !== member.id));
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
