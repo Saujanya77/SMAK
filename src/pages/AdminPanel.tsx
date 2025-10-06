@@ -81,7 +81,85 @@ const AdminPanel: React.FC = () => {
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
     const [loadingVideos, setLoadingVideos] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers'>('journals');
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes'>('journals');
+    // Quiz state
+    const [showQuizModal, setShowQuizModal] = useState(false);
+    const [quizMode, setQuizMode] = useState<'manual' | 'gform'>('manual');
+    const [quizForm, setQuizForm] = useState({
+        title: '',
+        thumbnail: '',
+        gformLink: '',
+        questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
+    });
+    const [uploadingQuiz, setUploadingQuiz] = useState(false);
+    const [quizzes, setQuizzes] = useState([]);
+
+    // Fetch quizzes
+    useEffect(() => {
+        const fetchQuizzes = async () => {
+            const querySnapshot = await getDocs(collection(db, "quizzes"));
+            setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+        };
+        fetchQuizzes();
+    }, []);
+
+    // Quiz handlers
+    const handleQuizFormChange = (field, value) => {
+        setQuizForm(prev => ({ ...prev, [field]: value }));
+    };
+    const handleQuizQuestionChange = (idx, field, value) => {
+        setQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[idx][field] = value;
+            return { ...prev, questions: updated };
+        });
+    };
+    const handleAddQuizQuestion = () => {
+        setQuizForm(prev => ({ ...prev, questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }] }));
+    };
+    const handleRemoveQuizQuestion = (idx) => {
+        setQuizForm(prev => ({ ...prev, questions: prev.questions.filter((_, i) => i !== idx) }));
+    };
+    const handleQuizOptionChange = (qIdx, optIdx, value) => {
+        setQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options[optIdx] = value;
+            return { ...prev, questions: updated };
+        });
+    };
+    const handleAddQuizOption = (qIdx) => {
+        setQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options.push('');
+            return { ...prev, questions: updated };
+        });
+    };
+    const handleRemoveQuizOption = (qIdx, optIdx) => {
+        setQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options = updated[qIdx].options.filter((_, i) => i !== optIdx);
+            return { ...prev, questions: updated };
+        });
+    };
+    const handleQuizSubmit = async (e) => {
+        e.preventDefault();
+        setUploadingQuiz(true);
+        const quizData = {
+            title: quizForm.title,
+            thumbnail: quizForm.thumbnail,
+            type: quizMode,
+            questions: quizMode === 'manual' ? quizForm.questions : [],
+            gformLink: quizMode === 'gform' ? quizForm.gformLink : '',
+            createdAt: new Date(),
+        };
+        await addDoc(collection(db, "quizzes"), quizData);
+        setQuizForm({ title: '', thumbnail: '', gformLink: '', questions: [{ question: '', options: ['', ''], correctAnswer: 0 }] });
+        setShowQuizModal(false);
+        setUploadingQuiz(false);
+        // Refresh quizzes
+        const querySnapshot = await getDocs(collection(db, "quizzes"));
+        setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    };
 
     // Achievements state
     const defaultAchievements = [
@@ -364,9 +442,96 @@ const AdminPanel: React.FC = () => {
                     >
                         Video Lectures
                     </Button>
+                    <Button
+                        variant={activeTab === 'quizzes' ? 'default' : 'outline'}
+                        onClick={() => setActiveTab('quizzes')}
+                        className={activeTab === 'quizzes' ? 'bg-blue-600 text-white' : ''}
+                    >
+                        Quizzes
+                    </Button>
                 </div>
             </div>
             <div className="grid gap-6">
+                {activeTab === 'quizzes' && (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">Create & Manage Quizzes</h2>
+                        <Button className="mb-4 bg-blue-600 text-white" onClick={() => setShowQuizModal(true)}>Create Quiz</Button>
+                        {/* Quiz Modal */}
+                        {showQuizModal && (
+                            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-lg p-8 max-w-lg w-full text-blue-900 relative">
+                                    <button className="absolute top-2 right-2 text-gray-500" onClick={() => setShowQuizModal(false)}>✕</button>
+                                    <h3 className="text-xl font-bold mb-4">Create Quiz</h3>
+                                    <form onSubmit={handleQuizSubmit} className="space-y-4">
+                                        <div>
+                                            <label className="block font-semibold mb-1">Quiz Title</label>
+                                            <input type="text" className="w-full border rounded px-3 py-2" value={quizForm.title} onChange={e => handleQuizFormChange('title', e.target.value)} required />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-1">Thumbnail URL</label>
+                                            <input type="text" className="w-full border rounded px-3 py-2" value={quizForm.thumbnail} onChange={e => handleQuizFormChange('thumbnail', e.target.value)} required />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-1">Quiz Type</label>
+                                            <select className="w-full border rounded px-3 py-2" value={quizMode} onChange={e => setQuizMode(e.target.value as 'manual' | 'gform')}>
+                                                <option value="manual">Manual Creation</option>
+                                                <option value="gform">Google Form Link</option>
+                                            </select>
+                                        </div>
+                                        {quizMode === 'gform' && (
+                                            <div>
+                                                <label className="block font-semibold mb-1">Google Form Link</label>
+                                                <input type="url" className="w-full border rounded px-3 py-2" value={quizForm.gformLink} onChange={e => handleQuizFormChange('gformLink', e.target.value)} required />
+                                            </div>
+                                        )}
+                                        {quizMode === 'manual' && (
+                                            <div>
+                                                <label className="block font-semibold mb-2">Questions</label>
+                                                {quizForm.questions.map((q, idx) => (
+                                                    <div key={idx} className="border rounded p-3 mb-2">
+                                                        <input type="text" className="w-full border rounded px-2 py-1 mb-2" placeholder="Question" value={q.question} onChange={e => handleQuizQuestionChange(idx, 'question', e.target.value)} required />
+                                                        <div className="mb-2">
+                                                            <label className="block font-semibold mb-1">Options</label>
+                                                            {q.options.map((opt, oIdx) => (
+                                                                <div key={oIdx} className="flex items-center mb-1">
+                                                                    <input type="text" className="flex-1 border rounded px-2 py-1" placeholder={`Option ${oIdx + 1}`} value={opt} onChange={e => handleQuizOptionChange(idx, oIdx, e.target.value)} required />
+                                                                    <button type="button" className="ml-2 text-red-500" onClick={() => handleRemoveQuizOption(idx, oIdx)} disabled={q.options.length <= 2}>Remove</button>
+                                                                </div>
+                                                            ))}
+                                                            <button type="button" className="text-blue-600" onClick={() => handleAddQuizOption(idx)}>Add Option</button>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block font-semibold mb-1">Correct Answer (option index)</label>
+                                                            <input type="number" min="0" max={q.options.length - 1} className="w-20 border rounded px-2 py-1" value={q.correctAnswer} onChange={e => handleQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value))} required />
+                                                        </div>
+                                                        <button type="button" className="mt-2 text-red-500" onClick={() => handleRemoveQuizQuestion(idx)} disabled={quizForm.questions.length <= 1}>Remove Question</button>
+                                                    </div>
+                                                ))}
+                                                <button type="button" className="text-blue-600" onClick={handleAddQuizQuestion}>Add Question</button>
+                                            </div>
+                                        )}
+                                        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded" disabled={uploadingQuiz}>{uploadingQuiz ? 'Uploading...' : 'Create Quiz'}</button>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+                        {/* Quiz List */}
+                        <div className="grid gap-4 mt-8">
+                            {quizzes.map((quiz) => (
+                                <div key={quiz.id} className="flex items-center gap-4 bg-blue-900/10 p-4 rounded-lg">
+                                    <img src={quiz.thumbnail} alt={quiz.title} className="w-24 h-24 object-cover rounded-lg" />
+                                    <div>
+                                        <h4 className="font-bold text-lg">{quiz.title}</h4>
+                                        <span className="text-sm text-blue-300">{quiz.type === 'manual' ? 'Manual Quiz' : 'Google Form'}</span>
+                                        {quiz.type === 'gform' && quiz.gformLink && (
+                                            <a href={quiz.gformLink} target="_blank" rel="noopener noreferrer" className="ml-4 text-blue-500 underline">Open Form</a>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 {activeTab === 'bulkmembers' && (
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Bulk Members Upload</h2>

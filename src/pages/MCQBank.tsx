@@ -69,7 +69,10 @@ interface MCQQuestion {
 const MCQQuestionBank = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'questionBank' | 'mcq'>('questionBank');
+  const [activeTab, setActiveTab] = useState<'questionBank' | 'mcq' | 'quizzes'>('questionBank');
+  const [quizzes, setQuizzes] = useState([]);
+  const [showQuiz, setShowQuiz] = useState(null);
+  const [quizAnswers, setQuizAnswers] = useState({});
   const [showAddQuestionBank, setShowAddQuestionBank] = useState(false);
   const [showAddMCQ, setShowAddMCQ] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<string | null>(null);
@@ -111,7 +114,36 @@ const MCQQuestionBank = () => {
   useEffect(() => {
     loadQuestionBanks();
     loadMCQTests();
+    loadQuizzes();
   }, []);
+
+  const loadQuizzes = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'quizzes'));
+      const quizList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setQuizzes(quizList);
+    } catch (error) {
+      console.error('Error loading quizzes:', error);
+    }
+  };
+
+  const handleStartQuiz = (quiz) => {
+    setShowQuiz(quiz);
+    setQuizAnswers({});
+  };
+  const handleQuizAnswer = (qIdx, optIdx) => {
+    setQuizAnswers(prev => ({ ...prev, [qIdx]: optIdx }));
+  };
+  const handleSubmitQuiz = () => {
+    if (!showQuiz) return;
+    let score = 0;
+    showQuiz.questions.forEach((q, idx) => {
+      if (quizAnswers[idx] === q.correctAnswer) score++;
+    });
+    alert(`Quiz completed! Your score: ${score}/${showQuiz.questions.length}`);
+    setShowQuiz(null);
+    setQuizAnswers({});
+  };
 
   const loadQuestionBanks = async () => {
     try {
@@ -394,6 +426,10 @@ const MCQQuestionBank = () => {
   if (showMCQTest) {
     const currentQuestion = showMCQTest.questions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / showMCQTest.questions.length) * 100;
+
+    function handlePreviousQuestion(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
+      throw new Error('Function not implemented.');
+    }
 
     return (
       <div className={`min-h-screen transition-all duration-300 ${
@@ -760,8 +796,71 @@ const MCQQuestionBank = () => {
               <Brain className="h-4 w-4 mr-2" />
               MCQ Tests
             </Button>
+            <Button
+              variant={activeTab === 'quizzes' ? 'default' : 'ghost'}
+              onClick={() => setActiveTab('quizzes')}
+              className={`px-8 py-3 rounded-xl font-medium transition-all ${
+                activeTab === 'quizzes' 
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' 
+                  : isDarkMode ? 'hover:bg-blue-800/30 text-blue-300' : 'hover:bg-blue-100/50 text-blue-700'
+              }`}
+            >
+              Quizzes
+            </Button>
           </div>
         </div>
+        {/* Quizzes Section */}
+        {activeTab === 'quizzes' && (
+          <div className="space-y-8">
+            <h2 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Quizzes</h2>
+            {showQuiz ? (
+              <div className={`max-w-xl mx-auto p-6 rounded-xl shadow-lg ${isDarkMode ? 'bg-slate-800/60 border-blue-800/30' : 'bg-slate-800/60 border-blue-200/30'}`}>
+                <div className="flex items-center gap-4 mb-6">
+                  <img src={showQuiz.thumbnail} alt={showQuiz.title} className="w-20 h-20 object-cover rounded-lg" />
+                  <div>
+                    <h3 className="text-2xl font-bold mb-1">{showQuiz.title}</h3>
+                    <span className="text-sm text-blue-400">Manual Quiz</span>
+                  </div>
+                </div>
+                {showQuiz.questions.map((q, idx) => (
+                  <div key={idx} className="mb-6">
+                    <div className={`font-semibold mb-2 ${isDarkMode ? 'text-blue-200' : 'text-gray-900'}`}>Q{idx + 1}. {q.question}</div>
+                    <div className="grid gap-2">
+                      {q.options.map((opt, oIdx) => (
+                        <label key={oIdx} className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={`quiz-q${idx}`}
+                            checked={quizAnswers[idx] === oIdx}
+                            onChange={() => handleQuizAnswer(idx, oIdx)}
+                          />
+                          <span className={isDarkMode ? 'text-blue-200' : 'text-gray-900'}>{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <Button className="bg-blue-600 text-white" onClick={handleSubmitQuiz}>Submit Quiz</Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {quizzes.length === 0 && <p>No quizzes available.</p>}
+                {quizzes.map((quiz) => (
+                  <Card key={quiz.id} className={`p-6 flex flex-col items-center ${isDarkMode ? 'bg-slate-800/60 border-blue-800/30' : 'bg-white/90 border-blue-200/30'}`}>
+                    <img src={quiz.thumbnail} alt={quiz.title} className="w-24 h-24 object-cover rounded-lg mb-4" />
+                    <h3 className="font-bold text-lg mb-2">{quiz.title}</h3>
+                    <span className="text-sm text-blue-400 mb-2">{quiz.type === 'manual' ? 'Manual Quiz' : 'Google Form'}</span>
+                    {quiz.type === 'manual' ? (
+                      <Button className="bg-blue-600 text-white" onClick={() => handleStartQuiz(quiz)}>Take Quiz</Button>
+                    ) : quiz.gformLink ? (
+                      <a href={quiz.gformLink} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-4 py-2 rounded mt-2">Open Form</a>
+                    ) : null}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Question Bank Section */}
         {activeTab === 'questionBank' && (
