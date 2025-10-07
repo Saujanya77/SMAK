@@ -1,3 +1,5 @@
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { QuizQuestionDraggable } from '../components/QuizQuestionDraggable';
 interface Journal {
     id: string;
     title: string;
@@ -60,6 +62,120 @@ interface VideoLectureAdmin {
 }
 
 const AdminPanel: React.FC = () => {
+    // State for editing quiz
+    const [editingQuiz, setEditingQuiz] = useState(null);
+    const [editQuizForm, setEditQuizForm] = useState({
+        title: '',
+        thumbnail: '',
+        thumbnailType: 'url',
+        questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
+        gformLink: '',
+        type: 'manual',
+    });
+    const [showEditModal, setShowEditModal] = useState(false);
+
+    // Open edit modal for manual quiz
+    const handleEditQuiz = (quiz) => {
+        setEditingQuiz(quiz);
+        setEditQuizForm({
+            title: quiz.title || '',
+            thumbnail: quiz.thumbnail || '',
+            thumbnailType: quiz.thumbnail ? 'url' : 'upload',
+            questions: quiz.questions || [{ question: '', options: ['', ''], correctAnswer: 0 }],
+            gformLink: quiz.gformLink || '',
+            type: quiz.type || 'manual',
+        });
+        setShowEditModal(true);
+    };
+
+    // Edit quiz form handlers
+    const handleEditQuizFormChange = (field, value) => {
+        setEditQuizForm(prev => ({ ...prev, [field]: value }));
+    };
+    const handleEditQuizQuestionChange = (idx, field, value) => {
+        setEditQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[idx][field] = value;
+            return { ...prev, questions: updated };
+        });
+    };
+    const handleEditAddQuizQuestion = () => {
+        setEditQuizForm(prev => ({ ...prev, questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }] }));
+    };
+    const handleEditRemoveQuizQuestion = (idx) => {
+        setEditQuizForm(prev => ({ ...prev, questions: prev.questions.filter((_, i) => i !== idx) }));
+    };
+    const handleEditQuizOptionChange = (qIdx, optIdx, value) => {
+        setEditQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options[optIdx] = value;
+            return { ...prev, questions: updated };
+        });
+    };
+    const handleEditAddQuizOption = (qIdx) => {
+        setEditQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options.push('');
+            return { ...prev, questions: updated };
+        });
+    };
+    const handleEditRemoveQuizOption = (qIdx, optIdx) => {
+        setEditQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options = updated[qIdx].options.filter((_, i) => i !== optIdx);
+            return { ...prev, questions: updated };
+        });
+    };
+    // Save edited quiz
+    const handleSaveEditedQuiz = async (e) => {
+        e.preventDefault();
+        if (!editingQuiz) return;
+        try {
+            const updateData: any = {
+                title: editQuizForm.title,
+                thumbnail: editQuizForm.thumbnail,
+            };
+            if (editQuizForm.type === 'manual') {
+                updateData.questions = editQuizForm.questions;
+            } else if (editQuizForm.type === 'gform') {
+                updateData.gformLink = editQuizForm.gformLink;
+            }
+            await updateDoc(doc(db, 'quizzes', editingQuiz.id), updateData);
+            setShowEditModal(false);
+            setEditingQuiz(null);
+            // Refresh quizzes
+            const querySnapshot = await getDocs(collection(db, "quizzes"));
+            setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+        } catch (err) {
+            alert('Failed to update quiz.');
+        }
+    };
+    // Delete quiz handler
+    const handleDeleteQuiz = async (quizId) => {
+        if (!window.confirm('Are you sure you want to delete this quiz?')) return;
+        try {
+            await deleteDoc(doc(db, 'quizzes', quizId));
+            setQuizzes(prev => prev.filter(q => q.id !== quizId));
+        } catch (err) {
+            alert('Failed to delete quiz.');
+        }
+    };
+    // State declarations for quizzes section
+    const [quizzes, setQuizzes] = useState([]);
+    const [quizForm, setQuizForm] = useState({
+        title: '',
+        thumbnail: '',
+        thumbnailType: 'url',
+        gformLink: '',
+        questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
+    });
+    const [quizMode, setQuizMode] = useState<'manual' | 'gform'>('manual');
+    const [uploadingQuiz, setUploadingQuiz] = useState(false);
+    const [showQuizModal, setShowQuizModal] = useState(false);
+    // Section type for course section 1
+    const [sectionType, setSectionType] = useState('video');
+    // Quiz type for course section 1
+    const [quizType, setQuizType] = useState<'manual' | 'gform'>('manual');
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -81,20 +197,7 @@ const AdminPanel: React.FC = () => {
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
     const [loadingVideos, setLoadingVideos] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes'>('journals');
-    // Quiz state
-    const [showQuizModal, setShowQuizModal] = useState(false);
-    const [quizMode, setQuizMode] = useState<'manual' | 'gform'>('manual');
-    const [quizForm, setQuizForm] = useState({
-        title: '',
-        thumbnail: '',
-        gformLink: '',
-        questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
-    });
-    const [uploadingQuiz, setUploadingQuiz] = useState(false);
-    const [quizzes, setQuizzes] = useState([]);
-
-    // Fetch quizzes
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes' | 'courses'>('journals');
     useEffect(() => {
         const fetchQuizzes = async () => {
             const querySnapshot = await getDocs(collection(db, "quizzes"));
@@ -153,7 +256,7 @@ const AdminPanel: React.FC = () => {
             createdAt: new Date(),
         };
         await addDoc(collection(db, "quizzes"), quizData);
-        setQuizForm({ title: '', thumbnail: '', gformLink: '', questions: [{ question: '', options: ['', ''], correctAnswer: 0 }] });
+        setQuizForm({ title: '', thumbnail: '', thumbnailType: 'url', gformLink: '', questions: [{ question: '', options: ['', ''], correctAnswer: 0 }] });
         setShowQuizModal(false);
         setUploadingQuiz(false);
         // Refresh quizzes
@@ -363,7 +466,7 @@ const AdminPanel: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[rgb(15,23,42)] via-blue-900 to-[rgb(15,23,42)] bg-grid-pattern text-white p-0">
+        <div className="min-h-screen bg-gradient-to-br from-[rgb(15,23,42)] via-blue-900 to-[rgb(15,23,42)] text-white p-0">
             {/* Navbar */}
             <nav className="w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 shadow-lg border-b border-blue-300/20">
                 <button
@@ -443,6 +546,13 @@ const AdminPanel: React.FC = () => {
                         Video Lectures
                     </Button>
                     <Button
+                        variant={activeTab === 'courses' ? 'default' : 'outline'}
+                        onClick={() => setActiveTab('courses')}
+                        className={activeTab === 'courses' ? 'bg-blue-600 text-white' : ''}
+                    >
+                        Courses
+                    </Button>
+                    <Button
                         variant={activeTab === 'quizzes' ? 'default' : 'outline'}
                         onClick={() => setActiveTab('quizzes')}
                         className={activeTab === 'quizzes' ? 'bg-blue-600 text-white' : ''}
@@ -459,8 +569,8 @@ const AdminPanel: React.FC = () => {
                         {/* Quiz Modal */}
                         {showQuizModal && (
                             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                                <div className="bg-white rounded-lg p-8 max-w-lg w-full text-blue-900 relative">
-                                    <button className="absolute top-2 right-2 text-gray-500" onClick={() => setShowQuizModal(false)}>✕</button>
+                                <div className="rounded-lg p-8 max-w-lg w-full relative border-2 border-blue-300 shadow-xl bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 text-blue-900" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+                                    <button className="absolute top-2 right-2 text-gray-500 text-2xl" onClick={() => setShowQuizModal(false)} title="Close">×</button>
                                     <h3 className="text-xl font-bold mb-4">Create Quiz</h3>
                                     <form onSubmit={handleQuizSubmit} className="space-y-4">
                                         <div>
@@ -468,8 +578,23 @@ const AdminPanel: React.FC = () => {
                                             <input type="text" className="w-full border rounded px-3 py-2" value={quizForm.title} onChange={e => handleQuizFormChange('title', e.target.value)} required />
                                         </div>
                                         <div>
-                                            <label className="block font-semibold mb-1">Thumbnail URL</label>
-                                            <input type="text" className="w-full border rounded px-3 py-2" value={quizForm.thumbnail} onChange={e => handleQuizFormChange('thumbnail', e.target.value)} required />
+                                            <label className="block font-semibold mb-1">Thumbnail</label>
+                                            <div className="flex gap-2 mb-2">
+                                                <label className="flex items-center gap-2">
+                                                    <input type="radio" name="thumbnailType" value="url" checked={quizForm.thumbnailType === 'url'} onChange={() => handleQuizFormChange('thumbnailType', 'url')} />
+                                                    URL
+                                                </label>
+                                                <label className="flex items-center gap-2">
+                                                    <input type="radio" name="thumbnailType" value="upload" checked={quizForm.thumbnailType === 'upload'} onChange={() => handleQuizFormChange('thumbnailType', 'upload')} />
+                                                    Upload
+                                                </label>
+                                            </div>
+                                            {quizForm.thumbnailType === 'url' && (
+                                                <input type="text" className="w-full border rounded px-3 py-2" value={quizForm.thumbnail} onChange={e => handleQuizFormChange('thumbnail', e.target.value)} placeholder="Thumbnail URL" />
+                                            )}
+                                            {quizForm.thumbnailType === 'upload' && (
+                                                <input type="file" accept="image/*" className="w-full border rounded px-3 py-2" onChange={e => handleQuizFormChange('thumbnail', e.target.files[0])} />
+                                            )}
                                         </div>
                                         <div>
                                             <label className="block font-semibold mb-1">Quiz Type</label>
@@ -487,26 +612,43 @@ const AdminPanel: React.FC = () => {
                                         {quizMode === 'manual' && (
                                             <div>
                                                 <label className="block font-semibold mb-2">Questions</label>
-                                                {quizForm.questions.map((q, idx) => (
-                                                    <div key={idx} className="border rounded p-3 mb-2">
-                                                        <input type="text" className="w-full border rounded px-2 py-1 mb-2" placeholder="Question" value={q.question} onChange={e => handleQuizQuestionChange(idx, 'question', e.target.value)} required />
-                                                        <div className="mb-2">
-                                                            <label className="block font-semibold mb-1">Options</label>
-                                                            {q.options.map((opt, oIdx) => (
-                                                                <div key={oIdx} className="flex items-center mb-1">
-                                                                    <input type="text" className="flex-1 border rounded px-2 py-1" placeholder={`Option ${oIdx + 1}`} value={opt} onChange={e => handleQuizOptionChange(idx, oIdx, e.target.value)} required />
-                                                                    <button type="button" className="ml-2 text-red-500" onClick={() => handleRemoveQuizOption(idx, oIdx)} disabled={q.options.length <= 2}>Remove</button>
-                                                                </div>
-                                                            ))}
-                                                            <button type="button" className="text-blue-600" onClick={() => handleAddQuizOption(idx)}>Add Option</button>
-                                                        </div>
-                                                        <div>
-                                                            <label className="block font-semibold mb-1">Correct Answer (option index)</label>
-                                                            <input type="number" min="0" max={q.options.length - 1} className="w-20 border rounded px-2 py-1" value={q.correctAnswer} onChange={e => handleQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value))} required />
-                                                        </div>
-                                                        <button type="button" className="mt-2 text-red-500" onClick={() => handleRemoveQuizQuestion(idx)} disabled={quizForm.questions.length <= 1}>Remove Question</button>
-                                                    </div>
-                                                ))}
+                                                <DragDropContext onDragEnd={result => {
+                                                    if (!result.destination) return;
+                                                    const reordered = Array.from(quizForm.questions);
+                                                    const [removed] = reordered.splice(result.source.index, 1);
+                                                    reordered.splice(result.destination.index, 0, removed);
+                                                    setQuizForm(prev => ({ ...prev, questions: reordered }));
+                                                }}>
+                                                    <Droppable droppableId="questions-droppable">
+                                                        {(provided) => (
+                                                            <div ref={provided.innerRef} {...provided.droppableProps}>
+                                                                {quizForm.questions.map((q, idx) => (
+                                                                    <QuizQuestionDraggable key={idx} question={q} idx={idx}>
+                                                                        <div className="border rounded p-3 mb-2">
+                                                                            <input type="text" className="w-full border rounded px-2 py-1 mb-2" placeholder="Question" value={q.question} onChange={e => handleQuizQuestionChange(idx, 'question', e.target.value)} required />
+                                                                            <div className="mb-2">
+                                                                                <label className="block font-semibold mb-1">Options</label>
+                                                                                {q.options.map((opt, oIdx) => (
+                                                                                    <div key={oIdx} className="flex items-center mb-1">
+                                                                                        <input type="text" className="flex-1 border rounded px-2 py-1" placeholder={`Option ${oIdx + 1}`} value={opt} onChange={e => handleQuizOptionChange(idx, oIdx, e.target.value)} required />
+                                                                                        <button type="button" className="ml-2 text-red-500" onClick={() => handleRemoveQuizOption(idx, oIdx)} disabled={q.options.length <= 2}>Remove</button>
+                                                                                    </div>
+                                                                                ))}
+                                                                                <button type="button" className="text-blue-600" onClick={() => handleAddQuizOption(idx)}>Add Option</button>
+                                                                            </div>
+                                                                            <div>
+                                                                                <label className="block font-semibold mb-1">Correct Answer (option index)</label>
+                                                                                <input type="number" min="0" max={q.options.length - 1} className="w-20 border rounded px-2 py-1" value={q.correctAnswer} onChange={e => handleQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value))} required />
+                                                                            </div>
+                                                                            <button type="button" className="mt-2 text-red-500" onClick={() => handleRemoveQuizQuestion(idx)} disabled={quizForm.questions.length <= 1}>Remove Question</button>
+                                                                        </div>
+                                                                    </QuizQuestionDraggable>
+                                                                ))}
+                                                                {provided.placeholder}
+                                                            </div>
+                                                        )}
+                                                    </Droppable>
+                                                </DragDropContext>
                                                 <button type="button" className="text-blue-600" onClick={handleAddQuizQuestion}>Add Question</button>
                                             </div>
                                         )}
@@ -520,16 +662,110 @@ const AdminPanel: React.FC = () => {
                             {quizzes.map((quiz) => (
                                 <div key={quiz.id} className="flex items-center gap-4 bg-blue-900/10 p-4 rounded-lg">
                                     <img src={quiz.thumbnail} alt={quiz.title} className="w-24 h-24 object-cover rounded-lg" />
-                                    <div>
+                                    <div className="flex-1">
                                         <h4 className="font-bold text-lg">{quiz.title}</h4>
                                         <span className="text-sm text-blue-300">{quiz.type === 'manual' ? 'Manual Quiz' : 'Google Form'}</span>
                                         {quiz.type === 'gform' && quiz.gformLink && (
                                             <a href={quiz.gformLink} target="_blank" rel="noopener noreferrer" className="ml-4 text-blue-500 underline">Open Form</a>
                                         )}
                                     </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleEditQuiz(quiz)}
+                                        >
+                                            Edit
+                                        </Button>
+                                        {/* Edit Quiz Modal */}
+                                        {showEditModal && (
+                                            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                                                <div className="rounded-lg p-8 max-w-lg w-full relative border-2 border-blue-300 shadow-xl bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 text-blue-900" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+                                                    <button className="absolute top-2 right-2 text-gray-500 text-2xl" onClick={() => setShowEditModal(false)} title="Close">×</button>
+                                                    <h3 className="text-xl font-bold mb-4">Edit Quiz</h3>
+                                                    <form onSubmit={handleSaveEditedQuiz} className="space-y-4">
+                                                        <div>
+                                                            <label className="block font-semibold mb-1">Quiz Title</label>
+                                                            <input type="text" className="w-full border rounded px-3 py-2" value={editQuizForm.title} onChange={e => handleEditQuizFormChange('title', e.target.value)} required />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block font-semibold mb-1">Thumbnail</label>
+                                                            <div className="flex gap-2 mb-2">
+                                                                <label className="flex items-center gap-2">
+                                                                    <input type="radio" name="editThumbnailType" value="url" checked={editQuizForm.thumbnailType === 'url'} onChange={() => handleEditQuizFormChange('thumbnailType', 'url')} />
+                                                                    URL
+                                                                </label>
+                                                                <label className="flex items-center gap-2">
+                                                                    <input type="radio" name="editThumbnailType" value="upload" checked={editQuizForm.thumbnailType === 'upload'} onChange={() => handleEditQuizFormChange('thumbnailType', 'upload')} />
+                                                                    Upload
+                                                                </label>
+                                                            </div>
+                                                            {editQuizForm.thumbnailType === 'url' && (
+                                                                <input type="text" className="w-full border rounded px-3 py-2" value={editQuizForm.thumbnail} onChange={e => handleEditQuizFormChange('thumbnail', e.target.value)} placeholder="Thumbnail URL" />
+                                                            )}
+                                                            {editQuizForm.thumbnailType === 'upload' && (
+                                                                <input type="file" accept="image/*" className="w-full border rounded px-3 py-2" onChange={e => handleEditQuizFormChange('thumbnail', e.target.files[0])} />
+                                                            )}
+                                                        </div>
+                                                        {editQuizForm.type === 'gform' ? (
+                                                            <div>
+                                                                <label className="block font-semibold mb-1">Google Form Link</label>
+                                                                <input type="url" className="w-full border rounded px-3 py-2" value={editQuizForm.gformLink} onChange={e => handleEditQuizFormChange('gformLink', e.target.value)} required />
+                                                            </div>
+                                                        ) : (
+                                                            <div>
+                                                                <label className="block font-semibold mb-2">Questions</label>
+                                                                <DragDropContext onDragEnd={result => {
+                                                                    if (!result.destination) return;
+                                                                    const reordered = Array.from(editQuizForm.questions);
+                                                                    const [removed] = reordered.splice(result.source.index, 1);
+                                                                    reordered.splice(result.destination.index, 0, removed);
+                                                                    setEditQuizForm(prev => ({ ...prev, questions: reordered }));
+                                                                }}>
+                                                                    <Droppable droppableId="edit-questions-droppable">
+                                                                        {(provided) => (
+                                                                            <div ref={provided.innerRef} {...provided.droppableProps}>
+                                                                                {editQuizForm.questions.map((q, idx) => (
+                                                                                    <QuizQuestionDraggable key={idx} question={q} idx={idx}>
+                                                                                        <div className="border rounded p-3 mb-2">
+                                                                                            <input type="text" className="w-full border rounded px-2 py-1 mb-2" placeholder="Question" value={q.question} onChange={e => handleEditQuizQuestionChange(idx, 'question', e.target.value)} required />
+                                                                                            <div className="mb-2">
+                                                                                                <label className="block font-semibold mb-1">Options</label>
+                                                                                                {q.options.map((opt, oIdx) => (
+                                                                                                    <div key={oIdx} className="flex items-center mb-1">
+                                                                                                        <input type="text" className="flex-1 border rounded px-2 py-1" placeholder={`Option ${oIdx + 1}`} value={opt} onChange={e => handleEditQuizOptionChange(idx, oIdx, e.target.value)} required />
+                                                                                                        <button type="button" className="ml-2 text-red-500" onClick={() => handleEditRemoveQuizOption(idx, oIdx)} disabled={q.options.length <= 2}>Remove</button>
+                                                                                                    </div>
+                                                                                                ))}
+                                                                                                <button type="button" className="text-blue-600" onClick={() => handleEditAddQuizOption(idx)}>Add Option</button>
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <label className="block font-semibold mb-1">Correct Answer (option index)</label>
+                                                                                                <input type="number" min="0" max={q.options.length - 1} className="w-20 border rounded px-2 py-1" value={q.correctAnswer} onChange={e => handleEditQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value))} required />
+                                                                                            </div>
+                                                                                            <button type="button" className="mt-2 text-red-500" onClick={() => handleEditRemoveQuizQuestion(idx)} disabled={editQuizForm.questions.length <= 1}>Remove Question</button>
+                                                                                        </div>
+                                                                                    </QuizQuestionDraggable>
+                                                                                ))}
+                                                                                {provided.placeholder}
+                                                                            </div>
+                                                                        )}
+                                                                    </Droppable>
+                                                                </DragDropContext>
+                                                                <button type="button" className="text-blue-600" onClick={handleEditAddQuizQuestion}>Add Question</button>
+                                                            </div>
+                                                        )}
+                                                        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Save Changes</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <Button variant="destructive" size="sm" onClick={() => handleDeleteQuiz(quiz.id)}>Delete</Button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
+                        {/* ...existing code... */}
                     </div>
                 )}
                 {activeTab === 'bulkmembers' && (
@@ -537,6 +773,72 @@ const AdminPanel: React.FC = () => {
                         <h2 className="text-2xl font-bold mb-4">Bulk Members Upload</h2>
                         <BulkMemberUpload />
                     </div>
+                )}
+                {activeTab === 'courses' && (
+                    <Card className="mb-8 medical-card shadow-xl max-w-xl">
+                        <form className="p-6 space-y-4">
+                            <h2 className="text-2xl font-bold mb-4 text-blue-900 dark:text-white">Create Course</h2>
+                            <div>
+                                <label className="block font-semibold text-blue-900 dark:text-white mb-1">Course Name</label>
+                                <input type="text" required placeholder="Course Name" className="p-2 rounded w-full text-black border border-blue-300 focus:border-blue-600 focus:ring focus:ring-blue-200" />
+                            </div>
+                            <div>
+                                <label className="block font-semibold text-blue-900 dark:text-white mb-1">Course Description</label>
+                                <textarea required placeholder="Course Description" className="p-2 rounded w-full text-black border border-blue-300 focus:border-blue-600 focus:ring focus:ring-blue-200" />
+                            </div>
+                            <div>
+                                <label className="block font-semibold text-blue-900 dark:text-white mb-1">Course Thumbnail</label>
+                                <input type="file" accept="image/*" className="p-2 rounded w-full text-black border border-blue-300 focus:border-blue-600 focus:ring focus:ring-blue-200" />
+                            </div>
+                            <hr className="my-4 border-blue-200" />
+                            <h3 className="font-semibold text-blue-900 dark:text-white mb-2">Add Section</h3>
+                            <Card className="border p-4 mb-3 rounded bg-blue-50">
+                                <span className="font-medium text-blue-900">Section 1</span>
+                                <div className="mb-2 flex gap-4 mt-2">
+                                    <label className="flex items-center gap-2 text-blue-900">
+                                        <input type="radio" name="sectionType" value="video" checked={sectionType === 'video'} onChange={() => setSectionType('video')} /> Add Video
+                                    </label>
+                                    <label className="flex items-center gap-2 text-blue-900">
+                                        <input type="radio" name="sectionType" value="quiz" checked={sectionType === 'quiz'} onChange={() => setSectionType('quiz')} /> Add Quiz
+                                    </label>
+                                </div>
+                                {sectionType === 'video' && (
+                                    <div>
+                                        <label className="block font-medium text-blue-900 mb-1">Upload Link</label>
+                                        <input type="text" className="p-2 rounded w-full text-black border border-blue-300 focus:border-blue-600 focus:ring focus:ring-blue-200" placeholder="Paste video link here" />
+                                    </div>
+                                )}
+                                {sectionType === 'quiz' && (
+                                    <div>
+                                        <label className="block font-medium text-blue-900 mb-1">Quiz Type</label>
+                                        <div className="flex gap-4 mb-2">
+                                            <label className="flex items-center gap-2">
+                                                <input type="radio" name="quizType" value="manual" checked={quizType === 'manual'} onChange={() => setQuizType('manual')} /> Manual Form
+                                            </label>
+                                            <label className="flex items-center gap-2">
+                                                <input type="radio" name="quizType" value="gform" checked={quizType === 'gform'} onChange={() => setQuizType('gform')} /> Google Form
+                                            </label>
+                                        </div>
+                                        {quizType === 'manual' && (
+                                            <div>
+                                                <label className="block font-medium text-blue-900 mb-1">Manual Quiz Form (coming soon)</label>
+                                            </div>
+                                        )}
+                                        {quizType === 'gform' && (
+                                            <div>
+                                                <label className="block font-medium text-blue-900 mb-1">Google Form Link</label>
+                                                <input type="text" className="p-2 rounded w-full text-black border border-blue-300 focus:border-blue-600 focus:ring focus:ring-blue-200" placeholder="Paste Google Form link here" />
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                <div className="mt-4 text-right">
+                                    <Button type="button">Add another section</Button>
+                                </div>
+                            </Card>
+                            {/* ...existing code... */}
+                        </form>
+                    </Card>
                 )}
                 {activeTab === 'videos' && (
                     loadingVideos ? (<p>Loading pending video lectures...</p>) : pendingVideos.length === 0 ? (<p>No pending video lectures for approval.</p>) : (
