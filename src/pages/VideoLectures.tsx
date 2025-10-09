@@ -76,7 +76,6 @@ type VideoLecture = {
   uploadedAt?: import('firebase/firestore').Timestamp | Date | import('firebase/firestore').FieldValue | null;
 };
 
-
 const mockUser = {
   name: 'Demo User',
   avatar: 'https://ui-avatars.com/api/?name=Demo+User',
@@ -85,7 +84,7 @@ const mockUser = {
 
 const VideoLectures = () => {
   // State for video progress bar (modal)
-  const [videoProgress, setVideoProgress] = useState(0); // percent watched (modal)
+  const [videoProgress, setVideoProgress] = useState(0);
   // Track progress for all videos (card display)
   const [videoProgressMap, setVideoProgressMap] = useState<{ [id: string]: number }>({});
   const navigate = useNavigate();
@@ -116,29 +115,16 @@ const VideoLectures = () => {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [activeVideo, setActiveVideo] = useState<VideoLecture | null>(null);
 
-  // Placeholder for user context
   const user = mockUser;
 
-  // Placeholder: toggle theme
   const toggleTheme = () => setDarkMode((d) => !d);
-
-  // Placeholder: handle logout
   const handleLogout = () => alert('Logout!');
 
-  // Placeholder: handle input change
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Placeholder: handle file upload
-  const handleFileUpload = (type: string) => {
-    // This should open a file dialog and update formData
-    alert(`File upload for: ${type}`);
-  };
-
-  // Placeholder: upload file to Firebase Storage
   const uploadFileToFirebase = async (file: File, path: string, onProgress?: (progress: number) => void) => {
-    // Simulate upload
     return new Promise<string>((resolve) => {
       let progress = 0;
       const interval = setInterval(() => {
@@ -152,12 +138,9 @@ const VideoLectures = () => {
     });
   };
 
-  // Placeholder: download notes
   const downloadNotes = (video: VideoLecture) => {
     alert('Download notes for: ' + video.title);
   };
-
-
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.subject) {
@@ -173,7 +156,6 @@ const VideoLectures = () => {
       let videoUrl = '';
       let notesUrl = '';
 
-      // Upload thumbnail if provided
       if (formData.thumbnailFile) {
         const thumbnailPath = `thumbnails/${Date.now()}_${formData.thumbnailFile.name}`;
         thumbnailUrl = await uploadFileToFirebase(
@@ -183,7 +165,6 @@ const VideoLectures = () => {
         );
       }
 
-      // Upload video if provided
       if (formData.videoFile) {
         const videoPath = `videos/${Date.now()}_${formData.videoFile.name}`;
         videoUrl = await uploadFileToFirebase(
@@ -193,7 +174,6 @@ const VideoLectures = () => {
         );
       }
 
-      // Upload notes if provided
       if (formData.notesFile) {
         const notesPath = `notes/${Date.now()}_${formData.notesFile.name}`;
         notesUrl = await uploadFileToFirebase(
@@ -203,7 +183,6 @@ const VideoLectures = () => {
         );
       }
 
-      // Prepare video data - only include fields that have values
       const videoData: Partial<VideoLecture> = {
         title: formData.title,
         description: formData.description,
@@ -224,7 +203,6 @@ const VideoLectures = () => {
         uploadedAt: serverTimestamp()
       };
 
-      // Only add optional fields if they have values
       if (formData.isLink && formData.externalLink) {
         videoData.externalLink = formData.externalLink;
       }
@@ -237,12 +215,10 @@ const VideoLectures = () => {
         videoData.notesUrl = notesUrl;
       }
 
-      // Add to Firestore
       await addDoc(collection(db, 'videoLectures'), videoData);
 
       console.log('Video uploaded successfully');
 
-      // Reset form
       setFormData({
         title: '',
         subject: '',
@@ -276,7 +252,6 @@ const VideoLectures = () => {
   };
 
   const handleVideoClick = async (video: VideoLecture) => {
-    // Update view count
     try {
       const videoRef = doc(db, 'videoLectures', video.id);
       await updateDoc(videoRef, {
@@ -286,7 +261,6 @@ const VideoLectures = () => {
     } catch (error) {
       console.error('Error updating view count:', error);
     }
-    // Load progress from localStorage
     const stored = localStorage.getItem(`video-progress-${video.id}`);
     setVideoProgress(stored ? Number(stored) : 0);
     setActiveVideo(video);
@@ -308,21 +282,16 @@ const VideoLectures = () => {
   const getEmbedUrl = (url?: string) => {
     if (!url) return '';
 
-    // YouTube URL handling
     if (url.includes('youtube.com/watch?v=')) {
       const videoId = url.split('v=')[1].split('&')[0];
       return `https://www.youtube.com/embed/${videoId}`;
     } else if (url.includes('youtu.be/')) {
       const videoId = url.split('youtu.be/')[1].split('?')[0];
       return `https://www.youtube.com/embed/${videoId}`;
-    }
-    // Vimeo URL handling
-    else if (url.includes('vimeo.com/')) {
+    } else if (url.includes('vimeo.com/')) {
       const videoId = url.split('vimeo.com/')[1].split('/')[0];
       return `https://player.vimeo.com/video/${videoId}`;
-    }
-    // Dailymotion URL handling
-    else if (url.includes('dailymotion.com/video/')) {
+    } else if (url.includes('dailymotion.com/video/')) {
       const videoId = url.split('video/')[1].split('_')[0];
       return `https://www.dailymotion.com/embed/video/${videoId}`;
     }
@@ -335,21 +304,18 @@ const VideoLectures = () => {
       return (
         <video
           controls
-          className="w-full h-full rounded-t-lg"
+          className="w-full h-full rounded-lg"
           poster={video.thumbnail}
           onTimeUpdate={e => {
             const target = e.target as HTMLVideoElement;
             if (target.duration > 0) {
               const percent = (target.currentTime / target.duration) * 100;
               setVideoProgress(percent);
-              // Save progress to localStorage
               localStorage.setItem(`video-progress-${video.id}`, String(percent));
-              // Only update card progress for local videos
               setVideoProgressMap(prev => ({ ...prev, [video.id]: percent }));
             }
           }}
           onLoadedMetadata={e => {
-            // Restore progress on load
             const target = e.target as HTMLVideoElement;
             const stored = localStorage.getItem(`video-progress-${video.id}`);
             if (stored && target.duration > 0) {
@@ -367,13 +333,12 @@ const VideoLectures = () => {
       );
     }
 
-    // For external videos, do not show progress bar
     if (video.videoUrl) {
       const embedUrl = getEmbedUrl(video.videoUrl);
       return (
         <iframe
           src={embedUrl}
-          className="w-full h-full rounded-t-lg"
+          className="w-full h-full rounded-lg"
           allowFullScreen
           title={video.title}
         />
@@ -383,7 +348,6 @@ const VideoLectures = () => {
     return null;
   };
 
-  // Load videos from Firestore
   useEffect(() => {
     const loadVideos = async () => {
       try {
@@ -399,9 +363,8 @@ const VideoLectures = () => {
             ...data,
             publishedDate: data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString() : new Date().toLocaleDateString()
           } as VideoLecture;
-        }).filter(video => video.status === 'approved'); // Only show approved videos
+        }).filter(video => video.status === 'approved');
 
-        // Load progress for all videos from localStorage
         const progressMap: { [id: string]: number } = {};
         videos.forEach(video => {
           const stored = localStorage.getItem(`video-progress-${video.id}`);
@@ -420,103 +383,106 @@ const VideoLectures = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-gray-800">
       {/* Video Modal Popup */}
       {showVideoModal && activeVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-5xl w-full relative" style={{ minWidth: '700px', minHeight: '500px' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full mx-4 relative">
             <button
-              className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-red-600"
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors z-10"
               onClick={() => { setShowVideoModal(false); setActiveVideo(null); setVideoProgress(0); }}
             >
-              <X className="h-6 w-6" />
+              <X className="h-8 w-8" />
             </button>
-            <div className="p-8">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{activeVideo.title}</h2>
-              <p className="text-base mb-6 text-gray-600 dark:text-gray-400">{activeVideo.description}</p>
-              <div className="mb-6" style={{ height: '350px' }}>
-                {renderVideoPlayer(activeVideo)}
-                {/* Progress Bar for local video */}
-                {activeVideo.isLocalVideo && (
-                  <div className="w-full h-2 bg-gray-200 rounded-full mt-2">
-                    <div
-                      className="h-2 bg-blue-600 rounded-full transition-all duration-300"
-                      style={{ width: `${videoProgress}%` }}
-                    ></div>
-                  </div>
-                )}
-                {/* For external videos, progress bar not shown (YouTube API required for tracking) */}
+            <div className="p-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{activeVideo.title}</h2>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{activeVideo.description}</p>
               </div>
-              <div className="flex items-center justify-between text-base text-gray-500">
-                <span>By {activeVideo.instructor}</span>
+              <div className="bg-black rounded-xl overflow-hidden mb-4" style={{ height: '400px' }}>
+                {renderVideoPlayer(activeVideo)}
+              </div>
+              {activeVideo.isLocalVideo && (
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-6">
+                  <div
+                    className="h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300"
+                    style={{ width: `${videoProgress}%` }}
+                  ></div>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                <span className="font-medium">By {activeVideo.instructor}</span>
                 <span>{activeVideo.publishedDate}</span>
               </div>
             </div>
           </div>
         </div>
       )}
+      
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+      <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => window.history.back()}
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
             </Button>
             <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Video Lectures</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Video Lectures
+            </h1>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="relative hidden md:block">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
                 placeholder="Search videos..."
-                className="w-64 pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="w-64 pl-10 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm"
               />
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="text-gray-600 hover:text-gray-700 hover:bg-gray-100"
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-5 w-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full"></span>
+            <Button variant="ghost" size="sm" className="relative text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              <Bell className="h-5 w-5" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
             </Button>
             <div className="relative">
               <Button
                 variant="ghost"
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
-                <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
+                <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full ring-2 ring-gray-300 dark:ring-gray-600" />
                 <ChevronDown className="h-4 w-4" />
               </Button>
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
-                  <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.college}</p>
+                <div className="absolute right-0 mt-2 w-56 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/50">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{user.college}</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <User className="h-4 w-4 mr-2" />
+                  <Button variant="ghost" size="sm" className="w-full justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <User className="h-4 w-4 mr-3" />
                     Profile
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <Settings className="h-4 w-4 mr-2" />
+                  <Button variant="ghost" size="sm" className="w-full justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <Settings className="h-4 w-4 mr-3" />
                     Settings
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start text-red-600">
-                    <LogOut className="h-4 w-4 mr-2" />
+                  <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                    <LogOut className="h-4 w-4 mr-3" />
                     Logout
                   </Button>
                 </div>
@@ -525,303 +491,416 @@ const VideoLectures = () => {
           </div>
         </div>
       </header>
+
       {/* Main Content */}
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Video Lectures</h2>
-              <p className="text-gray-600 dark:text-gray-400">Comprehensive video tutorials for medical education</p>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Video Library</h2>
+              <p className="text-lg text-gray-600 dark:text-gray-400">Comprehensive video tutorials for medical education</p>
             </div>
             <Button
               onClick={() => setShowAddForm(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2.5 rounded-xl"
               disabled={uploading}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              {uploading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
               Upload Video
             </Button>
           </div>
+
           {/* Add New Video Form */}
           {showAddForm && (
-            <Card className="mb-8 border-blue-200 bg-blue-50 dark:bg-blue-900/10">
-              <CardHeader>
-                <CardTitle className="text-blue-800 dark:text-blue-300">Upload New Video Lecture</CardTitle>
+            <Card className="mb-8 border-2 border-blue-200/50 dark:border-blue-500/20 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 backdrop-blur-sm shadow-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Upload New Video Lecture
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 {uploading && (
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Uploading...</span>
-                      <span className="text-sm text-gray-500">{Math.round(uploadProgress)}%</span>
+                  <div className="mb-6 p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Uploading...</span>
+                      <span className="text-sm font-bold text-blue-600">{Math.round(uploadProgress)}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                       <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-300 shadow-inner"
                         style={{ width: `${uploadProgress}%` }}
                       ></div>
                     </div>
                   </div>
                 )}
-                <form onSubmit={e => { e.preventDefault(); handleSubmit(); }}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video Title *</label>
+                
+                <form onSubmit={e => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Video Title *</label>
                       <Input
                         placeholder="Enter video title"
                         value={formData.title}
                         onChange={e => handleInputChange('title', e.target.value)}
                         disabled={uploading}
                         required
+                        className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-colors"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject *</label>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Subject *</label>
                       <Input
                         placeholder="e.g., Anatomy, Physiology"
                         value={formData.subject}
                         onChange={e => handleInputChange('subject', e.target.value)}
                         disabled={uploading}
                         required
+                        className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-colors"
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Instructor</label>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Instructor</label>
                       <Input
                         placeholder="Instructor name"
                         value={formData.instructor}
                         onChange={e => handleInputChange('instructor', e.target.value)}
                         disabled={uploading}
+                        className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-colors"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Duration</label>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Duration</label>
                       <Input
                         placeholder="e.g., 1h 30m"
                         value={formData.duration}
                         onChange={e => handleInputChange('duration', e.target.value)}
                         disabled={uploading}
+                        className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-colors"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Level</label>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Level</label>
                       <Input
                         placeholder="Beginner/Intermediate/Advanced"
                         value={formData.level}
                         onChange={e => handleInputChange('level', e.target.value)}
                         disabled={uploading}
+                        className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-colors"
                       />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Description</label>
                     <Textarea
                       placeholder="Video description and learning objectives..."
                       rows={4}
                       value={formData.description}
                       onChange={e => handleInputChange('description', e.target.value)}
                       disabled={uploading}
+                      className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-colors resize-none"
                     />
                   </div>
-                  <div className="flex items-center space-x-2 mb-4">
+
+                  <div className="flex items-center space-x-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg backdrop-blur-sm">
                     <input
                       type="checkbox"
                       id="isVideoLink"
                       checked={formData.isLink}
                       onChange={e => handleInputChange('isLink', e.target.checked)}
-                      className="rounded"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <label htmlFor="isVideoLink" className="text-sm text-gray-700 dark:text-gray-300">
+                    <label htmlFor="isVideoLink" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       External Video Link (YouTube, Vimeo, etc.)
                     </label>
                   </div>
+
                   {formData.isLink ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL (for embedding)</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Video URL *</label>
                         <Input
                           placeholder="https://www.youtube.com/watch?v=..."
                           value={formData.videoUrl}
                           onChange={e => handleInputChange('videoUrl', e.target.value)}
+                          className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-colors"
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">External Link (optional - same as video URL if not provided)</label>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">External Link</label>
                         <Input
                           placeholder="https://www.youtube.com/watch?v=..."
                           value={formData.externalLink}
                           onChange={e => handleInputChange('externalLink', e.target.value)}
+                          className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-colors"
                         />
                       </div>
                     </div>
                   ) : (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL</label>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Video URL</label>
                       <Input
                         placeholder="https://www.youtube.com/watch?v=..."
                         value={formData.videoUrl}
                         onChange={e => handleInputChange('videoUrl', e.target.value)}
+                        className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-colors"
                       />
                     </div>
                   )}
-                  {/* File Inputs for video, thumbnail, notes */}
-                  <div className="flex space-x-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Video File</label>
-                      <input
-                        type="file"
-                        accept="video/*"
-                        onChange={e => {
-                          if (e.target.files && e.target.files[0]) {
-                            handleInputChange('videoFile', e.target.files[0]);
-                          }
-                        }}
-                        disabled={uploading}
-                      />
+
+                  {/* File Uploads */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Video File</label>
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={e => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleInputChange('videoFile', e.target.files[0]);
+                            }
+                          }}
+                          disabled={uploading}
+                          className="hidden"
+                          id="video-upload"
+                        />
+                        <label htmlFor="video-upload" className="cursor-pointer">
+                          <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Click to upload video</p>
+                        </label>
+                      </div>
                       {formData.videoFile && (
-                        <p className="text-xs mt-1 text-green-700">Selected: {formData.videoFile.name}</p>
+                        <p className="text-xs text-green-600 dark:text-green-400 font-medium text-center">
+                          ✓ {formData.videoFile.name}
+                        </p>
                       )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Thumbnail</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={e => {
-                          if (e.target.files && e.target.files[0]) {
-                            handleInputChange('thumbnailFile', e.target.files[0]);
-                            // Show preview
-                            const reader = new FileReader();
-                            reader.onload = ev => handleInputChange('thumbnail', ev.target?.result);
-                            reader.readAsDataURL(e.target.files[0]);
-                          }
-                        }}
-                        disabled={uploading}
-                      />
+
+                    <div className="space-y-3">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Thumbnail</label>
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={e => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleInputChange('thumbnailFile', e.target.files[0]);
+                              const reader = new FileReader();
+                              reader.onload = ev => handleInputChange('thumbnail', ev.target?.result);
+                              reader.readAsDataURL(e.target.files[0]);
+                            }
+                          }}
+                          disabled={uploading}
+                          className="hidden"
+                          id="thumbnail-upload"
+                        />
+                        <label htmlFor="thumbnail-upload" className="cursor-pointer">
+                          <Image className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Upload thumbnail</p>
+                        </label>
+                      </div>
                       {formData.thumbnail && (
-                        <img src={formData.thumbnail} alt="Preview" className="w-20 h-12 object-cover mt-1 rounded" />
+                        <img src={formData.thumbnail} alt="Preview" className="w-20 h-12 object-cover mx-auto rounded-lg shadow-sm" />
                       )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Notes (PDF)</label>
-                      <input
-                        type="file"
-                        accept="application/pdf"
-                        onChange={e => {
-                          if (e.target.files && e.target.files[0]) {
-                            handleInputChange('notesFile', e.target.files[0]);
-                            handleInputChange('notes', e.target.files[0].name);
-                          }
-                        }}
-                        disabled={uploading}
-                      />
+
+                    <div className="space-y-3">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Notes (PDF)</label>
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+                        <input
+                          type="file"
+                          accept="application/pdf"
+                          onChange={e => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleInputChange('notesFile', e.target.files[0]);
+                              handleInputChange('notes', e.target.files[0].name);
+                            }
+                          }}
+                          disabled={uploading}
+                          className="hidden"
+                          id="notes-upload"
+                        />
+                        <label htmlFor="notes-upload" className="cursor-pointer">
+                          <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Upload notes</p>
+                        </label>
+                      </div>
                       {formData.notes && (
-                        <p className="text-xs mt-1 text-blue-700">Selected: {formData.notes}</p>
+                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium text-center">
+                          ✓ {formData.notes}
+                        </p>
                       )}
                     </div>
                   </div>
-                  <div className="flex space-x-4 mt-6">
+
+                  <div className="flex space-x-4 pt-4">
                     <Button
                       type="submit"
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-2.5 rounded-xl flex-1"
                       disabled={uploading}
                     >
-                      Upload Video
+                      {uploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        'Upload Video'
+                      )}
                     </Button>
-                    <Button variant="outline" type="button" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                    <Button 
+                      variant="outline" 
+                      type="button" 
+                      onClick={() => setShowAddForm(false)}
+                      className="flex-1 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-xl"
+                    >
+                      Cancel
+                    </Button>
                   </div>
                 </form>
               </CardContent>
             </Card>
           )}
+
           {/* Video Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {videoLectures.map((video) => (
-              <Card key={video.id} className="group hover:shadow-lg transition-all border-gray-200 hover:border-blue-300 cursor-pointer"
-                onClick={() => handleVideoClick(video)}>
-                <div className="relative h-48 overflow-hidden rounded-t-lg">
-                  <img
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="h-16 w-16 text-white" />
-                  </div>
-                  <Badge className="absolute top-3 right-3 bg-blue-600 text-white">
-                    {video.level}
-                  </Badge>
-                  {video.isLink && (
-                    <Badge className="absolute top-3 left-3 bg-green-600 text-white">
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      Link
-                    </Badge>
-                  )}
-                  {video.isLocalVideo && (
-                    <Badge className="absolute top-12 left-3 bg-purple-600 text-white">
-                      <Upload className="h-3 w-3 mr-1" />
-                      Local
-                    </Badge>
-                  )}
-                  <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                    {video.duration}
-                  </div>
-                  {/* Progress Bar for video (card) */}
-                  <div className="absolute bottom-0 left-0 w-full h-2 bg-gray-200 rounded-b-lg">
-                    {/* Only show progress bar for local videos */}
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {videoLectures.map((video) => (
+                <Card 
+                  key={video.id} 
+                  className="group hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 cursor-pointer bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm overflow-hidden"
+                  onClick={() => handleVideoClick(video)}
+                >
+                  <div className="relative h-52 overflow-hidden">
+                    <img
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
+                        <PlayCircle className="h-12 w-12 text-white" />
+                      </div>
+                    </div>
+                    
+                    {/* Badges */}
+                    <div className="absolute top-3 right-3">
+                      <Badge className="bg-blue-600/90 backdrop-blur-sm text-white border-0 shadow-lg">
+                        {video.level}
+                      </Badge>
+                    </div>
+                    
+                    {video.isLink && (
+                      <Badge className="absolute top-3 left-3 bg-green-600/90 backdrop-blur-sm text-white border-0 shadow-lg">
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        External
+                      </Badge>
+                    )}
+                    
                     {video.isLocalVideo && (
-                      <div
-                        className="h-2 bg-blue-600 rounded-b-lg transition-all duration-300"
-                        style={{ width: `${videoProgressMap[video.id] || 0}%` }}
-                      ></div>
+                      <Badge className="absolute top-12 left-3 bg-purple-600/90 backdrop-blur-sm text-white border-0 shadow-lg">
+                        <Upload className="h-3 w-3 mr-1" />
+                        Local
+                      </Badge>
+                    )}
+
+                    <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                      <Clock className="h-3 w-3 inline mr-1" />
+                      {video.duration}
+                    </div>
+
+                    {/* Progress Bar */}
+                    {video.isLocalVideo && (
+                      <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gray-300/50 backdrop-blur-sm">
+                        <div
+                          className="h-1.5 bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300"
+                          style={{ width: `${videoProgressMap[video.id] || 0}%` }}
+                        ></div>
+                      </div>
                     )}
                   </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className="text-blue-600 border-blue-200">
-                      {video.subject}
-                    </Badge>
-                    <Button variant="ghost" size="sm">
-                      <Bookmark className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                    {video.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                    {video.description}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>By {video.instructor}</span>
-                    <span>{video.publishedDate}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span className="flex items-center">
-                        <Eye className="h-4 w-4 mr-1" />
-                        {video.views}
-                      </span>
-                      <span className="flex items-center">
-                        <Heart className="h-4 w-4 mr-1" />
-                        {video.likes}
-                      </span>
+
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <Badge variant="outline" className="text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/20 backdrop-blur-sm">
+                        {video.subject}
+                      </Badge>
+                      <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <Bookmark className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={e => { e.stopPropagation(); handleVideoClick(video); }}
-                    >
-                      Watch Now
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 text-lg leading-tight">
+                      {video.title}
+                    </h3>
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">
+                      {video.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      <span className="font-medium">By {video.instructor}</span>
+                      <span>{video.publishedDate}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center font-medium">
+                          <Eye className="h-4 w-4 mr-1.5" />
+                          {video.views}
+                        </span>
+                        <span className="flex items-center font-medium">
+                          <Heart className="h-4 w-4 mr-1.5" />
+                          {video.likes}
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-4 py-2 rounded-lg"
+                        onClick={e => { e.stopPropagation(); handleVideoClick(video); }}
+                      >
+                        Watch Now
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {!loading && videoLectures.length === 0 && (
+            <div className="text-center py-20">
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-12 max-w-2xl mx-auto border border-gray-200 dark:border-gray-700">
+                <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <PlayCircle className="h-12 w-12 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">No videos available</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
+                  Start by uploading your first video lecture to share with students.
+                </p>
+                <Button
+                  onClick={() => setShowAddForm(true)}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-3 rounded-xl text-lg"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Upload First Video
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
