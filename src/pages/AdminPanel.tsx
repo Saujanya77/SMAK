@@ -170,10 +170,16 @@ const AdminPanel: React.FC = () => {
     const [quizMode, setQuizMode] = useState<'manual' | 'gform'>('manual');
     const [uploadingQuiz, setUploadingQuiz] = useState(false);
     const [showQuizModal, setShowQuizModal] = useState(false);
-    // Section type for course section 1
-    const [sectionType, setSectionType] = useState('video');
-    // Quiz type for course section 1
-    const [quizType, setQuizType] = useState<'manual' | 'gform'>('manual');
+    // Dynamic course sections state
+    const [courseSections, setCourseSections] = useState([
+        {
+            sectionType: 'video',
+            quizType: 'manual',
+            quizTitle: '',
+            quizThumbnail: '',
+            questions: [{ question: '', options: ['', ''], correctAnswer: 0 }]
+        }
+    ]);
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -520,11 +526,10 @@ const AdminPanel: React.FC = () => {
                             key={tab.key}
                             variant={activeTab === tab.key ? 'default' : 'ghost'}
                             onClick={() => setActiveTab(tab.key as any)}
-                            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
-                                activeTab === tab.key 
-                                    ? 'bg-blue-600 text-white shadow-lg' 
-                                    : 'text-blue-200 hover:text-white hover:bg-blue-600/50'
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-all duration-200 ${activeTab === tab.key
+                                ? 'bg-blue-600 text-white shadow-lg'
+                                : 'text-blue-200 hover:text-white hover:bg-blue-600/50'
+                                }`}
                         >
                             {tab.label}
                         </Button>
@@ -539,7 +544,7 @@ const AdminPanel: React.FC = () => {
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Quiz Management</h2>
-                            <Button 
+                            <Button
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-200 flex items-center gap-2"
                                 onClick={() => setShowQuizModal(true)}
                             >
@@ -552,7 +557,7 @@ const AdminPanel: React.FC = () => {
                         {showQuizModal && (
                             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
                                 <div className="rounded-2xl p-8 max-w-2xl w-full relative border-2 border-blue-300/50 shadow-2xl bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white max-h-[90vh] overflow-y-auto">
-                                    <button 
+                                    <button
                                         className="absolute top-4 right-4 text-gray-300 hover:text-white text-2xl transition-colors duration-200 bg-blue-600/50 w-8 h-8 rounded-full flex items-center justify-center"
                                         onClick={() => setShowQuizModal(false)}
                                         title="Close"
@@ -563,12 +568,12 @@ const AdminPanel: React.FC = () => {
                                     <form onSubmit={handleQuizSubmit} className="space-y-6">
                                         <div className="space-y-4">
                                             <label className="block font-semibold text-blue-200">Quiz Title</label>
-                                            <input 
-                                                type="text" 
+                                            <input
+                                                type="text"
                                                 className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                value={quizForm.title} 
-                                                onChange={e => handleQuizFormChange('title', e.target.value)} 
-                                                required 
+                                                value={quizForm.title}
+                                                onChange={e => handleQuizFormChange('title', e.target.value)}
+                                                required
                                                 placeholder="Enter quiz title..."
                                             />
                                         </div>
@@ -586,29 +591,29 @@ const AdminPanel: React.FC = () => {
                                                 </label>
                                             </div>
                                             {quizForm.thumbnailType === 'url' && (
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                    value={quizForm.thumbnail} 
-                                                    onChange={e => handleQuizFormChange('thumbnail', e.target.value)} 
+                                                    value={quizForm.thumbnail}
+                                                    onChange={e => handleQuizFormChange('thumbnail', e.target.value)}
                                                     placeholder="Enter thumbnail URL..."
                                                 />
                                             )}
                                             {quizForm.thumbnailType === 'upload' && (
-                                                <input 
-                                                    type="file" 
-                                                    accept="image/*" 
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
                                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
-                                                    onChange={e => handleQuizFormChange('thumbnail', e.target.files[0])} 
+                                                    onChange={e => handleQuizFormChange('thumbnail', e.target.files[0])}
                                                 />
                                             )}
                                         </div>
 
                                         <div className="space-y-4">
                                             <label className="block font-semibold text-blue-200">Quiz Type</label>
-                                            <select 
+                                            <select
                                                 className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                value={quizMode} 
+                                                value={quizMode}
                                                 onChange={e => setQuizMode(e.target.value as 'manual' | 'gform')}
                                             >
                                                 <option value="manual" className="bg-slate-800">Manual Creation</option>
@@ -619,12 +624,12 @@ const AdminPanel: React.FC = () => {
                                         {quizMode === 'gform' && (
                                             <div className="space-y-4">
                                                 <label className="block font-semibold text-blue-200">Google Form Link</label>
-                                                <input 
-                                                    type="url" 
+                                                <input
+                                                    type="url"
                                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                    value={quizForm.gformLink} 
-                                                    onChange={e => handleQuizFormChange('gformLink', e.target.value)} 
-                                                    required 
+                                                    value={quizForm.gformLink}
+                                                    onChange={e => handleQuizFormChange('gformLink', e.target.value)}
+                                                    required
                                                     placeholder="https://forms.google.com/..."
                                                 />
                                             </div>
@@ -647,38 +652,38 @@ const AdminPanel: React.FC = () => {
                                                                     {quizForm.questions.map((q, idx) => (
                                                                         <QuizQuestionDraggable key={idx} question={q} idx={idx}>
                                                                             <div className="bg-blue-800/20 border border-blue-600/30 rounded-xl p-4 space-y-4 hover:border-blue-500/50 transition-all duration-200">
-                                                                                <input 
-                                                                                    type="text" 
+                                                                                <input
+                                                                                    type="text"
                                                                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                                    placeholder="Enter question..." 
-                                                                                    value={q.question} 
-                                                                                    onChange={e => handleQuizQuestionChange(idx, 'question', e.target.value)} 
-                                                                                    required 
+                                                                                    placeholder="Enter question..."
+                                                                                    value={q.question}
+                                                                                    onChange={e => handleQuizQuestionChange(idx, 'question', e.target.value)}
+                                                                                    required
                                                                                 />
                                                                                 <div className="space-y-3">
                                                                                     <label className="block font-semibold text-blue-200 text-sm">Options</label>
                                                                                     {q.options.map((opt, oIdx) => (
                                                                                         <div key={oIdx} className="flex items-center gap-2">
-                                                                                            <input 
-                                                                                                type="text" 
+                                                                                            <input
+                                                                                                type="text"
                                                                                                 className="flex-1 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                                                placeholder={`Option ${oIdx + 1}`} 
-                                                                                                value={opt} 
-                                                                                                onChange={e => handleQuizOptionChange(idx, oIdx, e.target.value)} 
-                                                                                                required 
+                                                                                                placeholder={`Option ${oIdx + 1}`}
+                                                                                                value={opt}
+                                                                                                onChange={e => handleQuizOptionChange(idx, oIdx, e.target.value)}
+                                                                                                required
                                                                                             />
-                                                                                            <button 
-                                                                                                type="button" 
+                                                                                            <button
+                                                                                                type="button"
                                                                                                 className="text-red-400 hover:text-red-300 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 rounded"
-                                                                                                onClick={() => handleRemoveQuizOption(idx, oIdx)} 
+                                                                                                onClick={() => handleRemoveQuizOption(idx, oIdx)}
                                                                                                 disabled={q.options.length <= 2}
                                                                                             >
                                                                                                 Remove
                                                                                             </button>
                                                                                         </div>
                                                                                     ))}
-                                                                                    <button 
-                                                                                        type="button" 
+                                                                                    <button
+                                                                                        type="button"
                                                                                         className="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center gap-1 text-sm"
                                                                                         onClick={() => handleAddQuizOption(idx)}
                                                                                     >
@@ -688,20 +693,20 @@ const AdminPanel: React.FC = () => {
                                                                                 </div>
                                                                                 <div className="space-y-2">
                                                                                     <label className="block font-semibold text-blue-200 text-sm">Correct Answer (option index)</label>
-                                                                                    <input 
-                                                                                        type="number" 
-                                                                                        min="0" 
-                                                                                        max={q.options.length - 1} 
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        min="0"
+                                                                                        max={q.options.length - 1}
                                                                                         className="w-20 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                                        value={q.correctAnswer} 
-                                                                                        onChange={e => handleQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value))} 
-                                                                                        required 
+                                                                                        value={q.correctAnswer}
+                                                                                        onChange={e => handleQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value))}
+                                                                                        required
                                                                                     />
                                                                                 </div>
-                                                                                <button 
-                                                                                    type="button" 
+                                                                                <button
+                                                                                    type="button"
                                                                                     className="text-red-400 hover:text-red-300 transition-colors duration-200 text-sm flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                                    onClick={() => handleRemoveQuizQuestion(idx)} 
+                                                                                    onClick={() => handleRemoveQuizQuestion(idx)}
                                                                                     disabled={quizForm.questions.length <= 1}
                                                                                 >
                                                                                     <Trash2 size={16} />
@@ -716,8 +721,8 @@ const AdminPanel: React.FC = () => {
                                                         </Droppable>
                                                     </DragDropContext>
                                                 </div>
-                                                <button 
-                                                    type="button" 
+                                                <button
+                                                    type="button"
                                                     className="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center gap-2"
                                                     onClick={handleAddQuizQuestion}
                                                 >
@@ -728,15 +733,15 @@ const AdminPanel: React.FC = () => {
                                         )}
 
                                         <div className="flex gap-4 pt-4">
-                                            <button 
-                                                type="submit" 
+                                            <button
+                                                type="submit"
                                                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                                 disabled={uploadingQuiz}
                                             >
                                                 {uploadingQuiz ? 'Creating...' : 'Create Quiz'}
                                             </button>
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl transition-all duration-200"
                                                 onClick={() => setShowQuizModal(false)}
                                             >
@@ -772,9 +777,9 @@ const AdminPanel: React.FC = () => {
                                                         <Edit size={16} />
                                                         Edit
                                                     </Button>
-                                                    <Button 
-                                                        variant="destructive" 
-                                                        size="sm" 
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
                                                         onClick={() => handleDeleteQuiz(quiz.id)}
                                                         className="flex items-center gap-2"
                                                     >
@@ -784,10 +789,10 @@ const AdminPanel: React.FC = () => {
                                                 </div>
                                             </div>
                                             {quiz.type === 'gform' && quiz.gformLink && (
-                                                <a 
-                                                    href={quiz.gformLink} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer" 
+                                                <a
+                                                    href={quiz.gformLink}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors duration-200"
                                                 >
                                                     <Eye size={16} />
@@ -804,7 +809,7 @@ const AdminPanel: React.FC = () => {
                         {showEditModal && (
                             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
                                 <div className="rounded-2xl p-8 max-w-2xl w-full relative border-2 border-blue-300/50 shadow-2xl bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white max-h-[90vh] overflow-y-auto">
-                                    <button 
+                                    <button
                                         className="absolute top-4 right-4 text-gray-300 hover:text-white text-2xl transition-colors duration-200 bg-blue-600/50 w-8 h-8 rounded-full flex items-center justify-center"
                                         onClick={() => setShowEditModal(false)}
                                         title="Close"
@@ -816,24 +821,24 @@ const AdminPanel: React.FC = () => {
                                         {/* Edit form content - similar to create form but with editQuizForm */}
                                         <div className="space-y-4">
                                             <label className="block font-semibold text-blue-200">Quiz Title</label>
-                                            <input 
-                                                type="text" 
+                                            <input
+                                                type="text"
                                                 className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                value={editQuizForm.title} 
-                                                onChange={e => handleEditQuizFormChange('title', e.target.value)} 
-                                                required 
+                                                value={editQuizForm.title}
+                                                onChange={e => handleEditQuizFormChange('title', e.target.value)}
+                                                required
                                             />
                                         </div>
                                         {/* ... rest of edit form ... */}
                                         <div className="flex gap-4 pt-4">
-                                            <button 
-                                                type="submit" 
+                                            <button
+                                                type="submit"
                                                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
                                             >
                                                 Save Changes
                                             </button>
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl transition-all duration-200"
                                                 onClick={() => setShowEditModal(false)}
                                             >
@@ -859,103 +864,260 @@ const AdminPanel: React.FC = () => {
                     <Card className="medical-card shadow-2xl max-w-2xl mx-auto bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
                         <form className="p-8 space-y-6">
                             <h2 className="text-3xl font-bold text-white mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Create Course</h2>
-                            
                             <div className="space-y-4">
                                 <label className="block font-semibold text-blue-200">Course Name</label>
-                                <input 
-                                    type="text" 
-                                    required 
-                                    placeholder="Course Name" 
+                                <input
+                                    type="text"
+                                    required
+                                    placeholder="Course Name"
                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                 />
                             </div>
-                            
                             <div className="space-y-4">
                                 <label className="block font-semibold text-blue-200">Course Description</label>
-                                <textarea 
-                                    required 
-                                    placeholder="Course Description" 
+                                <textarea
+                                    required
+                                    placeholder="Course Description"
                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[100px]"
                                 />
                             </div>
-                            
                             <div className="space-y-4">
                                 <label className="block font-semibold text-blue-200">Course Thumbnail</label>
-                                <input 
-                                    type="file" 
-                                    accept="image/*" 
+                                <input
+                                    type="file"
+                                    accept="image/*"
                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
                                 />
                             </div>
-                            
                             <hr className="my-6 border-blue-500/30" />
-                            
                             <h3 className="font-semibold text-blue-200 text-xl mb-4">Add Section</h3>
-                            <Card className="border border-blue-600/30 p-6 mb-4 rounded-xl bg-blue-800/20 backdrop-blur-sm">
-                                <span className="font-medium text-blue-200 text-lg">Section 1</span>
-                                <div className="mb-4 flex gap-6 mt-4">
-                                    <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
-                                        <input type="radio" name="sectionType" value="video" checked={sectionType === 'video'} onChange={() => setSectionType('video')} className="text-blue-500" />
-                                        Add Video
-                                    </label>
-                                    <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
-                                        <input type="radio" name="sectionType" value="quiz" checked={sectionType === 'quiz'} onChange={() => setSectionType('quiz')} className="text-blue-500" />
-                                        Add Quiz
-                                    </label>
-                                </div>
-                                
-                                {sectionType === 'video' && (
-                                    <div className="space-y-4">
-                                        <label className="block font-medium text-blue-200">Video Link</label>
-                                        <input 
-                                            type="text" 
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Paste video link here" 
-                                        />
+                            {courseSections.map((section, idx) => (
+                                <Card key={idx} className="border border-blue-600/30 p-6 mb-4 rounded-xl bg-blue-800/20 backdrop-blur-sm relative">
+                                    <span className="font-medium text-blue-200 text-lg">Section {idx + 1}</span>
+                                    {/* Cross (delete) button */}
+                                    <button
+                                        type="button"
+                                        className="absolute top-4 right-4 text-gray-300 hover:text-red-400 text-xl transition-colors duration-200 bg-blue-600/50 w-8 h-8 rounded-full flex items-center justify-center"
+                                        title="Delete Section"
+                                        onClick={() => setCourseSections(sections => sections.filter((_, i) => i !== idx))}
+                                        disabled={courseSections.length === 1}
+                                    >
+                                        ×
+                                    </button>
+                                    <div className="mb-4 flex gap-6 mt-4">
+                                        <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
+                                            <input type="radio" name={`sectionType-${idx}`} value="video" checked={section.sectionType === 'video'} onChange={() => {
+                                                setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, sectionType: 'video' } : s));
+                                            }} className="text-blue-500" />
+                                            Add Video
+                                        </label>
+                                        <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
+                                            <input type="radio" name={`sectionType-${idx}`} value="quiz" checked={section.sectionType === 'quiz'} onChange={() => {
+                                                setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, sectionType: 'quiz' } : s));
+                                            }} className="text-blue-500" />
+                                            Add Quiz
+                                        </label>
                                     </div>
-                                )}
-                                
-                                {sectionType === 'quiz' && (
-                                    <div className="space-y-4">
-                                        <label className="block font-medium text-blue-200">Quiz Type</label>
-                                        <div className="flex gap-6 mb-4">
-                                            <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
-                                                <input type="radio" name="quizType" value="manual" checked={quizType === 'manual'} onChange={() => setQuizType('manual')} className="text-blue-500" />
-                                                Manual Form
-                                            </label>
-                                            <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
-                                                <input type="radio" name="quizType" value="gform" checked={quizType === 'gform'} onChange={() => setQuizType('gform')} className="text-blue-500" />
-                                                Google Form
-                                            </label>
+                                    {section.sectionType === 'video' && (
+                                        <div className="space-y-4">
+                                            <label className="block font-medium text-blue-200">Video Link</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                placeholder="Paste video link here"
+                                            />
                                         </div>
-                                        
-                                        {quizType === 'manual' && (
-                                            <div className="space-y-4">
-                                                <label className="block font-medium text-blue-200">Manual Quiz Form (coming soon)</label>
-                                                <div className="text-blue-300 text-sm">Advanced quiz builder coming soon...</div>
+                                    )}
+                                    {section.sectionType === 'quiz' && (
+                                        <div className="space-y-4">
+                                            <label className="block font-medium text-blue-200">Quiz Type</label>
+                                            <div className="flex gap-6 mb-4">
+                                                <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
+                                                    <input type="radio" name={`quizType-${idx}`} value="manual" checked={section.quizType === 'manual'} onChange={() => {
+                                                        setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizType: 'manual' } : s));
+                                                    }} className="text-blue-500" />
+                                                    Manual Form
+                                                </label>
+                                                <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
+                                                    <input type="radio" name={`quizType-${idx}`} value="gform" checked={section.quizType === 'gform'} onChange={() => {
+                                                        setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizType: 'gform' } : s));
+                                                    }} className="text-blue-500" />
+                                                    Google Form
+                                                </label>
                                             </div>
-                                        )}
-                                        
-                                        {quizType === 'gform' && (
-                                            <div className="space-y-4">
-                                                <label className="block font-medium text-blue-200">Google Form Link</label>
-                                                <input 
-                                                    type="text" 
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    placeholder="Paste Google Form link here" 
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                                
-                                <div className="mt-6 text-right">
-                                    <Button type="button" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition-all duration-200 flex items-center gap-2 ml-auto">
-                                        <Plus size={20} />
-                                        Add another section
-                                    </Button>
-                                </div>
-                            </Card>
+                                            {section.quizType === 'manual' && (
+                                                <div className="space-y-4">
+                                                    {/* Full quiz creation form, similar to quizzes section, with drag-and-drop for questions */}
+                                                    <label className="block font-semibold text-blue-200">Quiz Title</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                        value={section.quizTitle || ''}
+                                                        onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizTitle: e.target.value } : s))}
+                                                        required
+                                                        placeholder="Enter quiz title..."
+                                                    />
+                                                    <label className="block font-semibold text-blue-200">Thumbnail</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                        value={section.quizThumbnail || ''}
+                                                        onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizThumbnail: e.target.value } : s))}
+                                                        placeholder="Enter thumbnail URL..."
+                                                    />
+                                                    <label className="block font-semibold text-blue-200">Questions</label>
+                                                    <DragDropContext onDragEnd={result => {
+                                                        if (!result.destination) return;
+                                                        const reordered = Array.from(section.questions);
+                                                        const [removed] = reordered.splice(result.source.index, 1);
+                                                        reordered.splice(result.destination.index, 0, removed);
+                                                        setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, questions: reordered } : s));
+                                                    }}>
+                                                        <Droppable droppableId={`questions-droppable-${idx}`}>
+                                                            {(provided) => (
+                                                                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-4">
+                                                                    {section.questions.map((q, qIdx) => (
+                                                                        <QuizQuestionDraggable key={qIdx} question={q} idx={qIdx}>
+                                                                            <div className="bg-blue-800/20 border border-blue-600/30 rounded-xl p-4 space-y-4 mb-2">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                    placeholder="Enter question..."
+                                                                                    value={q.question}
+                                                                                    onChange={e => {
+                                                                                        const updatedQuestions = section.questions.map((qq, qqIdx) => qqIdx === qIdx ? { ...qq, question: e.target.value } : qq);
+                                                                                        setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, questions: updatedQuestions } : s));
+                                                                                    }}
+                                                                                    required
+                                                                                />
+                                                                                <label className="block font-semibold text-blue-200 text-sm">Options</label>
+                                                                                {q.options.map((opt, oIdx) => (
+                                                                                    <div key={oIdx} className="flex items-center gap-2">
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            className="flex-1 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                            placeholder={`Option ${oIdx + 1}`}
+                                                                                            value={opt}
+                                                                                            onChange={e => {
+                                                                                                const updatedQuestions = section.questions.map((qq, qqIdx) => {
+                                                                                                    if (qqIdx === qIdx) {
+                                                                                                        const updatedOptions = qq.options.map((oo, ooIdx) => ooIdx === oIdx ? e.target.value : oo);
+                                                                                                        return { ...qq, options: updatedOptions };
+                                                                                                    }
+                                                                                                    return qq;
+                                                                                                });
+                                                                                                setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, questions: updatedQuestions } : s));
+                                                                                            }}
+                                                                                            required
+                                                                                        />
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="text-red-400 hover:text-red-300 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 rounded"
+                                                                                            onClick={() => {
+                                                                                                const updatedQuestions = section.questions.map((qq, qqIdx) => {
+                                                                                                    if (qqIdx === qIdx) {
+                                                                                                        return { ...qq, options: qq.options.filter((_, ooIdx) => ooIdx !== oIdx) };
+                                                                                                    }
+                                                                                                    return qq;
+                                                                                                });
+                                                                                                setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, questions: updatedQuestions } : s));
+                                                                                            }}
+                                                                                            disabled={q.options.length <= 2}
+                                                                                        >Remove</button>
+                                                                                    </div>
+                                                                                ))}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center gap-1 text-sm"
+                                                                                    onClick={() => {
+                                                                                        const updatedQuestions = section.questions.map((qq, qqIdx) => {
+                                                                                            if (qqIdx === qIdx) {
+                                                                                                return { ...qq, options: [...qq.options, ''] };
+                                                                                            }
+                                                                                            return qq;
+                                                                                        });
+                                                                                        setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, questions: updatedQuestions } : s));
+                                                                                    }}
+                                                                                >
+                                                                                    <Plus size={16} /> Add Option
+                                                                                </button>
+                                                                                <label className="block font-semibold text-blue-200 text-sm">Correct Answer (option index)</label>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    min="0"
+                                                                                    max={q.options.length - 1}
+                                                                                    className="w-20 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                    value={q.correctAnswer}
+                                                                                    onChange={e => {
+                                                                                        const updatedQuestions = section.questions.map((qq, qqIdx) => qqIdx === qIdx ? { ...qq, correctAnswer: Number(e.target.value) } : qq);
+                                                                                        setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, questions: updatedQuestions } : s));
+                                                                                    }}
+                                                                                    required
+                                                                                />
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="text-red-400 hover:text-red-300 transition-colors duration-200 text-sm flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                                    onClick={() => {
+                                                                                        const updatedQuestions = section.questions.filter((_, qqIdx) => qqIdx !== qIdx);
+                                                                                        setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, questions: updatedQuestions } : s));
+                                                                                    }}
+                                                                                    disabled={section.questions.length <= 1}
+                                                                                >
+                                                                                    <Trash2 size={16} /> Remove Question
+                                                                                </button>
+                                                                            </div>
+                                                                        </QuizQuestionDraggable>
+                                                                    ))}
+                                                                    {provided.placeholder}
+                                                                </div>
+                                                            )}
+                                                        </Droppable>
+                                                    </DragDropContext>
+                                                    <button
+                                                        type="button"
+                                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center gap-2"
+                                                        onClick={() => {
+                                                            const updatedQuestions = [...section.questions, { question: '', options: ['', ''], correctAnswer: 0 }];
+                                                            setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, questions: updatedQuestions } : s));
+                                                        }}
+                                                    >
+                                                        <Plus size={20} /> Add Question
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {section.quizType === 'gform' && (
+                                                <div className="space-y-4">
+                                                    <label className="block font-medium text-blue-200">Google Form Link</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        placeholder="Paste Google Form link here"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </Card>
+                            ))}
+                            <div className="mt-6 text-right">
+                                <Button
+                                    type="button"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition-all duration-200 flex items-center gap-2 ml-auto"
+                                    onClick={() => setCourseSections(sections => [
+                                        ...sections,
+                                        {
+                                            sectionType: 'video',
+                                            quizType: 'manual',
+                                            quizTitle: '',
+                                            quizThumbnail: '',
+                                            questions: [{ question: '', options: ['', ''], correctAnswer: 0 }]
+                                        }
+                                    ])}
+                                >
+                                    <Plus size={20} />
+                                    Add another section
+                                </Button>
+                            </div>
                         </form>
                     </Card>
                 )}
@@ -966,11 +1128,11 @@ const AdminPanel: React.FC = () => {
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-6">
                             Pending {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} for Approval
                         </h2>
-                        
+
                         {(() => {
                             const loadingState = activeTab === 'videos' ? loadingVideos : activeTab === 'journals' ? loadingJournals : loadingBlogs;
                             const pendingItems = activeTab === 'videos' ? pendingVideos : activeTab === 'journals' ? pendingJournals : pendingBlogs;
-                            
+
                             if (loadingState) {
                                 return (
                                     <div className="flex justify-center items-center py-12">
@@ -978,7 +1140,7 @@ const AdminPanel: React.FC = () => {
                                     </div>
                                 );
                             }
-                            
+
                             if (pendingItems.length === 0) {
                                 return (
                                     <Card className="text-center py-12 bg-blue-800/20 backdrop-blur-sm border border-blue-600/30 rounded-2xl">
@@ -986,7 +1148,7 @@ const AdminPanel: React.FC = () => {
                                     </Card>
                                 );
                             }
-                            
+
                             return (
                                 <div className="grid gap-6">
                                     {pendingItems.map((item) => (
@@ -1049,15 +1211,15 @@ const AdminPanel: React.FC = () => {
                                                     </Button>
                                                 )}
                                                 <div className="flex gap-2 ml-auto">
-                                                    <Button 
-                                                        onClick={() => activeTab === 'videos' ? handleApproveVideo(item.id) : activeTab === 'journals' ? handleApproveJournal(item.id) : handleApproveBlog(item.id)} 
+                                                    <Button
+                                                        onClick={() => activeTab === 'videos' ? handleApproveVideo(item.id) : activeTab === 'journals' ? handleApproveJournal(item.id) : handleApproveBlog(item.id)}
                                                         className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 transition-all duration-200"
                                                     >
                                                         <CheckCircle size={16} />
                                                         Approve
                                                     </Button>
-                                                    <Button 
-                                                        onClick={() => activeTab === 'videos' ? handleRejectVideo(item.id) : activeTab === 'journals' ? handleRejectJournal(item.id) : handleRejectBlog(item.id)} 
+                                                    <Button
+                                                        onClick={() => activeTab === 'videos' ? handleRejectVideo(item.id) : activeTab === 'journals' ? handleRejectJournal(item.id) : handleRejectBlog(item.id)}
                                                         className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2 transition-all duration-200"
                                                     >
                                                         <XCircle size={16} />
@@ -1083,10 +1245,10 @@ const AdminPanel: React.FC = () => {
                                 <div className="grid md:grid-cols-3 gap-6">
                                     <div className="space-y-4">
                                         <label className="block text-sm font-medium text-blue-200">Icon <span className="text-red-400">*</span></label>
-                                        <select 
-                                            required 
+                                        <select
+                                            required
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            value={achievementForm.icon} 
+                                            value={achievementForm.icon}
                                             onChange={e => setAchievementForm(f => ({ ...f, icon: e.target.value }))}
                                         >
                                             <option value="" className="bg-slate-800">Select Icon</option>
@@ -1097,38 +1259,38 @@ const AdminPanel: React.FC = () => {
                                     </div>
                                     <div className="space-y-4">
                                         <label className="block text-sm font-medium text-blue-200">Value <span className="text-red-400">*</span></label>
-                                        <input 
-                                            type="text" 
-                                            required 
-                                            placeholder="Achievement Value" 
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Achievement Value"
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            value={achievementForm.value} 
-                                            onChange={e => setAchievementForm(f => ({ ...f, value: e.target.value }))} 
+                                            value={achievementForm.value}
+                                            onChange={e => setAchievementForm(f => ({ ...f, value: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-4">
                                         <label className="block text-sm font-medium text-blue-200">Label <span className="text-red-400">*</span></label>
-                                        <input 
-                                            type="text" 
-                                            required 
-                                            placeholder="Achievement Label" 
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Achievement Label"
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            value={achievementForm.label} 
-                                            onChange={e => setAchievementForm(f => ({ ...f, label: e.target.value }))} 
+                                            value={achievementForm.label}
+                                            onChange={e => setAchievementForm(f => ({ ...f, label: e.target.value }))}
                                         />
                                     </div>
                                 </div>
                                 <div className="flex gap-4 pt-4">
-                                    <Button 
-                                        type="submit" 
+                                    <Button
+                                        type="submit"
                                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
                                     >
                                         <Plus size={20} />
                                         {editingAchievementId ? 'Update' : 'Add'} Achievement
                                     </Button>
-                                    <Button 
-                                        type="button" 
-                                        variant="outline" 
+                                    <Button
+                                        type="button"
+                                        variant="outline"
                                         className="border-blue-500/50 text-blue-300 hover:bg-blue-500/20 hover:text-white transition-all duration-200 px-6 py-3 rounded-xl"
                                         onClick={() => { setEditingAchievementId(null); setAchievementForm({ icon: '', value: '', label: '', isStatic: false, staticIndex: null }); }}
                                     >
@@ -1137,7 +1299,7 @@ const AdminPanel: React.FC = () => {
                                 </div>
                             </form>
                         </Card>
-                        
+
                         <div className="grid md:grid-cols-2 gap-6 mt-8">
                             {staticAchievements.map((a, idx) => (
                                 <Card key={"static-" + idx} className="medical-card text-white p-6 flex items-center gap-6 card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
@@ -1149,14 +1311,14 @@ const AdminPanel: React.FC = () => {
                                         <div className="text-blue-200">{a.label}</div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button 
+                                        <Button
                                             className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 flex items-center gap-2"
                                             onClick={() => handleEditAchievement(a, idx, true)}
                                         >
                                             <Edit size={16} />
                                             Edit
                                         </Button>
-                                        <Button 
+                                        <Button
                                             className="bg-red-600 hover:bg-red-700 text-white transition-all duration-200 flex items-center gap-2"
                                             onClick={() => handleDeleteAchievement(null, idx, true)}
                                         >
@@ -1176,14 +1338,14 @@ const AdminPanel: React.FC = () => {
                                         <div className="text-blue-200">{a.label}</div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button 
+                                        <Button
                                             className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 flex items-center gap-2"
                                             onClick={() => handleEditAchievement(a)}
                                         >
                                             <Edit size={16} />
                                             Edit
                                         </Button>
-                                        <Button 
+                                        <Button
                                             className="bg-red-600 hover:bg-red-700 text-white transition-all duration-200 flex items-center gap-2"
                                             onClick={() => handleDeleteAchievement(a.id)}
                                         >
@@ -1257,84 +1419,84 @@ const AdminPanel: React.FC = () => {
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
                                         <label className="block text-sm font-medium text-blue-200">Name <span className="text-red-400">*</span></label>
-                                        <input 
-                                            type="text" 
-                                            required 
-                                            placeholder="Full name" 
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Full name"
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            value={memberForm.name} 
-                                            onChange={e => setMemberForm(f => ({ ...f, name: e.target.value }))} 
+                                            value={memberForm.name}
+                                            onChange={e => setMemberForm(f => ({ ...f, name: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-4">
                                         <label className="block text-sm font-medium text-blue-200">Institution/College <span className="text-red-400">*</span></label>
-                                        <input 
-                                            type="text" 
-                                            required 
-                                            placeholder="Institution/College" 
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Institution/College"
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            value={memberForm.institution} 
-                                            onChange={e => setMemberForm(f => ({ ...f, institution: e.target.value }))} 
+                                            value={memberForm.institution}
+                                            onChange={e => setMemberForm(f => ({ ...f, institution: e.target.value }))}
                                         />
                                     </div>
                                 </div>
-                                
+
                                 <div className="space-y-4">
                                     <label className="block text-sm font-medium text-blue-200">Profile Picture <span className="text-red-400">*</span></label>
-                                    <input 
-                                        type="file" 
-                                        required 
-                                        accept="image/*" 
+                                    <input
+                                        type="file"
+                                        required
+                                        accept="image/*"
                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
-                                        onChange={e => setMemberForm(f => ({ ...f, picture: e.target.files[0] }))} 
+                                        onChange={e => setMemberForm(f => ({ ...f, picture: e.target.files[0] }))}
                                     />
                                 </div>
-                                
+
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
                                         <label className="block text-sm font-medium text-blue-200">Email</label>
-                                        <input 
-                                            type="email" 
-                                            placeholder="Email address" 
+                                        <input
+                                            type="email"
+                                            placeholder="Email address"
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            value={memberForm.email} 
-                                            onChange={e => setMemberForm(f => ({ ...f, email: e.target.value }))} 
+                                            value={memberForm.email}
+                                            onChange={e => setMemberForm(f => ({ ...f, email: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-4">
                                         <label className="block text-sm font-medium text-blue-200">Phone (with country code)</label>
-                                        <input 
-                                            type="tel" 
-                                            placeholder="+91 9876543210" 
+                                        <input
+                                            type="tel"
+                                            placeholder="+91 9876543210"
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            value={memberForm.phone || ''} 
-                                            onChange={e => setMemberForm(f => ({ ...f, phone: e.target.value }))} 
+                                            value={memberForm.phone || ''}
+                                            onChange={e => setMemberForm(f => ({ ...f, phone: e.target.value }))}
                                         />
                                     </div>
                                 </div>
-                                
+
                                 <div className="space-y-4">
                                     <label className="block text-sm font-medium text-blue-200">Designation</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Designation/Role" 
+                                    <input
+                                        type="text"
+                                        placeholder="Designation/Role"
                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                        value={memberForm.designation} 
-                                        onChange={e => setMemberForm(f => ({ ...f, designation: e.target.value }))} 
+                                        value={memberForm.designation}
+                                        onChange={e => setMemberForm(f => ({ ...f, designation: e.target.value }))}
                                     />
                                 </div>
-                                
+
                                 <div className="flex gap-4 pt-4">
-                                    <Button 
-                                        type="submit" 
+                                    <Button
+                                        type="submit"
                                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
                                     >
                                         <Plus size={20} />
                                         {editingMemberId ? 'Update Member' : 'Add Member'}
                                     </Button>
-                                    <Button 
-                                        type="button" 
-                                        variant="outline" 
+                                    <Button
+                                        type="button"
+                                        variant="outline"
                                         className="border-blue-500/50 text-blue-300 hover:bg-blue-500/20 hover:text-white transition-all duration-200 px-6 py-3 rounded-xl"
                                         onClick={() => { setEditingMemberId(null); setMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null, isStatic: false, staticIndex: null }); }}
                                     >
@@ -1343,7 +1505,7 @@ const AdminPanel: React.FC = () => {
                                 </div>
                             </form>
                         </Card>
-                        
+
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
                             {staticMembers.map((m, idx) => (
                                 <Card key={"static-" + idx} className="medical-card text-white p-6 flex flex-col items-center text-center card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
@@ -1354,7 +1516,7 @@ const AdminPanel: React.FC = () => {
                                         <div className="text-blue-300 text-sm font-semibold mb-4">{m.designation}</div>
                                     </div>
                                     <div className="flex gap-2 w-full">
-                                        <Button 
+                                        <Button
                                             className="bg-blue-600 hover:bg-blue-700 text-white flex-1 transition-all duration-200 flex items-center gap-2"
                                             onClick={() => {
                                                 setMemberForm({
@@ -1373,7 +1535,7 @@ const AdminPanel: React.FC = () => {
                                             <Edit size={16} />
                                             Edit
                                         </Button>
-                                        <Button 
+                                        <Button
                                             className="bg-red-600 hover:bg-red-700 text-white flex-1 transition-all duration-200 flex items-center gap-2"
                                             onClick={() => {
                                                 if (window.confirm('Delete this static member?')) {
@@ -1397,7 +1559,7 @@ const AdminPanel: React.FC = () => {
                                         <div className="text-blue-300 text-sm font-semibold mb-4">{m.designation}</div>
                                     </div>
                                     <div className="flex gap-2 w-full">
-                                        <Button 
+                                        <Button
                                             className="bg-blue-600 hover:bg-blue-700 text-white flex-1 transition-all duration-200 flex items-center gap-2"
                                             onClick={() => {
                                                 setEditingMemberId(m.id);
@@ -1416,7 +1578,7 @@ const AdminPanel: React.FC = () => {
                                             <Edit size={16} />
                                             Edit
                                         </Button>
-                                        <Button 
+                                        <Button
                                             className="bg-red-600 hover:bg-red-700 text-white flex-1 transition-all duration-200 flex items-center gap-2"
                                             onClick={async () => {
                                                 if (window.confirm('Delete this member?')) {
