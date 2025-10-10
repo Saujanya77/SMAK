@@ -127,6 +127,7 @@ const VideoLectures = () => {
   // Modal state for video popup
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [activeVideo, setActiveVideo] = useState<VideoLecture | null>(null);
+  const [activeVideoLink, setActiveVideoLink] = useState<string | null>(null);
 
   const user = mockUser;
 
@@ -1000,8 +1001,16 @@ const VideoLectures = () => {
                       </div>
                       {section.sectionType === 'video' && (
                         <div>
-                          <span className="font-semibold text-gray-700 dark:text-gray-300">Video Link:</span>
-                          <span className="ml-2 text-blue-700 dark:text-blue-300">{section.videoLink || 'N/A'}</span>
+                          <button
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow-md transition-all"
+                            onClick={() => {
+                              setShowVideoModal(true);
+                              setActiveVideoLink(section.videoLink);
+                            }}
+                            disabled={!section.videoLink}
+                          >
+                            Play Video
+                          </button>
                         </div>
                       )}
                       {section.sectionType === 'quiz' && (
@@ -1038,6 +1047,28 @@ const VideoLectures = () => {
                 <div className="text-gray-500">No sections found for this course.</div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Popup Modal */}
+      {showVideoModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-70">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full relative p-8 flex flex-col items-center">
+            <button
+              className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-red-600"
+              onClick={() => { setShowVideoModal(false); setActiveVideoLink(null); }}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            {activeVideoLink ? (
+              <video controls autoPlay className="w-full h-96 rounded-lg shadow-lg">
+                <source src={activeVideoLink} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <div className="text-gray-500">No video link available.</div>
+            )}
           </div>
         </div>
       )}

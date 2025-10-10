@@ -5,16 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Toggle } from '@/components/ui/toggle';
-import { 
-  BookOpen, 
-  Video, 
-  FileText, 
-  Bookmark, 
-  User, 
-  Settings, 
-  LogOut, 
-  Calendar, 
-  Users, 
+import {
+  BookOpen,
+  Video,
+  FileText,
+  Bookmark,
+  User,
+  Settings,
+  LogOut,
+  Calendar,
+  Users,
   Mail,
   TrendingUp,
   Clock,
@@ -82,6 +82,8 @@ const ContentHub = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const { user, logout } = useAuth();
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [activeVideoLink, setActiveVideoLink] = useState<string | null>(null);
 
   // Initialize theme from state (not localStorage)
   useEffect(() => {
@@ -98,9 +100,9 @@ const ContentHub = () => {
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, route: '/dashboard' },
-    { 
-      id: 'content-hub', 
-      label: 'Content Hub', 
+    {
+      id: 'content-hub',
+      label: 'Content Hub',
       icon: LibraryBig,
       route: '/Contenthub',
       subItems: [
@@ -299,15 +301,14 @@ const ContentHub = () => {
     <>
       {/* Overlay for mobile */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
-      <aside className={`fixed left-0 top-0 h-full w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-all duration-300 z-50 lg:translate-x-0 shadow-lg ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+
+      <aside className={`fixed left-0 top-0 h-full w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-all duration-300 z-50 lg:translate-x-0 shadow-lg ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 lg:hidden">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
@@ -331,21 +332,19 @@ const ContentHub = () => {
             <div key={item.id}>
               <button
                 onClick={() => handleNavigation(item.id, item.route)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                  item.id === 'content-hub'
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${item.id === 'content-hub'
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700'
-                }`}
+                  }`}
               >
                 <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
                 {item.subItems && (
-                  <ChevronRight className={`h-4 w-4 ml-auto transition-transform duration-200 ${
-                    item.id === 'content-hub' ? 'rotate-90' : ''
-                  }`} />
+                  <ChevronRight className={`h-4 w-4 ml-auto transition-transform duration-200 ${item.id === 'content-hub' ? 'rotate-90' : ''
+                    }`} />
                 )}
               </button>
-              
+
               {item.subItems && item.id === 'content-hub' && (
                 <div className="ml-6 mt-2 space-y-1">
                   {item.subItems.map((subItem) => (
@@ -387,7 +386,8 @@ const ContentHub = () => {
         recent: '15 new this week',
         duration: '300+ hours'
       },
-      route: '/video-lectures'
+      route: '/video-lectures',
+      videoLink: 'https://www.example.com/video-lecture' // Example video link
     },
     {
       id: 'subject-notes',
@@ -436,17 +436,17 @@ const ContentHub = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
       <Sidebar />
-      
+
       <div className="flex-1 lg:ml-72">
         <NavigationHeader />
-        
+
         <main className="p-6">
           <div className="space-y-8">
             {/* Hero Section */}
             <div className="relative bg-blue-600 dark:bg-blue-700 rounded-2xl p-8 text-white overflow-hidden">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
               <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-center space-x-3 mb-4">
                   <LibraryBig className="h-8 w-8 text-blue-100" />
@@ -484,8 +484,8 @@ const ContentHub = () => {
                   <div className={`grid grid-cols-1 lg:grid-cols-2 ${index % 2 === 1 ? 'lg:grid-flow-col-dense' : ''}`}>
                     {/* Image Section */}
                     <div className={`relative h-80 lg:h-auto ${index % 2 === 1 ? 'lg:col-start-2' : ''}`}>
-                      <img 
-                        src={section.image} 
+                      <img
+                        src={section.image}
                         alt={section.title}
                         className="w-full h-full object-cover"
                       />
@@ -500,6 +500,18 @@ const ContentHub = () => {
                           {section.stats.total} Resources
                         </Badge>
                       </div>
+                      {/* Watch Now button for video lectures only */}
+                      {section.id === 'video-lectures' && (
+                        <Button
+                          className="absolute bottom-6 left-6 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow-md"
+                          onClick={() => {
+                            setShowVideoModal(true);
+                            setActiveVideoLink(section.videoLink || ''); // Replace with actual video link
+                          }}
+                        >
+                          Watch Now
+                        </Button>
+                      )}
                     </div>
 
                     {/* Content Section */}
@@ -548,15 +560,15 @@ const ContentHub = () => {
 
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                          <Button 
+                          <Button
                             onClick={() => navigate(section.route)}
                             className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
                           >
                             <section.icon className="h-4 w-4 mr-2" />
                             Explore {section.title.split(' ')[1]}
                           </Button>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             className="hover:bg-blue-50 dark:hover:bg-blue-900/20 border-blue-200 text-blue-600"
                           >
                             <Eye className="h-4 w-4 mr-2" />
@@ -605,6 +617,28 @@ const ContentHub = () => {
           </div>
         </main>
       </div>
+
+      {/* Video Popup Modal */}
+      {showVideoModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-70">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-2xl w-full relative p-8 flex flex-col items-center">
+            <button
+              className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-red-600"
+              onClick={() => { setShowVideoModal(false); setActiveVideoLink(null); }}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            {activeVideoLink ? (
+              <video controls autoPlay className="w-full h-96 rounded-lg shadow-lg">
+                <source src={activeVideoLink} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <div className="text-gray-500">No video link available.</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
