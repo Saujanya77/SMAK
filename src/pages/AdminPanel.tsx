@@ -177,9 +177,17 @@ const AdminPanel: React.FC = () => {
             quizType: 'manual',
             quizTitle: '',
             quizThumbnail: '',
-            questions: [{ question: '', options: ['', ''], correctAnswer: 0 }]
+            questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
+            videoLink: '',
+            gformLink: ''
         }
     ]);
+    const [courseName, setCourseName] = useState('');
+    const [courseDescription, setCourseDescription] = useState('');
+    const [courseThumbnailType, setCourseThumbnailType] = useState('url');
+    const [courseThumbnail, setCourseThumbnail] = useState('');
+    const [courseThumbnailFile, setCourseThumbnailFile] = useState(null);
+    const [savingCourse, setSavingCourse] = useState(false);
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -862,7 +870,45 @@ const AdminPanel: React.FC = () => {
 
                 {activeTab === 'courses' && (
                     <Card className="medical-card shadow-2xl max-w-2xl mx-auto bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
-                        <form className="p-8 space-y-6">
+                        <form className="p-8 space-y-6" onSubmit={async e => {
+                            e.preventDefault();
+                            setSavingCourse(true);
+                            let thumbnailUrl = '';
+                            if (courseThumbnailType === 'upload' && courseThumbnailFile) {
+                                // Upload thumbnail to Firebase Storage
+                                const storageRef = ref(storage, `courseThumbnails/${Date.now()}_${courseThumbnailFile.name}`);
+                                await uploadBytes(storageRef, courseThumbnailFile);
+                                thumbnailUrl = await getDownloadURL(storageRef);
+                            } else if (courseThumbnailType === 'url' && courseThumbnail) {
+                                thumbnailUrl = courseThumbnail;
+                            }
+                            const courseData = {
+                                name: courseName,
+                                description: courseDescription,
+                                thumbnail: thumbnailUrl,
+                                sections: courseSections,
+                                createdAt: new Date()
+                            };
+                            await addDoc(collection(db, 'courses'), courseData);
+                            setCourseName('');
+                            setCourseDescription('');
+                            setCourseThumbnail('');
+                            setCourseThumbnailFile(null);
+                            setCourseThumbnailType('url');
+                            setCourseSections([
+                                {
+                                    sectionType: 'video',
+                                    quizType: 'manual',
+                                    quizTitle: '',
+                                    quizThumbnail: '',
+                                    questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
+                                    videoLink: '',
+                                    gformLink: ''
+                                }
+                            ]);
+                            setSavingCourse(false);
+                            alert('Course created successfully!');
+                        }}>
                             <h2 className="text-3xl font-bold text-white mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Create Course</h2>
                             <div className="space-y-4">
                                 <label className="block font-semibold text-blue-200">Course Name</label>
@@ -870,6 +916,8 @@ const AdminPanel: React.FC = () => {
                                     type="text"
                                     required
                                     placeholder="Course Name"
+                                    value={courseName}
+                                    onChange={e => setCourseName(e.target.value)}
                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                 />
                             </div>
@@ -878,16 +926,40 @@ const AdminPanel: React.FC = () => {
                                 <textarea
                                     required
                                     placeholder="Course Description"
+                                    value={courseDescription}
+                                    onChange={e => setCourseDescription(e.target.value)}
                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[100px]"
                                 />
                             </div>
                             <div className="space-y-4">
                                 <label className="block font-semibold text-blue-200">Course Thumbnail</label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
-                                />
+                                <div className="flex gap-4 mb-3">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="courseThumbnailType" value="url" checked={courseThumbnailType === 'url'} onChange={() => setCourseThumbnailType('url')} className="text-blue-500" />
+                                        <span>URL</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="courseThumbnailType" value="upload" checked={courseThumbnailType === 'upload'} onChange={() => setCourseThumbnailType('upload')} className="text-blue-500" />
+                                        <span>Upload</span>
+                                    </label>
+                                </div>
+                                {courseThumbnailType === 'url' && (
+                                    <input
+                                        type="text"
+                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        value={courseThumbnail}
+                                        onChange={e => setCourseThumbnail(e.target.value)}
+                                        placeholder="Enter thumbnail URL..."
+                                    />
+                                )}
+                                {courseThumbnailType === 'upload' && (
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={e => setCourseThumbnailFile(e.target.files[0])}
+                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                    />
+                                )}
                             </div>
                             <hr className="my-6 border-blue-500/30" />
                             <h3 className="font-semibold text-blue-200 text-xl mb-4">Add Section</h3>
@@ -921,11 +993,26 @@ const AdminPanel: React.FC = () => {
                                     {section.sectionType === 'video' && (
                                         <div className="space-y-4">
                                             <label className="block font-medium text-blue-200">Video Link</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="Paste video link here"
-                                            />
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    placeholder="Paste video link here"
+                                                    value={section.videoLink || ''}
+                                                    onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, videoLink: e.target.value } : s))}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700"
+                                                    onClick={() => {
+                                                        // Save the video link to the section object (already handled by input)
+                                                        // Optionally show a confirmation
+                                                        alert('Video link saved for this section!');
+                                                    }}
+                                                >
+                                                    Done
+                                                </Button>
+                                            </div>
                                         </div>
                                     )}
                                     {section.sectionType === 'quiz' && (
@@ -1099,10 +1186,10 @@ const AdminPanel: React.FC = () => {
                                     )}
                                 </Card>
                             ))}
-                            <div className="mt-6 text-right">
+                            <div className="mt-6 flex justify-between items-center">
                                 <Button
                                     type="button"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition-all duration-200 flex items-center gap-2 ml-auto"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition-all duration-200 flex items-center gap-2"
                                     onClick={() => setCourseSections(sections => [
                                         ...sections,
                                         {
@@ -1110,12 +1197,21 @@ const AdminPanel: React.FC = () => {
                                             quizType: 'manual',
                                             quizTitle: '',
                                             quizThumbnail: '',
-                                            questions: [{ question: '', options: ['', ''], correctAnswer: 0 }]
+                                            questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
+                                            videoLink: '',
+                                            gformLink: ''
                                         }
                                     ])}
                                 >
                                     <Plus size={20} />
                                     Add another section
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl transition-all duration-200 flex items-center gap-2"
+                                    disabled={savingCourse}
+                                >
+                                    {savingCourse ? 'Saving...' : 'Add Course'}
                                 </Button>
                             </div>
                         </form>

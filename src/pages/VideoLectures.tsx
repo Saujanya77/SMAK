@@ -83,6 +83,15 @@ const mockUser = {
   college: 'Demo College',
 };
 
+interface Course {
+  id: string;
+  name: string;
+  description: string;
+  thumbnail: string;
+  sections: any[];
+  createdAt?: any;
+}
+
 const VideoLectures = () => {
   // State for video progress bar (modal)
   const [videoProgress, setVideoProgress] = useState(0); // percent watched (modal)
@@ -93,6 +102,10 @@ const VideoLectures = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [videoLectures, setVideoLectures] = useState<VideoLecture[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [activeCourse, setActiveCourse] = useState<Course | null>(null);
+  const [showCourseModal, setShowCourseModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -383,7 +396,7 @@ const VideoLectures = () => {
     return null;
   };
 
-  // Load videos from Firestore
+  // Load videos and courses from Firestore
   useEffect(() => {
     const loadVideos = async () => {
       try {
@@ -399,9 +412,7 @@ const VideoLectures = () => {
             ...data,
             publishedDate: data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString() : new Date().toLocaleDateString()
           } as VideoLecture;
-        }).filter(video => video.status === 'approved'); // Only show approved videos
-
-        // Load progress for all videos from localStorage
+        }).filter(video => video.status === 'approved');
         const progressMap: { [id: string]: number } = {};
         videos.forEach(video => {
           const stored = localStorage.getItem(`video-progress-${video.id}`);
@@ -415,12 +426,29 @@ const VideoLectures = () => {
         setLoading(false);
       }
     };
-
+    const loadCourses = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'courses'));
+        const coursesList = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data
+          } as Course;
+        });
+        setCourses(coursesList);
+      } catch (error) {
+        console.error('Error loading courses:', error);
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
     loadVideos();
+    loadCourses();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Video Modal Popup */}
       {showVideoModal && activeVideo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
@@ -737,11 +765,13 @@ const VideoLectures = () => {
               </CardContent>
             </Card>
           )}
-          {/* Video Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Video Lectures Grid */}
+          <h3 className="text-xl font-bold text-blue-700 dark:text-blue-300 mb-4 mt-8">Lectures</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {videoLectures.map((video) => (
               <Card key={video.id} className="group hover:shadow-lg transition-all border-gray-200 hover:border-blue-300 cursor-pointer"
                 onClick={() => handleVideoClick(video)}>
+                {/* ...existing code for video card... */}
                 <div className="relative h-48 overflow-hidden rounded-t-lg">
                   <img
                     src={video.thumbnail}
@@ -822,10 +852,117 @@ const VideoLectures = () => {
               </Card>
             ))}
           </div>
+          {/* Courses Section */}
+          <h3 className="text-xl font-bold text-green-700 dark:text-green-300 mb-4">Courses</h3>
+          {loadingCourses ? (
+            <div className="text-center text-gray-500">Loading courses...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.length === 0 ? (
+                <div className="text-gray-500 col-span-3">No courses available.</div>
+              ) : (
+                courses.map(course => (
+                  <Card key={course.id} className="border-green-200 hover:border-green-400 transition-all cursor-pointer">
+                    <div className="relative h-48 overflow-hidden rounded-t-lg">
+                      <img
+                        src={course.thumbnail || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop'}
+                        alt={course.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <CardContent className="p-6">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                        {course.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                        {course.description}
+                      </p>
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+                        <span>Sections: {course.sections?.length || 0}</span>
+                        <span>{course.createdAt ? (course.createdAt.toDate ? course.createdAt.toDate().toLocaleDateString() : new Date(course.createdAt).toLocaleDateString()) : ''}</span>
+                      </div>
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => { setActiveCourse(course); setShowCourseModal(true); }}>View Course</Button>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
+      {/* Course Modal Popup */}
+      {showCourseModal && activeCourse && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-3xl w-full relative" style={{ minWidth: '400px', minHeight: '300px' }}>
+            <button
+              className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-red-600"
+              onClick={() => { setShowCourseModal(false); setActiveCourse(null); }}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <div className="p-8">
+              <div className="flex gap-6 items-center mb-6">
+                <img src={activeCourse.thumbnail || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop'} alt={activeCourse.name} className="w-32 h-32 object-cover rounded-xl shadow-lg" />
+                <div>
+                  <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{activeCourse.name}</h2>
+                  <p className="text-gray-600 dark:text-gray-400 mb-2">{activeCourse.description}</p>
+                  <span className="text-sm text-gray-500">Created: {activeCourse.createdAt ? (activeCourse.createdAt.toDate ? activeCourse.createdAt.toDate().toLocaleDateString() : new Date(activeCourse.createdAt).toLocaleDateString()) : ''}</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-4">Sections</h3>
+              {activeCourse.sections && activeCourse.sections.length > 0 ? (
+                <div className="space-y-6">
+                  {activeCourse.sections.map((section, idx) => (
+                    <div key={idx} className="border border-green-200 rounded-xl p-4 bg-green-50 dark:bg-green-900/10">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-bold text-green-700 dark:text-green-300">Section {idx + 1}:</span>
+                        <span className="font-medium text-gray-800 dark:text-gray-200">{section.sectionType === 'video' ? 'Video' : 'Quiz'}</span>
+                      </div>
+                      {section.sectionType === 'video' && (
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">Video Link:</span>
+                          <span className="ml-2 text-blue-700 dark:text-blue-300">{section.videoLink || 'N/A'}</span>
+                        </div>
+                      )}
+                      {section.sectionType === 'quiz' && (
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">Quiz Type:</span>
+                          <span className="ml-2 text-blue-700 dark:text-blue-300">{section.quizType === 'manual' ? 'Manual' : 'Google Form'}</span>
+                          {section.quizType === 'manual' && (
+                            <div className="mt-2">
+                              <div className="font-semibold text-gray-700 dark:text-gray-300">Quiz Title: <span className="font-normal text-gray-800 dark:text-gray-200">{section.quizTitle || 'Untitled'}</span></div>
+                              <div className="font-semibold text-gray-700 dark:text-gray-300">Questions:</div>
+                              <ul className="list-disc ml-6 mt-1">
+                                {section.questions && section.questions.length > 0 ? section.questions.map((q, qIdx) => (
+                                  <li key={qIdx} className="mb-2">
+                                    <span className="font-medium text-gray-800 dark:text-gray-200">{q.question}</span>
+                                    <div className="ml-4 text-sm text-gray-600 dark:text-gray-400">Options: {q.options.join(', ')}</div>
+                                    <div className="ml-4 text-sm text-green-700 dark:text-green-300">Correct Answer: Option {q.correctAnswer + 1}</div>
+                                  </li>
+                                )) : <li className="text-gray-500">No questions.</li>}
+                              </ul>
+                            </div>
+                          )}
+                          {section.quizType === 'gform' && (
+                            <div className="mt-2">
+                              <span className="font-semibold text-gray-700 dark:text-gray-300">Google Form Link:</span>
+                              <a href={section.gformLink} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 underline">{section.gformLink || 'N/A'}</a>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-gray-500">No sections found for this course.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default VideoLectures;
