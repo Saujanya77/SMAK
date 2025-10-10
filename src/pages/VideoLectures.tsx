@@ -69,11 +69,11 @@ type VideoLecture = {
   notesUrl?: string;
   isLocalVideo?: boolean;
   videoFile?: File;
-  createdAt?: import('firebase/firestore').Timestamp | Date | import('firebase/firestore').FieldValue | null;
-  updatedAt?: import('firebase/firestore').Timestamp | Date | import('firebase/firestore').FieldValue | null;
+  createdAt?: any;
+  updatedAt?: any;
   status?: string;
   uploadedBy?: string;
-  uploadedAt?: import('firebase/firestore').Timestamp | Date | import('firebase/firestore').FieldValue | null;
+  uploadedAt?: any;
 };
 
 const mockUser = {
@@ -89,6 +89,32 @@ interface Course {
   thumbnail: string;
   sections: any[];
   createdAt?: any;
+}
+
+interface Section {
+  sectionType: 'video' | 'quiz';
+  videoLink?: string;
+  quizType?: 'manual' | 'gform';
+  quizTitle?: string;
+  questions?: Array<{
+    question: string;
+    options: string[];
+    correctAnswer: number;
+  }>;
+  gformLink?: string;
+}
+
+// Helper to check if a link is an embed (YouTube, Vimeo, etc.)
+function isEmbedLink(url?: string): boolean {
+  if (!url) {
+    return false;
+  }
+  return (
+    url.includes('youtube.com/watch?v=') ||
+    url.includes('youtu.be/') ||
+    url.includes('vimeo.com/') ||
+    url.includes('dailymotion.com/video/')
+  );
 }
 
 const VideoLectures = () => {
@@ -725,7 +751,7 @@ const VideoLectures = () => {
                             if (e.target.files && e.target.files[0]) {
                               handleInputChange('thumbnailFile', e.target.files[0]);
                               const reader = new FileReader();
-                              reader.onload = ev => handleInputChange('thumbnail', ev.target?.result);
+                              reader.onload = ev => handleInputChange('thumbnail', ev.target?.result as string);
                               reader.readAsDataURL(e.target.files[0]);
                             }
                           }}
@@ -815,7 +841,6 @@ const VideoLectures = () => {
                   className="group hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 cursor-pointer bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm overflow-hidden"
                   onClick={() => handleVideoClick(video)}
                 >
-                  {/* ...existing code for video card... */}
                   <div className="relative h-52 overflow-hidden">
                     <img
                       src={video.thumbnail}
@@ -993,7 +1018,7 @@ const VideoLectures = () => {
               <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-4">Sections</h3>
               {activeCourse.sections && activeCourse.sections.length > 0 ? (
                 <div className="space-y-6">
-                  {activeCourse.sections.map((section, idx) => (
+                  {activeCourse.sections.map((section: Section, idx: number) => (
                     <div key={idx} className="border border-green-200 rounded-xl p-4 bg-green-50 dark:bg-green-900/10">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-bold text-green-700 dark:text-green-300">Section {idx + 1}:</span>
@@ -1005,7 +1030,7 @@ const VideoLectures = () => {
                             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow-md transition-all"
                             onClick={() => {
                               setShowVideoModal(true);
-                              setActiveVideoLink(section.videoLink);
+                              setActiveVideoLink(section.videoLink || null);
                             }}
                             disabled={!section.videoLink}
                           >
@@ -1062,10 +1087,21 @@ const VideoLectures = () => {
               <X className="h-6 w-6" />
             </button>
             {activeVideoLink ? (
-              <video controls autoPlay className="w-full h-96 rounded-lg shadow-lg">
-                <source src={activeVideoLink} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              isEmbedLink(activeVideoLink)
+                ? (
+                  <iframe
+                    src={getEmbedUrl(activeVideoLink)}
+                    className="w-full h-96 rounded-lg shadow-lg"
+                    allowFullScreen
+                    title="Course Video"
+                  />
+                )
+                : (
+                  <video controls autoPlay className="w-full h-96 rounded-lg shadow-lg">
+                    <source src={activeVideoLink} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                )
             ) : (
               <div className="text-gray-500">No video link available.</div>
             )}
