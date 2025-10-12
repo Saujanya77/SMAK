@@ -26,7 +26,8 @@ import {
   Moon,
   ExternalLink,
   X,
-  Loader2
+  Loader2,
+  CheckCircle
 } from 'lucide-react';
 
 // Firebase imports
@@ -154,6 +155,12 @@ const VideoLectures = () => {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [activeVideo, setActiveVideo] = useState<VideoLecture | null>(null);
   const [activeVideoLink, setActiveVideoLink] = useState<string | null>(null);
+  // Quiz modal state
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [activeQuizSection, setActiveQuizSection] = useState<any>(null);
+  const [quizResults, setQuizResults] = useState<{ correct: boolean[]; submitted: boolean } | null>(null);
+  // State for section progress tracking
+  const [sectionProgress, setSectionProgress] = useState<{ [key: number]: boolean }>({});
 
   const user = mockUser;
 
@@ -1018,11 +1025,14 @@ const VideoLectures = () => {
               <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-4">Sections</h3>
               {activeCourse.sections && activeCourse.sections.length > 0 ? (
                 <div className="space-y-6">
-                  {activeCourse.sections.map((section: Section, idx: number) => (
+                  {activeCourse.sections.map((section, idx) => (
                     <div key={idx} className="border border-green-200 rounded-xl p-4 bg-green-50 dark:bg-green-900/10">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-bold text-green-700 dark:text-green-300">Section {idx + 1}:</span>
                         <span className="font-medium text-gray-800 dark:text-gray-200">{section.sectionType === 'video' ? 'Video' : 'Quiz'}</span>
+                        {sectionProgress[idx] && (
+                          <span className="ml-2 text-green-600"><CheckCircle className="inline h-5 w-5" /></span>
+                        )}
                       </div>
                       {section.sectionType === 'video' && (
                         <div>
@@ -1030,7 +1040,8 @@ const VideoLectures = () => {
                             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow-md transition-all"
                             onClick={() => {
                               setShowVideoModal(true);
-                              setActiveVideoLink(section.videoLink || null);
+                              setActiveVideoLink(section.videoLink);
+                              setSectionProgress(prev => ({ ...prev, [idx]: true }));
                             }}
                             disabled={!section.videoLink}
                           >
@@ -1040,29 +1051,16 @@ const VideoLectures = () => {
                       )}
                       {section.sectionType === 'quiz' && (
                         <div>
-                          <span className="font-semibold text-gray-700 dark:text-gray-300">Quiz Type:</span>
-                          <span className="ml-2 text-blue-700 dark:text-blue-300">{section.quizType === 'manual' ? 'Manual' : 'Google Form'}</span>
-                          {section.quizType === 'manual' && (
-                            <div className="mt-2">
-                              <div className="font-semibold text-gray-700 dark:text-gray-300">Quiz Title: <span className="font-normal text-gray-800 dark:text-gray-200">{section.quizTitle || 'Untitled'}</span></div>
-                              <div className="font-semibold text-gray-700 dark:text-gray-300">Questions:</div>
-                              <ul className="list-disc ml-6 mt-1">
-                                {section.questions && section.questions.length > 0 ? section.questions.map((q, qIdx) => (
-                                  <li key={qIdx} className="mb-2">
-                                    <span className="font-medium text-gray-800 dark:text-gray-200">{q.question}</span>
-                                    <div className="ml-4 text-sm text-gray-600 dark:text-gray-400">Options: {q.options.join(', ')}</div>
-                                    <div className="ml-4 text-sm text-green-700 dark:text-green-300">Correct Answer: Option {q.correctAnswer + 1}</div>
-                                  </li>
-                                )) : <li className="text-gray-500">No questions.</li>}
-                              </ul>
-                            </div>
-                          )}
-                          {section.quizType === 'gform' && (
-                            <div className="mt-2">
-                              <span className="font-semibold text-gray-700 dark:text-gray-300">Google Form Link:</span>
-                              <a href={section.gformLink} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 underline">{section.gformLink || 'N/A'}</a>
-                            </div>
-                          )}
+                          <button
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold shadow-md transition-all"
+                            onClick={() => {
+                              setShowQuizModal(true);
+                              setActiveQuizSection(section);
+                            }}
+                            disabled={!section.questions || section.questions.length === 0}
+                          >
+                            Play Quiz
+                          </button>
                         </div>
                       )}
                     </div>
@@ -1105,6 +1103,66 @@ const VideoLectures = () => {
             ) : (
               <div className="text-gray-500">No video link available.</div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Quiz Popup Modal */}
+      {showQuizModal && activeQuizSection && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-70">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full relative p-8 flex flex-col items-center">
+            <button
+              className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-red-600"
+              onClick={() => {
+                setShowQuizModal(false);
+                setActiveQuizSection(null);
+                setQuizResults(null);
+              }}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <h2 className="text-xl font-bold mb-4 text-blue-700 dark:text-blue-300">{activeQuizSection.quizTitle || 'Quiz'}</h2>
+            <form className="w-full max-w-lg space-y-6" onSubmit={e => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const results = activeQuizSection.questions.map((q, idx) => {
+                const selected = Number(formData.get(`q${idx}`));
+                return selected === q.correctAnswer;
+              });
+              setQuizResults({ correct: results, submitted: true });
+              // Mark section as completed
+              const idx = activeCourse.sections.findIndex(s => s === activeQuizSection);
+              setSectionProgress(prev => ({ ...prev, [idx]: true }));
+            }}>
+              {activeQuizSection.questions && activeQuizSection.questions.length > 0 ? (
+                activeQuizSection.questions.map((q, idx) => (
+                  <div key={idx} className="mb-6">
+                    <div className="font-semibold mb-2 text-gray-900 dark:text-white">Q{idx + 1}: {q.question}</div>
+                    <div className="space-y-2">
+                      {q.options.map((opt, oIdx) => (
+                        <label key={oIdx} className="flex items-center gap-2 cursor-pointer">
+                          <input type="radio" name={`q${idx}`} value={oIdx} className="text-blue-600" required disabled={quizResults?.submitted} />
+                          <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {quizResults?.submitted && (
+                      <div className={quizResults.correct[idx] ? "text-green-600 font-semibold mt-2" : "text-red-600 font-semibold mt-2"}>
+                        {quizResults.correct[idx] ? "Correct!" : "Incorrect!"}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-gray-500">No questions found.</div>
+              )}
+              {!quizResults?.submitted && (
+                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold shadow-md mt-4">Submit Quiz</button>
+              )}
+              {quizResults?.submitted && (
+                <div className="mt-6 text-lg font-bold text-blue-700 dark:text-blue-300">Quiz submitted! See feedback above.</div>
+              )}
+            </form>
           </div>
         </div>
       )}
