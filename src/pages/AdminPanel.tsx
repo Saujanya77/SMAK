@@ -59,9 +59,73 @@ interface VideoLectureAdmin {
     createdAt?: any;
 }
 
+interface RCMember {
+    id: string;
+    name: string;
+    institution: string;
+    email: string;
+    designation: string;
+    phone: string;
+    pictureUrl?: string;
+}
+
+interface Quiz {
+    id: string;
+    title: string;
+    thumbnail: string;
+    type: 'manual' | 'gform';
+    questions?: any[];
+    gformLink?: string;
+    createdAt: any;
+}
+
+interface Achievement {
+    id: string;
+    icon: string;
+    value: string;
+    label: string;
+}
+
 const AdminPanel: React.FC = () => {
+    const adminTabs = [
+        { key: 'journals', label: 'Journals' },
+        { key: 'blogs', label: 'Blogs' },
+        { key: 'members', label: 'Members' },
+        { key: 'researchclubmembers', label: 'Research Club Members' },
+        { key: 'researchclubmentors', label: 'Research Club Mentors' },
+        { key: 'bulkmembers', label: 'Bulk Members' },
+        { key: 'achievements', label: 'Achievements' },
+        { key: 'videos', label: 'Video Lectures' },
+        { key: 'courses', label: 'Courses' },
+        { key: 'quizzes', label: 'Quizzes' }
+    ];
+    
+    // Research Club Members state
+    const [rcMembers, setRCMembers] = useState<RCMember[]>([]);
+    const [rcMemberForm, setRCMemberForm] = useState({
+        name: '',
+        institution: '',
+        email: '',
+        designation: '',
+        phone: '',
+        picture: null as File | null,
+    });
+    const [editingRCMemberId, setEditingRCMemberId] = useState<string | null>(null);
+
+    // Research Club Mentors state
+    const [rcMentors, setRCMentors] = useState<RCMember[]>([]);
+    const [rcMentorForm, setRCMentorForm] = useState({
+        name: '',
+        institution: '',
+        email: '',
+        designation: '',
+        phone: '',
+        picture: null as File | null,
+    });
+    const [editingRCMentorId, setEditingRCMentorId] = useState<string | null>(null);
+
     // State for editing quiz
-    const [editingQuiz, setEditingQuiz] = useState(null);
+    const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
     const [editQuizForm, setEditQuizForm] = useState({
         title: '',
         thumbnail: '',
@@ -72,94 +136,8 @@ const AdminPanel: React.FC = () => {
     });
     const [showEditModal, setShowEditModal] = useState(false);
 
-    // Open edit modal for manual quiz
-    const handleEditQuiz = (quiz) => {
-        setEditingQuiz(quiz);
-        setEditQuizForm({
-            title: quiz.title || '',
-            thumbnail: quiz.thumbnail || '',
-            thumbnailType: quiz.thumbnail ? 'url' : 'upload',
-            questions: quiz.questions || [{ question: '', options: ['', ''], correctAnswer: 0 }],
-            gformLink: quiz.gformLink || '',
-            type: quiz.type || 'manual',
-        });
-        setShowEditModal(true);
-    };
-
-    // Edit quiz form handlers
-    const handleEditQuizFormChange = (field, value) => {
-        setEditQuizForm(prev => ({ ...prev, [field]: value }));
-    };
-    const handleEditQuizQuestionChange = (idx, field, value) => {
-        setEditQuizForm(prev => {
-            const updated = [...prev.questions];
-            updated[idx][field] = value;
-            return { ...prev, questions: updated };
-        });
-    };
-    const handleEditAddQuizQuestion = () => {
-        setEditQuizForm(prev => ({ ...prev, questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }] }));
-    };
-    const handleEditRemoveQuizQuestion = (idx) => {
-        setEditQuizForm(prev => ({ ...prev, questions: prev.questions.filter((_, i) => i !== idx) }));
-    };
-    const handleEditQuizOptionChange = (qIdx, optIdx, value) => {
-        setEditQuizForm(prev => {
-            const updated = [...prev.questions];
-            updated[qIdx].options[optIdx] = value;
-            return { ...prev, questions: updated };
-        });
-    };
-    const handleEditAddQuizOption = (qIdx) => {
-        setEditQuizForm(prev => {
-            const updated = [...prev.questions];
-            updated[qIdx].options.push('');
-            return { ...prev, questions: updated };
-        });
-    };
-    const handleEditRemoveQuizOption = (qIdx, optIdx) => {
-        setEditQuizForm(prev => {
-            const updated = [...prev.questions];
-            updated[qIdx].options = updated[qIdx].options.filter((_, i) => i !== optIdx);
-            return { ...prev, questions: updated };
-        });
-    };
-    // Save edited quiz
-    const handleSaveEditedQuiz = async (e) => {
-        e.preventDefault();
-        if (!editingQuiz) return;
-        try {
-            const updateData: any = {
-                title: editQuizForm.title,
-                thumbnail: editQuizForm.thumbnail,
-            };
-            if (editQuizForm.type === 'manual') {
-                updateData.questions = editQuizForm.questions;
-            } else if (editQuizForm.type === 'gform') {
-                updateData.gformLink = editQuizForm.gformLink;
-            }
-            await updateDoc(doc(db, 'quizzes', editingQuiz.id), updateData);
-            setShowEditModal(false);
-            setEditingQuiz(null);
-            // Refresh quizzes
-            const querySnapshot = await getDocs(collection(db, "quizzes"));
-            setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-        } catch (err) {
-            alert('Failed to update quiz.');
-        }
-    };
-    // Delete quiz handler
-    const handleDeleteQuiz = async (quizId) => {
-        if (!window.confirm('Are you sure you want to delete this quiz?')) return;
-        try {
-            await deleteDoc(doc(db, 'quizzes', quizId));
-            setQuizzes(prev => prev.filter(q => q.id !== quizId));
-        } catch (err) {
-            alert('Failed to delete quiz.');
-        }
-    };
     // State declarations for quizzes section
-    const [quizzes, setQuizzes] = useState([]);
+    const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [quizForm, setQuizForm] = useState({
         title: '',
         thumbnail: '',
@@ -170,6 +148,7 @@ const AdminPanel: React.FC = () => {
     const [quizMode, setQuizMode] = useState<'manual' | 'gform'>('manual');
     const [uploadingQuiz, setUploadingQuiz] = useState(false);
     const [showQuizModal, setShowQuizModal] = useState(false);
+
     // Dynamic course sections state
     const [courseSections, setCourseSections] = useState([
         {
@@ -186,8 +165,9 @@ const AdminPanel: React.FC = () => {
     const [courseDescription, setCourseDescription] = useState('');
     const [courseThumbnailType, setCourseThumbnailType] = useState('url');
     const [courseThumbnail, setCourseThumbnail] = useState('');
-    const [courseThumbnailFile, setCourseThumbnailFile] = useState(null);
+    const [courseThumbnailFile, setCourseThumbnailFile] = useState<File | null>(null);
     const [savingCourse, setSavingCourse] = useState(false);
+
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -197,7 +177,6 @@ const AdminPanel: React.FC = () => {
         setAnchorEl(null);
     };
     const handleSignOut = () => {
-        // Add your sign out logic here
         if (window.confirm("Sign out?")) {
             window.location.href = "/login";
         }
@@ -209,72 +188,7 @@ const AdminPanel: React.FC = () => {
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
     const [loadingVideos, setLoadingVideos] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes' | 'courses'>('journals');
-    useEffect(() => {
-        const fetchQuizzes = async () => {
-            const querySnapshot = await getDocs(collection(db, "quizzes"));
-            setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-        };
-        fetchQuizzes();
-    }, []);
-
-    // Quiz handlers
-    const handleQuizFormChange = (field, value) => {
-        setQuizForm(prev => ({ ...prev, [field]: value }));
-    };
-    const handleQuizQuestionChange = (idx, field, value) => {
-        setQuizForm(prev => {
-            const updated = [...prev.questions];
-            updated[idx][field] = value;
-            return { ...prev, questions: updated };
-        });
-    };
-    const handleAddQuizQuestion = () => {
-        setQuizForm(prev => ({ ...prev, questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }] }));
-    };
-    const handleRemoveQuizQuestion = (idx) => {
-        setQuizForm(prev => ({ ...prev, questions: prev.questions.filter((_, i) => i !== idx) }));
-    };
-    const handleQuizOptionChange = (qIdx, optIdx, value) => {
-        setQuizForm(prev => {
-            const updated = [...prev.questions];
-            updated[qIdx].options[optIdx] = value;
-            return { ...prev, questions: updated };
-        });
-    };
-    const handleAddQuizOption = (qIdx) => {
-        setQuizForm(prev => {
-            const updated = [...prev.questions];
-            updated[qIdx].options.push('');
-            return { ...prev, questions: updated };
-        });
-    };
-    const handleRemoveQuizOption = (qIdx, optIdx) => {
-        setQuizForm(prev => {
-            const updated = [...prev.questions];
-            updated[qIdx].options = updated[qIdx].options.filter((_, i) => i !== optIdx);
-            return { ...prev, questions: updated };
-        });
-    };
-    const handleQuizSubmit = async (e) => {
-        e.preventDefault();
-        setUploadingQuiz(true);
-        const quizData = {
-            title: quizForm.title,
-            thumbnail: quizForm.thumbnail,
-            type: quizMode,
-            questions: quizMode === 'manual' ? quizForm.questions : [],
-            gformLink: quizMode === 'gform' ? quizForm.gformLink : '',
-            createdAt: new Date(),
-        };
-        await addDoc(collection(db, "quizzes"), quizData);
-        setQuizForm({ title: '', thumbnail: '', thumbnailType: 'url', gformLink: '', questions: [{ question: '', options: ['', ''], correctAnswer: 0 }] });
-        setShowQuizModal(false);
-        setUploadingQuiz(false);
-        // Refresh quizzes
-        const querySnapshot = await getDocs(collection(db, "quizzes"));
-        setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    };
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes' | 'courses' | 'researchclubmembers' | 'researchclubmentors'>('journals');
 
     // Achievements state
     const defaultAchievements = [
@@ -284,7 +198,6 @@ const AdminPanel: React.FC = () => {
         { icon: 'Globe', value: '50+', label: 'Partner Colleges' }
     ];
     const [staticAchievements, setStaticAchievements] = useState(() => {
-        // Try to load from localStorage first
         const local = localStorage.getItem('staticAchievements');
         if (local) {
             try {
@@ -293,18 +206,19 @@ const AdminPanel: React.FC = () => {
         }
         return defaultAchievements;
     });
-    const [achievements, setAchievements] = useState([]);
+    const [achievements, setAchievements] = useState<Achievement[]>([]);
     const [achievementForm, setAchievementForm] = useState({
         icon: '',
         value: '',
         label: '',
         isStatic: false,
-        staticIndex: null,
+        staticIndex: null as number | null,
     });
-    const [editingAchievementId, setEditingAchievementId] = useState(null);
+    const [editingAchievementId, setEditingAchievementId] = useState<string | null>(null);
     const achievementIcons = [
         'Trophy', 'Users', 'BookOpen', 'Globe', 'Star', 'Award', 'Calendar', 'FileText', 'Heart', 'Activity', 'Shield', 'Microscope', 'Crown', 'Zap', 'Sparkles'
     ];
+
     // Static members array
     const [staticMembers, setStaticMembers] = useState([
         { name: "SAMUDRA CHAUDHARI ", institution: "SMAK", designation: "FOUNDER", pictureUrl: "https://i.postimg.cc/65tpg88S/Whats-App-Image-2025-08-13-at-13-39-13-32477921.jpg", phone: "", objectPosition: "center 20%" },
@@ -321,24 +235,295 @@ const AdminPanel: React.FC = () => {
         { name: "Pratik Gupta", institution: "IMS and SUM campus 2", designation: "Head - Campus outreach and coordination Committee", pictureUrl: "https://i.postimg.cc/B6rSQ6Zr/Whats-App-Image-2025-08-13-at-13-01-49-eeb0d546.jpg", phone: "" },
         { name: "Madhav Tripathi", institution: "Virendra Kumar Sakhlecha Government Medical College, Neemuch (MP)", designation: "Coordinator - Outreach & Collaboration Committee", pictureUrl: "https://i.postimg.cc/50cTXFvS/Whats-App-Image-2025-08-13-at-13-01-49-7c1ed6e6.jpg", phone: "" },
     ]);
+    
     // Members state
-    const [members, setMembers] = useState([]);
+    const [members, setMembers] = useState<any[]>([]);
     const [memberForm, setMemberForm] = useState({
         name: '',
         institution: '',
         email: '',
         designation: '',
         phone: '',
-        picture: null,
+        picture: null as File | null,
         isStatic: false,
-        staticIndex: null,
+        staticIndex: null as number | null,
     });
-    const [editingMemberId, setEditingMemberId] = useState(null);
+    const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+
+    // Fetch Research Club Members and Mentors
+    useEffect(() => {
+        const fetchRCMembers = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "researchClubMembers"));
+                const membersList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember));
+                setRCMembers(membersList);
+            } catch (error) {
+                console.error("Error fetching research club members:", error);
+            }
+        };
+
+        const fetchRCMentors = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "researchClubMentors"));
+                const mentorsList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember));
+                setRCMentors(mentorsList);
+            } catch (error) {
+                console.error("Error fetching research club mentors:", error);
+            }
+        };
+
+        if (activeTab === 'researchclubmembers') {
+            fetchRCMembers();
+        }
+        if (activeTab === 'researchclubmentors') {
+            fetchRCMentors();
+        }
+    }, [activeTab]);
+
+    // Fetch other data
+    useEffect(() => {
+        const fetchQuizzes = async () => {
+            const querySnapshot = await getDocs(collection(db, "quizzes"));
+            setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Quiz)));
+        };
+
+        const fetchPendingJournals = async () => {
+            setLoadingJournals(true);
+            const querySnapshot = await getDocs(collection(db, "journals"));
+            const pending = querySnapshot.docs
+                .map((doc) => ({ id: doc.id, ...doc.data() } as Journal))
+                .filter((journal) => journal.status === "pending");
+            setPendingJournals(pending);
+            setLoadingJournals(false);
+        };
+
+        const fetchPendingVideos = async () => {
+            setLoadingVideos(true);
+            const querySnapshot = await getDocs(collection(db, "videoLectures"));
+            const pending = querySnapshot.docs
+                .map((doc) => ({ id: doc.id, ...doc.data() } as VideoLectureAdmin))
+                .filter((video) => video.status === "pending");
+            setPendingVideos(pending);
+            setLoadingVideos(false);
+        };
+
+        const fetchPendingBlogs = async () => {
+            setLoadingBlogs(true);
+            const querySnapshot = await getDocs(collection(db, "blogs"));
+            const pending = querySnapshot.docs
+                .map((doc) => ({ id: doc.id, ...doc.data() } as Blog))
+                .filter((blog) => blog.status === "pending");
+            setPendingBlogs(pending);
+            setLoadingBlogs(false);
+        };
+
+        const fetchMembers = async () => {
+            const querySnapshot = await getDocs(collection(db, "members"));
+            const membersList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            setMembers(membersList);
+        };
+
+        const fetchAchievements = async () => {
+            const querySnapshot = await getDocs(collection(db, "achievements"));
+            const achievementsList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Achievement));
+            setAchievements(achievementsList);
+        };
+
+        fetchQuizzes();
+        fetchPendingJournals();
+        fetchPendingVideos();
+        fetchPendingBlogs();
+        fetchMembers();
+        fetchAchievements();
+    }, []);
+
+    // Quiz handlers
+    const handleQuizFormChange = (field: string, value: any) => {
+        setQuizForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleQuizQuestionChange = (idx: number, field: string, value: any) => {
+        setQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[idx] = { ...updated[idx], [field]: value };
+            return { ...prev, questions: updated };
+        });
+    };
+
+    const handleAddQuizQuestion = () => {
+        setQuizForm(prev => ({ 
+            ...prev, 
+            questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }] 
+        }));
+    };
+
+    const handleRemoveQuizQuestion = (idx: number) => {
+        setQuizForm(prev => ({ 
+            ...prev, 
+            questions: prev.questions.filter((_, i) => i !== idx) 
+        }));
+    };
+
+    const handleQuizOptionChange = (qIdx: number, optIdx: number, value: string) => {
+        setQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options[optIdx] = value;
+            return { ...prev, questions: updated };
+        });
+    };
+
+    const handleAddQuizOption = (qIdx: number) => {
+        setQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options.push('');
+            return { ...prev, questions: updated };
+        });
+    };
+
+    const handleRemoveQuizOption = (qIdx: number, optIdx: number) => {
+        setQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options = updated[qIdx].options.filter((_, i) => i !== optIdx);
+            return { ...prev, questions: updated };
+        });
+    };
+
+    const handleQuizSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setUploadingQuiz(true);
+        try {
+            const quizData = {
+                title: quizForm.title,
+                thumbnail: quizForm.thumbnail,
+                type: quizMode,
+                questions: quizMode === 'manual' ? quizForm.questions : [],
+                gformLink: quizMode === 'gform' ? quizForm.gformLink : '',
+                createdAt: new Date(),
+            };
+            await addDoc(collection(db, "quizzes"), quizData);
+            setQuizForm({ 
+                title: '', 
+                thumbnail: '', 
+                thumbnailType: 'url', 
+                gformLink: '', 
+                questions: [{ question: '', options: ['', ''], correctAnswer: 0 }] 
+            });
+            setShowQuizModal(false);
+            
+            // Refresh quizzes
+            const querySnapshot = await getDocs(collection(db, "quizzes"));
+            setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Quiz)));
+        } catch (error) {
+            console.error("Error creating quiz:", error);
+            alert('Failed to create quiz.');
+        } finally {
+            setUploadingQuiz(false);
+        }
+    };
+
+    // Edit quiz handlers
+    const handleEditQuiz = (quiz: Quiz) => {
+        setEditingQuiz(quiz);
+        setEditQuizForm({
+            title: quiz.title || '',
+            thumbnail: quiz.thumbnail || '',
+            thumbnailType: quiz.thumbnail ? 'url' : 'upload',
+            questions: quiz.questions || [{ question: '', options: ['', ''], correctAnswer: 0 }],
+            gformLink: quiz.gformLink || '',
+            type: quiz.type || 'manual',
+        });
+        setShowEditModal(true);
+    };
+
+    const handleEditQuizFormChange = (field: string, value: any) => {
+        setEditQuizForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleEditQuizQuestionChange = (idx: number, field: string, value: any) => {
+        setEditQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[idx] = { ...updated[idx], [field]: value };
+            return { ...prev, questions: updated };
+        });
+    };
+
+    const handleEditAddQuizQuestion = () => {
+        setEditQuizForm(prev => ({ 
+            ...prev, 
+            questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }] 
+        }));
+    };
+
+    const handleEditRemoveQuizQuestion = (idx: number) => {
+        setEditQuizForm(prev => ({ 
+            ...prev, 
+            questions: prev.questions.filter((_, i) => i !== idx) 
+        }));
+    };
+
+    const handleEditQuizOptionChange = (qIdx: number, optIdx: number, value: string) => {
+        setEditQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options[optIdx] = value;
+            return { ...prev, questions: updated };
+        });
+    };
+
+    const handleEditAddQuizOption = (qIdx: number) => {
+        setEditQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options.push('');
+            return { ...prev, questions: updated };
+        });
+    };
+
+    const handleEditRemoveQuizOption = (qIdx: number, optIdx: number) => {
+        setEditQuizForm(prev => {
+            const updated = [...prev.questions];
+            updated[qIdx].options = updated[qIdx].options.filter((_, i) => i !== optIdx);
+            return { ...prev, questions: updated };
+        });
+    };
+
+    const handleSaveEditedQuiz = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingQuiz) return;
+        try {
+            const updateData: any = {
+                title: editQuizForm.title,
+                thumbnail: editQuizForm.thumbnail,
+            };
+            if (editQuizForm.type === 'manual') {
+                updateData.questions = editQuizForm.questions;
+            } else if (editQuizForm.type === 'gform') {
+                updateData.gformLink = editQuizForm.gformLink;
+            }
+            await updateDoc(doc(db, 'quizzes', editingQuiz.id), updateData);
+            setShowEditModal(false);
+            setEditingQuiz(null);
+            
+            // Refresh quizzes
+            const querySnapshot = await getDocs(collection(db, "quizzes"));
+            setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Quiz)));
+        } catch (err) {
+            alert('Failed to update quiz.');
+        }
+    };
+
+    const handleDeleteQuiz = async (quizId: string) => {
+        if (!window.confirm('Are you sure you want to delete this quiz?')) return;
+        try {
+            await deleteDoc(doc(db, 'quizzes', quizId));
+            setQuizzes(prev => prev.filter(q => q.id !== quizId));
+        } catch (err) {
+            alert('Failed to delete quiz.');
+        }
+    };
 
     // Achievement CRUD handlers
-    const handleAchievementSubmit = async (e) => {
+    const handleAchievementSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (achievementForm.isStatic) {
+        if (achievementForm.isStatic && achievementForm.staticIndex !== null) {
             // Update static achievement
             setStaticAchievements(prev => {
                 const updated = prev.map((a, idx) => idx === achievementForm.staticIndex ? {
@@ -367,23 +552,36 @@ const AdminPanel: React.FC = () => {
             });
         }
         setAchievementForm({ icon: '', value: '', label: '', isStatic: false, staticIndex: null });
+        
         // Refresh Firestore achievements
         const querySnapshot = await getDocs(collection(db, "achievements"));
-        setAchievements(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+        setAchievements(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Achievement)));
     };
 
-    const handleEditAchievement = (ach, idx = null, isStatic = false) => {
-        if (isStatic) {
-            setAchievementForm({ icon: ach.icon, value: ach.value, label: ach.label, isStatic: true, staticIndex: idx });
+    const handleEditAchievement = (ach: any, idx: number | null = null, isStatic: boolean = false) => {
+        if (isStatic && idx !== null) {
+            setAchievementForm({ 
+                icon: ach.icon, 
+                value: ach.value, 
+                label: ach.label, 
+                isStatic: true, 
+                staticIndex: idx 
+            });
             setEditingAchievementId(null);
         } else {
             setEditingAchievementId(ach.id);
-            setAchievementForm({ icon: ach.icon, value: ach.value, label: ach.label, isStatic: false, staticIndex: null });
+            setAchievementForm({ 
+                icon: ach.icon, 
+                value: ach.value, 
+                label: ach.label, 
+                isStatic: false, 
+                staticIndex: null 
+            });
         }
     };
 
-    const handleDeleteAchievement = async (id, idx = null, isStatic = false) => {
-        if (isStatic) {
+    const handleDeleteAchievement = async (id: string | null, idx: number | null = null, isStatic: boolean = false) => {
+        if (isStatic && idx !== null) {
             if (window.confirm('Delete this static achievement?')) {
                 setStaticAchievements(prev => {
                     const updated = prev.filter((_, i) => i !== idx);
@@ -391,53 +589,13 @@ const AdminPanel: React.FC = () => {
                     return updated;
                 });
             }
-        } else {
+        } else if (id) {
             if (window.confirm('Delete this achievement?')) {
                 await deleteDoc(doc(db, "achievements", id));
                 setAchievements(achievements.filter(a => a.id !== id));
             }
         }
     };
-
-    useEffect(() => {
-        const fetchPendingJournals = async () => {
-            setLoadingJournals(true);
-            const querySnapshot = await getDocs(collection(db, "journals"));
-            const pending = querySnapshot.docs
-                .map((doc) => ({ id: doc.id, ...doc.data() } as Journal))
-                .filter((journal) => journal.status === "pending");
-            setPendingJournals(pending);
-            setLoadingJournals(false);
-        };
-        fetchPendingJournals();
-
-        // Fetch pending video lectures
-        const fetchPendingVideos = async () => {
-            setLoadingVideos(true);
-            const querySnapshot = await getDocs(collection(db, "videoLectures"));
-            const pending = querySnapshot.docs
-                .map((doc) => ({ id: doc.id, ...doc.data() } as VideoLectureAdmin))
-                .filter((video) => video.status === "pending");
-            setPendingVideos(pending);
-            setLoadingVideos(false);
-        };
-        fetchPendingVideos();
-
-        // Fetch members from Firestore
-        const fetchMembers = async () => {
-            const querySnapshot = await getDocs(collection(db, "members"));
-            const membersList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setMembers(membersList);
-        };
-        fetchMembers();
-        // Fetch achievements from Firestore
-        const fetchAchievements = async () => {
-            const querySnapshot = await getDocs(collection(db, "achievements"));
-            const achievementsList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setAchievements(achievementsList);
-        };
-        fetchAchievements();
-    }, []);
 
     // Blog/Journals/Video approval handlers
     const handleApproveVideo = async (id: string) => {
@@ -449,6 +607,7 @@ const AdminPanel: React.FC = () => {
         await updateDoc(doc(db, "videoLectures", id), { status: "rejected" });
         setPendingVideos((prev) => prev.filter((v) => v.id !== id));
     };
+
     const handleApproveJournal = async (id: string) => {
         await updateDoc(doc(db, "journals", id), { status: "approved" });
         setPendingJournals((prev) => prev.filter((j) => j.id !== id));
@@ -468,6 +627,124 @@ const AdminPanel: React.FC = () => {
         await updateDoc(doc(db, "blogs", id), { status: "rejected" });
         setPendingBlogs((prev) => prev.filter((b) => b.id !== id));
     };
+
+    // Course handlers
+    const handleCourseSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSavingCourse(true);
+        try {
+            let thumbnailUrl = '';
+            if (courseThumbnailType === 'upload' && courseThumbnailFile) {
+                const storageRef = ref(storage, `courseThumbnails/${Date.now()}_${courseThumbnailFile.name}`);
+                await uploadBytes(storageRef, courseThumbnailFile);
+                thumbnailUrl = await getDownloadURL(storageRef);
+            } else if (courseThumbnailType === 'url' && courseThumbnail) {
+                thumbnailUrl = courseThumbnail;
+            }
+            
+            const courseData = {
+                name: courseName,
+                description: courseDescription,
+                thumbnail: thumbnailUrl,
+                sections: courseSections,
+                createdAt: new Date()
+            };
+            
+            await addDoc(collection(db, 'courses'), courseData);
+            
+            // Reset form
+            setCourseName('');
+            setCourseDescription('');
+            setCourseThumbnail('');
+            setCourseThumbnailFile(null);
+            setCourseThumbnailType('url');
+            setCourseSections([{
+                sectionType: 'video',
+                quizType: 'manual',
+                quizTitle: '',
+                quizThumbnail: '',
+                questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
+                videoLink: '',
+                gformLink: ''
+            }]);
+            
+            alert('Course created successfully!');
+        } catch (error) {
+            console.error("Error creating course:", error);
+            alert('Failed to create course.');
+        } finally {
+            setSavingCourse(false);
+        }
+    };
+
+    // Member handlers
+    const handleMemberSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            let pictureUrl = '';
+            if (memberForm.picture) {
+                const fileRef = ref(storage, `members/${Date.now()}_${memberForm.picture.name}`);
+                await uploadBytes(fileRef, memberForm.picture);
+                pictureUrl = await getDownloadURL(fileRef);
+            }
+            
+            if (memberForm.isStatic && memberForm.staticIndex !== null) {
+                // Update static member
+                setStaticMembers(prev => prev.map((m, idx) => idx === memberForm.staticIndex ? {
+                    ...m,
+                    name: memberForm.name,
+                    institution: memberForm.institution,
+                    designation: memberForm.designation,
+                    phone: memberForm.phone,
+                    pictureUrl: pictureUrl || m.pictureUrl,
+                } : m));
+            } else if (editingMemberId) {
+                // Update Firestore member
+                const memberDoc = doc(db, "members", editingMemberId);
+                await updateDoc(memberDoc, {
+                    name: memberForm.name,
+                    institution: memberForm.institution,
+                    email: memberForm.email,
+                    designation: memberForm.designation,
+                    phone: memberForm.phone,
+                    ...(pictureUrl ? { pictureUrl } : {}),
+                });
+                setEditingMemberId(null);
+            } else {
+                // Add Firestore member
+                const membersCol = collection(db, "members");
+                const newMember = {
+                    name: memberForm.name,
+                    institution: memberForm.institution,
+                    email: memberForm.email,
+                    designation: memberForm.designation,
+                    phone: memberForm.phone,
+                    pictureUrl,
+                };
+                await addDoc(membersCol, newMember);
+            }
+            
+            setMemberForm({ 
+                name: '', 
+                institution: '', 
+                email: '', 
+                designation: '', 
+                phone: '', 
+                picture: null, 
+                isStatic: false, 
+                staticIndex: null 
+            });
+            
+            // Refresh members list
+            const membersCol = collection(db, "members");
+            const querySnapshot = await getDocs(membersCol);
+            setMembers(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+        } catch (error) {
+            console.error("Error handling member:", error);
+            alert('Failed to save member.');
+        }
+    };
+
     if (!user || !ADMIN_EMAILS.includes(user.email)) {
         return (
             <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
@@ -520,16 +797,7 @@ const AdminPanel: React.FC = () => {
             {/* Tab Navigation */}
             <div className="flex justify-center mb-8 mt-8 animate-fade-in">
                 <div className="flex gap-2 bg-blue-800/30 backdrop-blur-sm rounded-xl p-2 border border-blue-600/30">
-                    {[
-                        { key: 'journals', label: 'Journals' },
-                        { key: 'blogs', label: 'Blogs' },
-                        { key: 'members', label: 'Members' },
-                        { key: 'bulkmembers', label: 'Bulk Members' },
-                        { key: 'achievements', label: 'Achievements' },
-                        { key: 'videos', label: 'Video Lectures' },
-                        { key: 'courses', label: 'Courses' },
-                        { key: 'quizzes', label: 'Quizzes' }
-                    ].map((tab) => (
+                    {adminTabs.map((tab) => (
                         <Button
                             key={tab.key}
                             variant={activeTab === tab.key ? 'default' : 'ghost'}
@@ -547,6 +815,410 @@ const AdminPanel: React.FC = () => {
 
             {/* Main Content */}
             <div className="container mx-auto px-4 pb-8">
+                {/* Research Club Members Section */}
+                {activeTab === 'researchclubmembers' && (
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Research Club Members</h2>
+                        <Card className="medical-card shadow-2xl max-w-4xl bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                            <form className="p-8 space-y-6" onSubmit={async e => {
+                                e.preventDefault();
+                                let pictureUrl = '';
+                                if (rcMemberForm.picture) {
+                                    const storageRef = ref(storage, `rcMemberPictures/${Date.now()}_${rcMemberForm.picture.name}`);
+                                    await uploadBytes(storageRef, rcMemberForm.picture);
+                                    pictureUrl = await getDownloadURL(storageRef);
+                                }
+                                if (editingRCMemberId) {
+                                    const memberDoc = doc(db, "researchClubMembers", editingRCMemberId);
+                                    await updateDoc(memberDoc, {
+                                        name: rcMemberForm.name,
+                                        institution: rcMemberForm.institution,
+                                        email: rcMemberForm.email,
+                                        designation: rcMemberForm.designation,
+                                        phone: rcMemberForm.phone,
+                                        ...(pictureUrl ? { pictureUrl } : {})
+                                    });
+                                    setEditingRCMemberId(null);
+                                } else {
+                                    await addDoc(collection(db, "researchClubMembers"), {
+                                        name: rcMemberForm.name,
+                                        institution: rcMemberForm.institution,
+                                        email: rcMemberForm.email,
+                                        designation: rcMemberForm.designation,
+                                        phone: rcMemberForm.phone,
+                                        pictureUrl
+                                    });
+                                }
+                                setRCMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null });
+                                // Refresh list
+                                const querySnapshot = await getDocs(collection(db, "researchClubMembers"));
+                                setRCMembers(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember)));
+                            }}>
+                                <h3 className="text-xl font-semibold text-blue-200 mb-4">
+                                    {editingRCMemberId ? 'Edit Research Club Member' : 'Add New Research Club Member'}
+                                </h3>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-blue-200">Name *</label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            placeholder="Full Name" 
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            value={rcMemberForm.name} 
+                                            onChange={e => setRCMemberForm(f => ({ ...f, name: e.target.value }))} 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-blue-200">Institution *</label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            placeholder="Institution/College" 
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            value={rcMemberForm.institution} 
+                                            onChange={e => setRCMemberForm(f => ({ ...f, institution: e.target.value }))} 
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-blue-200">Email *</label>
+                                        <input 
+                                            type="email" 
+                                            required 
+                                            placeholder="Email Address" 
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            value={rcMemberForm.email} 
+                                            onChange={e => setRCMemberForm(f => ({ ...f, email: e.target.value }))} 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-blue-200">Phone</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Phone Number" 
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            value={rcMemberForm.phone} 
+                                            onChange={e => setRCMemberForm(f => ({ ...f, phone: e.target.value }))} 
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-blue-200">Designation/Role *</label>
+                                    <input 
+                                        type="text" 
+                                        required
+                                        placeholder="Designation/Role" 
+                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                        value={rcMemberForm.designation} 
+                                        onChange={e => setRCMemberForm(f => ({ ...f, designation: e.target.value }))} 
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-blue-200">
+                                        Profile Picture {!editingRCMemberId && '*'}
+                                    </label>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
+                                        onChange={e => setRCMemberForm(f => ({ ...f, picture: e.target.files?.[0] || null }))} 
+                                        required={!editingRCMemberId}
+                                    />
+                                    {editingRCMemberId && (
+                                        <p className="text-blue-300 text-sm mt-1">Leave empty to keep current picture</p>
+                                    )}
+                                </div>
+                                <div className="flex gap-4 pt-4">
+                                    <Button 
+                                        type="submit" 
+                                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
+                                    >
+                                        {editingRCMemberId ? 'Update' : 'Add'} Member
+                                    </Button>
+                                    {editingRCMemberId && (
+                                        <Button 
+                                            type="button" 
+                                            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl transition-all duration-200" 
+                                            onClick={() => { 
+                                                setEditingRCMemberId(null); 
+                                                setRCMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null }); 
+                                            }}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </div>
+                            </form>
+                        </Card>
+                        
+                        {/* Research Club Members List */}
+                        <div className="mt-8">
+                            <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-6">
+                                Research Club Members ({rcMembers.length})
+                            </h3>
+                            {rcMembers.length === 0 ? (
+                                <Card className="text-center py-12 bg-blue-800/20 backdrop-blur-sm border border-blue-600/30 rounded-2xl">
+                                    <div className="text-blue-300 text-lg">No research club members found.</div>
+                                </Card>
+                            ) : (
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {rcMembers.map((m) => (
+                                        <Card key={m.id} className="medical-card text-white p-6 flex flex-col items-center text-center card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
+                                            <img 
+                                                src={m.pictureUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face"} 
+                                                alt={m.name} 
+                                                className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50" 
+                                            />
+                                            <div className="font-bold text-lg mb-1 text-white">{m.name}</div>
+                                            <div className="text-blue-200 text-sm mb-1">{m.institution}</div>
+                                            <div className="text-blue-300 text-sm font-semibold mb-2">{m.designation}</div>
+                                            <div className="text-blue-400 text-xs mb-1">{m.email}</div>
+                                            {m.phone && <div className="text-blue-400 text-xs mb-4">{m.phone}</div>}
+                                            <div className="flex gap-2 mt-2 w-full">
+                                                <Button 
+                                                    size="sm" 
+                                                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1" 
+                                                    onClick={() => { 
+                                                        setEditingRCMemberId(m.id); 
+                                                        setRCMemberForm({ 
+                                                            name: m.name, 
+                                                            institution: m.institution, 
+                                                            email: m.email, 
+                                                            designation: m.designation, 
+                                                            phone: m.phone, 
+                                                            picture: null 
+                                                        }); 
+                                                    }}
+                                                >
+                                                    <Edit size={14} />
+                                                    Edit
+                                                </Button>
+                                                <Button 
+                                                    size="sm" 
+                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1" 
+                                                    onClick={async () => { 
+                                                        if (window.confirm('Are you sure you want to delete this member?')) { 
+                                                            await deleteDoc(doc(db, "researchClubMembers", m.id)); 
+                                                            setRCMembers(rcMembers.filter(mem => mem.id !== m.id)); 
+                                                        } 
+                                                    }}
+                                                >
+                                                    <Trash2 size={14} />
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Research Club Mentors Section */}
+                {activeTab === 'researchclubmentors' && (
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Research Club Mentors</h2>
+                        <Card className="medical-card shadow-2xl max-w-4xl bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                            <form className="p-8 space-y-6" onSubmit={async e => {
+                                e.preventDefault();
+                                let pictureUrl = '';
+                                if (rcMentorForm.picture) {
+                                    const storageRef = ref(storage, `rcMentorPictures/${Date.now()}_${rcMentorForm.picture.name}`);
+                                    await uploadBytes(storageRef, rcMentorForm.picture);
+                                    pictureUrl = await getDownloadURL(storageRef);
+                                }
+                                if (editingRCMentorId) {
+                                    const mentorDoc = doc(db, "researchClubMentors", editingRCMentorId);
+                                    await updateDoc(mentorDoc, {
+                                        name: rcMentorForm.name,
+                                        institution: rcMentorForm.institution,
+                                        email: rcMentorForm.email,
+                                        designation: rcMentorForm.designation,
+                                        phone: rcMentorForm.phone,
+                                        ...(pictureUrl ? { pictureUrl } : {})
+                                    });
+                                    setEditingRCMentorId(null);
+                                } else {
+                                    await addDoc(collection(db, "researchClubMentors"), {
+                                        name: rcMentorForm.name,
+                                        institution: rcMentorForm.institution,
+                                        email: rcMentorForm.email,
+                                        designation: rcMentorForm.designation,
+                                        phone: rcMentorForm.phone,
+                                        pictureUrl
+                                    });
+                                }
+                                setRCMentorForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null });
+                                // Refresh list
+                                const querySnapshot = await getDocs(collection(db, "researchClubMentors"));
+                                setRCMentors(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember)));
+                            }}>
+                                <h3 className="text-xl font-semibold text-blue-200 mb-4">
+                                    {editingRCMentorId ? 'Edit Research Club Mentor' : 'Add New Research Club Mentor'}
+                                </h3>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-blue-200">Name *</label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            placeholder="Full Name" 
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            value={rcMentorForm.name} 
+                                            onChange={e => setRCMentorForm(f => ({ ...f, name: e.target.value }))} 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-blue-200">Institution *</label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            placeholder="Institution/College" 
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            value={rcMentorForm.institution} 
+                                            onChange={e => setRCMentorForm(f => ({ ...f, institution: e.target.value }))} 
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-blue-200">Email *</label>
+                                        <input 
+                                            type="email" 
+                                            required 
+                                            placeholder="Email Address" 
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            value={rcMentorForm.email} 
+                                            onChange={e => setRCMentorForm(f => ({ ...f, email: e.target.value }))} 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-blue-200">Phone</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Phone Number" 
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            value={rcMentorForm.phone} 
+                                            onChange={e => setRCMentorForm(f => ({ ...f, phone: e.target.value }))} 
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-blue-200">Designation/Role *</label>
+                                    <input 
+                                        type="text" 
+                                        required
+                                        placeholder="Designation/Role" 
+                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                        value={rcMentorForm.designation} 
+                                        onChange={e => setRCMentorForm(f => ({ ...f, designation: e.target.value }))} 
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-blue-200">
+                                        Profile Picture {!editingRCMentorId && '*'}
+                                    </label>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
+                                        onChange={e => setRCMentorForm(f => ({ ...f, picture: e.target.files?.[0] || null }))} 
+                                        required={!editingRCMentorId}
+                                    />
+                                    {editingRCMentorId && (
+                                        <p className="text-blue-300 text-sm mt-1">Leave empty to keep current picture</p>
+                                    )}
+                                </div>
+                                <div className="flex gap-4 pt-4">
+                                    <Button 
+                                        type="submit" 
+                                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
+                                    >
+                                        {editingRCMentorId ? 'Update' : 'Add'} Mentor
+                                    </Button>
+                                    {editingRCMentorId && (
+                                        <Button 
+                                            type="button" 
+                                            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl transition-all duration-200" 
+                                            onClick={() => { 
+                                                setEditingRCMentorId(null); 
+                                                setRCMentorForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null }); 
+                                            }}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </div>
+                            </form>
+                        </Card>
+                        
+                        {/* Research Club Mentors List */}
+                        <div className="mt-8">
+                            <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-6">
+                                Research Club Mentors ({rcMentors.length})
+                            </h3>
+                            {rcMentors.length === 0 ? (
+                                <Card className="text-center py-12 bg-blue-800/20 backdrop-blur-sm border border-blue-600/30 rounded-2xl">
+                                    <div className="text-blue-300 text-lg">No research club mentors found.</div>
+                                </Card>
+                            ) : (
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {rcMentors.map((m) => (
+                                        <Card key={m.id} className="medical-card text-white p-6 flex flex-col items-center text-center card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
+                                            <img 
+                                                src={m.pictureUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face"} 
+                                                alt={m.name} 
+                                                className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50" 
+                                            />
+                                            <div className="font-bold text-lg mb-1 text-white">{m.name}</div>
+                                            <div className="text-blue-200 text-sm mb-1">{m.institution}</div>
+                                            <div className="text-blue-300 text-sm font-semibold mb-2">{m.designation}</div>
+                                            <div className="text-blue-400 text-xs mb-1">{m.email}</div>
+                                            {m.phone && <div className="text-blue-400 text-xs mb-4">{m.phone}</div>}
+                                            <div className="flex gap-2 mt-2 w-full">
+                                                <Button 
+                                                    size="sm" 
+                                                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1" 
+                                                    onClick={() => { 
+                                                        setEditingRCMentorId(m.id); 
+                                                        setRCMentorForm({ 
+                                                            name: m.name, 
+                                                            institution: m.institution, 
+                                                            email: m.email, 
+                                                            designation: m.designation, 
+                                                            phone: m.phone, 
+                                                            picture: null 
+                                                        }); 
+                                                    }}
+                                                >
+                                                    <Edit size={14} />
+                                                    Edit
+                                                </Button>
+                                                <Button 
+                                                    size="sm" 
+                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1" 
+                                                    onClick={async () => { 
+                                                        if (window.confirm('Are you sure you want to delete this mentor?')) { 
+                                                            await deleteDoc(doc(db, "researchClubMentors", m.id)); 
+                                                            setRCMentors(rcMentors.filter(mentor => mentor.id !== m.id)); 
+                                                        } 
+                                                    }}
+                                                >
+                                                    <Trash2 size={14} />
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {/* Quizzes Section */}
                 {activeTab === 'quizzes' && (
                     <div className="space-y-6">
@@ -612,7 +1284,7 @@ const AdminPanel: React.FC = () => {
                                                     type="file"
                                                     accept="image/*"
                                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
-                                                    onChange={e => handleQuizFormChange('thumbnail', e.target.files[0])}
+                                                    onChange={e => handleQuizFormChange('thumbnail', e.target.files?.[0])}
                                                 />
                                             )}
                                         </div>
@@ -826,7 +1498,6 @@ const AdminPanel: React.FC = () => {
                                     </button>
                                     <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Edit Quiz</h3>
                                     <form onSubmit={handleSaveEditedQuiz} className="space-y-6">
-                                        {/* Edit form content - similar to create form but with editQuizForm */}
                                         <div className="space-y-4">
                                             <label className="block font-semibold text-blue-200">Quiz Title</label>
                                             <input
@@ -837,7 +1508,161 @@ const AdminPanel: React.FC = () => {
                                                 required
                                             />
                                         </div>
-                                        {/* ... rest of edit form ... */}
+
+                                        <div className="space-y-4">
+                                            <label className="block font-semibold text-blue-200">Thumbnail</label>
+                                            <div className="flex gap-4 mb-3">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input type="radio" name="editThumbnailType" value="url" checked={editQuizForm.thumbnailType === 'url'} onChange={() => handleEditQuizFormChange('thumbnailType', 'url')} className="text-blue-500" />
+                                                    <span>URL</span>
+                                                </label>
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input type="radio" name="editThumbnailType" value="upload" checked={editQuizForm.thumbnailType === 'upload'} onChange={() => handleEditQuizFormChange('thumbnailType', 'upload')} className="text-blue-500" />
+                                                    <span>Upload</span>
+                                                </label>
+                                            </div>
+                                            {editQuizForm.thumbnailType === 'url' && (
+                                                <input
+                                                    type="text"
+                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    value={editQuizForm.thumbnail}
+                                                    onChange={e => handleEditQuizFormChange('thumbnail', e.target.value)}
+                                                    placeholder="Enter thumbnail URL..."
+                                                />
+                                            )}
+                                            {editQuizForm.thumbnailType === 'upload' && (
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                                    onChange={e => handleEditQuizFormChange('thumbnail', e.target.files?.[0])}
+                                                />
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <label className="block font-semibold text-blue-200">Quiz Type</label>
+                                            <select
+                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                value={editQuizForm.type}
+                                                onChange={e => handleEditQuizFormChange('type', e.target.value)}
+                                            >
+                                                <option value="manual" className="bg-slate-800">Manual Creation</option>
+                                                <option value="gform" className="bg-slate-800">Google Form Link</option>
+                                            </select>
+                                        </div>
+
+                                        {editQuizForm.type === 'gform' && (
+                                            <div className="space-y-4">
+                                                <label className="block font-semibold text-blue-200">Google Form Link</label>
+                                                <input
+                                                    type="url"
+                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    value={editQuizForm.gformLink}
+                                                    onChange={e => handleEditQuizFormChange('gformLink', e.target.value)}
+                                                    required
+                                                    placeholder="https://forms.google.com/..."
+                                                />
+                                            </div>
+                                        )}
+
+                                        {editQuizForm.type === 'manual' && (
+                                            <div className="space-y-4">
+                                                <label className="block font-semibold text-blue-200">Questions</label>
+                                                <div className="space-y-4 max-h-96 overflow-y-auto p-2">
+                                                    <DragDropContext onDragEnd={result => {
+                                                        if (!result.destination) return;
+                                                        const reordered = Array.from(editQuizForm.questions);
+                                                        const [removed] = reordered.splice(result.source.index, 1);
+                                                        reordered.splice(result.destination.index, 0, removed);
+                                                        setEditQuizForm(prev => ({ ...prev, questions: reordered }));
+                                                    }}>
+                                                        <Droppable droppableId="edit-questions-droppable">
+                                                            {(provided) => (
+                                                                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-4">
+                                                                    {editQuizForm.questions.map((q, idx) => (
+                                                                        <QuizQuestionDraggable key={idx} question={q} idx={idx}>
+                                                                            <div className="bg-blue-800/20 border border-blue-600/30 rounded-xl p-4 space-y-4 hover:border-blue-500/50 transition-all duration-200">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                    placeholder="Enter question..."
+                                                                                    value={q.question}
+                                                                                    onChange={e => handleEditQuizQuestionChange(idx, 'question', e.target.value)}
+                                                                                    required
+                                                                                />
+                                                                                <div className="space-y-3">
+                                                                                    <label className="block font-semibold text-blue-200 text-sm">Options</label>
+                                                                                    {q.options.map((opt, oIdx) => (
+                                                                                        <div key={oIdx} className="flex items-center gap-2">
+                                                                                            <input
+                                                                                                type="text"
+                                                                                                className="flex-1 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                                placeholder={`Option ${oIdx + 1}`}
+                                                                                                value={opt}
+                                                                                                onChange={e => handleEditQuizOptionChange(idx, oIdx, e.target.value)}
+                                                                                                required
+                                                                                            />
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                className="text-red-400 hover:text-red-300 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 rounded"
+                                                                                                onClick={() => handleEditRemoveQuizOption(idx, oIdx)}
+                                                                                                disabled={q.options.length <= 2}
+                                                                                            >
+                                                                                                Remove
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center gap-1 text-sm"
+                                                                                        onClick={() => handleEditAddQuizOption(idx)}
+                                                                                    >
+                                                                                        <Plus size={16} />
+                                                                                        Add Option
+                                                                                    </button>
+                                                                                </div>
+                                                                                <div className="space-y-2">
+                                                                                    <label className="block font-semibold text-blue-200 text-sm">Correct Answer (option index)</label>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        min="0"
+                                                                                        max={q.options.length - 1}
+                                                                                        className="w-20 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                        value={q.correctAnswer}
+                                                                                        onChange={e => handleEditQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value))}
+                                                                                        required
+                                                                                    />
+                                                                                </div>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="text-red-400 hover:text-red-300 transition-colors duration-200 text-sm flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                                    onClick={() => handleEditRemoveQuizQuestion(idx)}
+                                                                                    disabled={editQuizForm.questions.length <= 1}
+                                                                                >
+                                                                                    <Trash2 size={16} />
+                                                                                    Remove Question
+                                                                                </button>
+                                                                            </div>
+                                                                        </QuizQuestionDraggable>
+                                                                    ))}
+                                                                    {provided.placeholder}
+                                                                </div>
+                                                            )}
+                                                        </Droppable>
+                                                    </DragDropContext>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center gap-2"
+                                                    onClick={handleEditAddQuizQuestion}
+                                                >
+                                                    <Plus size={20} />
+                                                    Add Question
+                                                </button>
+                                            </div>
+                                        )}
+
                                         <div className="flex gap-4 pt-4">
                                             <button
                                                 type="submit"
@@ -860,55 +1685,10 @@ const AdminPanel: React.FC = () => {
                     </div>
                 )}
 
-                {/* Other sections remain similar but with improved styling */}
-                {activeTab === 'bulkmembers' && (
-                    <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Bulk Members Upload</h2>
-                        <BulkMemberUpload />
-                    </div>
-                )}
-
+                {/* Courses Section */}
                 {activeTab === 'courses' && (
                     <Card className="medical-card shadow-2xl max-w-2xl mx-auto bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
-                        <form className="p-8 space-y-6" onSubmit={async e => {
-                            e.preventDefault();
-                            setSavingCourse(true);
-                            let thumbnailUrl = '';
-                            if (courseThumbnailType === 'upload' && courseThumbnailFile) {
-                                // Upload thumbnail to Firebase Storage
-                                const storageRef = ref(storage, `courseThumbnails/${Date.now()}_${courseThumbnailFile.name}`);
-                                await uploadBytes(storageRef, courseThumbnailFile);
-                                thumbnailUrl = await getDownloadURL(storageRef);
-                            } else if (courseThumbnailType === 'url' && courseThumbnail) {
-                                thumbnailUrl = courseThumbnail;
-                            }
-                            const courseData = {
-                                name: courseName,
-                                description: courseDescription,
-                                thumbnail: thumbnailUrl,
-                                sections: courseSections,
-                                createdAt: new Date()
-                            };
-                            await addDoc(collection(db, 'courses'), courseData);
-                            setCourseName('');
-                            setCourseDescription('');
-                            setCourseThumbnail('');
-                            setCourseThumbnailFile(null);
-                            setCourseThumbnailType('url');
-                            setCourseSections([
-                                {
-                                    sectionType: 'video',
-                                    quizType: 'manual',
-                                    quizTitle: '',
-                                    quizThumbnail: '',
-                                    questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
-                                    videoLink: '',
-                                    gformLink: ''
-                                }
-                            ]);
-                            setSavingCourse(false);
-                            alert('Course created successfully!');
-                        }}>
+                        <form className="p-8 space-y-6" onSubmit={handleCourseSubmit}>
                             <h2 className="text-3xl font-bold text-white mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Create Course</h2>
                             <div className="space-y-4">
                                 <label className="block font-semibold text-blue-200">Course Name</label>
@@ -956,7 +1736,7 @@ const AdminPanel: React.FC = () => {
                                     <input
                                         type="file"
                                         accept="image/*"
-                                        onChange={e => setCourseThumbnailFile(e.target.files[0])}
+                                        onChange={e => setCourseThumbnailFile(e.target.files?.[0] || null)}
                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
                                     />
                                 )}
@@ -1005,8 +1785,6 @@ const AdminPanel: React.FC = () => {
                                                     type="button"
                                                     className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700"
                                                     onClick={() => {
-                                                        // Save the video link to the section object (already handled by input)
-                                                        // Optionally show a confirmation
                                                         alert('Video link saved for this section!');
                                                     }}
                                                 >
@@ -1034,7 +1812,6 @@ const AdminPanel: React.FC = () => {
                                             </div>
                                             {section.quizType === 'manual' && (
                                                 <div className="space-y-4">
-                                                    {/* Full quiz creation form, similar to quizzes section, with drag-and-drop for questions */}
                                                     <label className="block font-semibold text-blue-200">Quiz Title</label>
                                                     <input
                                                         type="text"
@@ -1179,6 +1956,8 @@ const AdminPanel: React.FC = () => {
                                                         type="text"
                                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                         placeholder="Paste Google Form link here"
+                                                        value={section.gformLink || ''}
+                                                        onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, gformLink: e.target.value } : s))}
                                                     />
                                                 </div>
                                             )}
@@ -1460,55 +2239,7 @@ const AdminPanel: React.FC = () => {
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Team Members</h2>
                         <Card className="medical-card shadow-2xl max-w-4xl bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
-                            <form className="p-8 space-y-6" onSubmit={async e => {
-                                e.preventDefault();
-                                let pictureUrl = '';
-                                if (memberForm.picture) {
-                                    const fileRef = ref(storage, `members/${Date.now()}_${memberForm.picture.name}`);
-                                    await uploadBytes(fileRef, memberForm.picture);
-                                    pictureUrl = await getDownloadURL(fileRef);
-                                }
-                                if (memberForm.isStatic) {
-                                    // Update static member
-                                    setStaticMembers(prev => prev.map((m, idx) => idx === memberForm.staticIndex ? {
-                                        ...m,
-                                        name: memberForm.name,
-                                        institution: memberForm.institution,
-                                        designation: memberForm.designation,
-                                        phone: memberForm.phone,
-                                        pictureUrl: pictureUrl || m.pictureUrl,
-                                    } : m));
-                                } else if (editingMemberId) {
-                                    // Update Firestore member
-                                    const memberDoc = doc(db, "members", editingMemberId);
-                                    await updateDoc(memberDoc, {
-                                        name: memberForm.name,
-                                        institution: memberForm.institution,
-                                        email: memberForm.email,
-                                        designation: memberForm.designation,
-                                        phone: memberForm.phone,
-                                        ...(pictureUrl ? { pictureUrl } : {}),
-                                    });
-                                    setEditingMemberId(null);
-                                } else {
-                                    // Add Firestore member
-                                    const membersCol = collection(db, "members");
-                                    const newMember = {
-                                        name: memberForm.name,
-                                        institution: memberForm.institution,
-                                        email: memberForm.email,
-                                        designation: memberForm.designation,
-                                        phone: memberForm.phone,
-                                        pictureUrl,
-                                    };
-                                    await addDoc(membersCol, newMember);
-                                }
-                                setMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null, isStatic: false, staticIndex: null });
-                                // Refresh members list
-                                const membersCol = collection(db, "members");
-                                const querySnapshot = await getDocs(membersCol);
-                                setMembers(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-                            }}>
+                            <form className="p-8 space-y-6" onSubmit={handleMemberSubmit}>
                                 <h3 className="text-xl font-semibold text-blue-200 mb-4">
                                     {editingMemberId ? 'Edit Member' : 'Add New Member'}
                                 </h3>
@@ -1544,7 +2275,7 @@ const AdminPanel: React.FC = () => {
                                         required
                                         accept="image/*"
                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
-                                        onChange={e => setMemberForm(f => ({ ...f, picture: e.target.files[0] }))}
+                                        onChange={e => setMemberForm(f => ({ ...f, picture: e.target.files?.[0] || null }))}
                                     />
                                 </div>
 
@@ -1690,6 +2421,14 @@ const AdminPanel: React.FC = () => {
                                 </Card>
                             ))}
                         </div>
+                    </div>
+                )}
+
+                {/* Bulk Members Section */}
+                {activeTab === 'bulkmembers' && (
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Bulk Members Upload</h2>
+                        <BulkMemberUpload />
                     </div>
                 )}
             </div>

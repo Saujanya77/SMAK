@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { db } from '../firebase';
+import { collection, getDocs } from 'firebase/firestore';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +9,25 @@ import { Users, BookOpen, Network, Calendar, Microscope, FileText, User } from '
 
 const Index = () => {
   // State for blog popup
-  const [showBlogPopup, setShowBlogPopup] = React.useState(false);
+  const [showBlogPopup, setShowBlogPopup] = useState(false);
+  // State for Research Club Members and Mentors
+  const [researchClubMembers, setResearchClubMembers] = useState([]);
+  const [mentors, setMentors] = useState([]);
+
+  useEffect(() => {
+    // Fetch Research Club Members
+    const fetchRCMembers = async () => {
+      const querySnapshot = await getDocs(collection(db, "researchClubMembers"));
+      setResearchClubMembers(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    };
+    fetchRCMembers();
+    // Fetch Mentors
+    const fetchMentors = async () => {
+      const querySnapshot = await getDocs(collection(db, "mentors"));
+      setMentors(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    };
+    fetchMentors();
+  }, []);
   const handleBlogPopupOpen = () => setShowBlogPopup(true);
   const handleBlogPopupClose = () => setShowBlogPopup(false);
   const handleStartBlog = () => {
@@ -241,76 +261,16 @@ const Index = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            <TeamMemberCard
-              name="Brishabh Raj Prajesh"
-              position="Head"
-              institution="SMAK RESEARCH CLUB"
-              batch=""
-              imageUrl="https://i.postimg.cc/L5ByYYTG/Whats-App-Image-2025-08-13-at-13-01-49-9d0aaa5d.jpg"
-            />
-            <TeamMemberCard
-              name="Musa M. Bharmal"
-              position="Co Head"
-              institution="SMAK RESEARCH CLUB"
-              batch=" "
-              imageUrl="https://i.postimg.cc/6pT0w1Dk/Whats-App-Image-2025-08-13-at-13-01-49-3b92b5a0.jpg"
-            />
-            <TeamMemberCard
-              name="Taniya Masud Temkar"
-              position="Head Of Event & Content Committee"
-              institution="DY Patil Medical College, Kolhapur"
-              batch=" "
-              imageUrl="https://i.postimg.cc/HsMYKpLR/Whats-App-Image-2025-08-13-at-13-01-49-6427a359.jpg"
-            />
-            <TeamMemberCard
-              name="Uzair Pathan"
-              position="Coordinator"
-              institution="Event and Content Committee"
-              batch="GMC Alibag"
-              imageUrl="https://i.postimg.cc/brcyYMC3/Whats-App-Image-2025-08-13-at-13-01-49-73477329.jpg"
-            />
-            <TeamMemberCard
-              name="Aakanksha Nanda"
-              position="Head of the Mentorship Program Committee"
-              institution="Veer Surendra Sai Institute of Medical Science And Research, Burla, Odisha"
-              batch=" "
-              imageUrl="https://i.postimg.cc/0QG3mB5t/Whats-App-Image-2025-08-13-at-13-01-49-8c3c0677.jpg"
-            />
-            <TeamMemberCard
-              name="Sanya Walia"
-              position="Coordinator - Mentorship Program Committee"
-              institution="Government Institute of Medical Sciences, Greater Noida "
-              batch=" "
-              imageUrl="https://i.postimg.cc/Gm0Fwhxy/Whats-App-Image-2025-08-13-at-13-01-49-c374962b.jpg"
-            />
-            <TeamMemberCard
-              name="Ananya"
-              position="Head Of Journal Development committee"
-              institution="Maulana Azad Medical College Delhi,"
-              batch=" "
-              imageUrl="https://i.postimg.cc/vTkKfgxz/Whats-App-Image-2025-08-13-at-13-01-49-c8ba169c.jpg"
-            />
-            <TeamMemberCard
-              name="Ansharah Khan"
-              position="Coordinator - Journal  Developme Committee"
-              institution="Grant medical college Mumbai"
-              batch=" "
-              imageUrl="https://i.postimg.cc/ydPgDc5M/Whats-App-Image-2025-08-13-at-13-01-49-62c3e89c.jpg"
-            />
-            <TeamMemberCard
-              name="Pratik Gupta"
-              position="Head - Campus outreach and coordination Committee"
-              institution="IMS and SUM campus 2"
-              batch=" "
-              imageUrl="https://i.postimg.cc/B6rSQ6Zr/Whats-App-Image-2025-08-13-at-13-01-49-eeb0d546.jpg"
-            />
-            <TeamMemberCard
-              name="Madhav Tripathi"
-              position="Coordinator - Outreach & Collaboration Committee"
-              institution="Virendra Kumar Sakhlecha Government Medical College, Neemuch ( MP)"
-              batch=" "
-              imageUrl="https://i.postimg.cc/50cTXFvS/Whats-App-Image-2025-08-13-at-13-01-49-7c1ed6e6.jpg"
-            />
+            {researchClubMembers.map((m) => (
+              <TeamMemberCard
+                key={m.id}
+                name={m.name}
+                position={m.designation}
+                institution={m.institution}
+                batch={m.batch || ''}
+                imageUrl={m.pictureUrl || ''}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -325,35 +285,16 @@ const Index = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {/* Example mentor cards, replace with real data as needed */}
-            <TeamMemberCard
-              name="Dr. Meera Gupta"
-              position="Mentor - Research Methodology"
-              institution="Lady Hardinge Medical College"
-              batch="MD, PhD"
-              imageUrl="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&h=200&fit=crop&crop=face"
-            />
-            <TeamMemberCard
-              name="Prof. Rajesh Kumar"
-              position="Mentor - Clinical Research"
-              institution="JIPMER Puducherry"
-              batch="MD, Professor"
-              imageUrl="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=200&h=200&fit=crop&crop=face"
-            />
-            <TeamMemberCard
-              name="Dr. Kavita Patel"
-              position="Mentor - Medical Education"
-              institution="Grant Medical College"
-              batch="MBBS, Principal"
-              imageUrl="https://images.unsplash.com/photo-1594824475871-2b2d28e2fb0e?w=200&h=200&fit=crop&crop=face"
-            />
-            <TeamMemberCard
-              name="Dr. Arjun Patel"
-              position="Mentor - Innovation & Technology"
-              institution="AIIMS Delhi"
-              batch="MD, Founder"
-              imageUrl="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop&crop=face"
-            />
+            {mentors.map((m) => (
+              <TeamMemberCard
+                key={m.id}
+                name={m.name}
+                position={m.position}
+                institution={m.institution}
+                batch={m.batch || ''}
+                imageUrl={m.pictureUrl || ''}
+              />
+            ))}
           </div>
         </div>
       </section>
