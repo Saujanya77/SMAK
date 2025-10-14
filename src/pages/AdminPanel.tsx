@@ -862,7 +862,7 @@ const AdminPanel: React.FC = () => {
                                         <label className="block text-sm font-medium text-blue-200">Name *</label>
                                         <input 
                                             type="text" 
-                                            required 
+                                            
                                             placeholder="Full Name" 
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMemberForm.name} 
@@ -870,10 +870,10 @@ const AdminPanel: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Institution *</label>
+                                        <label className="block text-sm font-medium text-blue-200">Institution </label>
                                         <input 
                                             type="text" 
-                                            required 
+                                            
                                             placeholder="Institution/College" 
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMemberForm.institution} 
@@ -883,10 +883,10 @@ const AdminPanel: React.FC = () => {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Email *</label>
+                                        <label className="block text-sm font-medium text-blue-200">Email </label>
                                         <input 
                                             type="email" 
-                                            required 
+                                            
                                             placeholder="Email Address" 
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMemberForm.email} 
@@ -905,10 +905,10 @@ const AdminPanel: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-blue-200">Designation/Role *</label>
+                                    <label className="block text-sm font-medium text-blue-200">Designation/Role </label>
                                     <input 
                                         type="text" 
-                                        required
+                                        
                                         placeholder="Designation/Role" 
                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                         value={rcMemberForm.designation} 
@@ -924,7 +924,7 @@ const AdminPanel: React.FC = () => {
                                         accept="image/*" 
                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
                                         onChange={e => setRCMemberForm(f => ({ ...f, picture: e.target.files?.[0] || null }))} 
-                                        required={!editingRCMemberId}
+                                        
                                     />
                                     {editingRCMemberId && (
                                         <p className="text-blue-300 text-sm mt-1">Leave empty to keep current picture</p>
@@ -1064,7 +1064,7 @@ const AdminPanel: React.FC = () => {
                                         <label className="block text-sm font-medium text-blue-200">Name *</label>
                                         <input 
                                             type="text" 
-                                            required 
+                                            
                                             placeholder="Full Name" 
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMentorForm.name} 
@@ -1072,10 +1072,10 @@ const AdminPanel: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Institution *</label>
+                                        <label className="block text-sm font-medium text-blue-200">Institution </label>
                                         <input 
                                             type="text" 
-                                            required 
+                                            
                                             placeholder="Institution/College" 
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMentorForm.institution} 
@@ -1085,10 +1085,10 @@ const AdminPanel: React.FC = () => {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Email *</label>
+                                        <label className="block text-sm font-medium text-blue-200">Email </label>
                                         <input 
                                             type="email" 
-                                            required 
+                                            
                                             placeholder="Email Address" 
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMentorForm.email} 
@@ -1107,10 +1107,10 @@ const AdminPanel: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-blue-200">Designation/Role *</label>
+                                    <label className="block text-sm font-medium text-blue-200">Designation/Role </label>
                                     <input 
                                         type="text" 
-                                        required
+                                        
                                         placeholder="Designation/Role" 
                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                         value={rcMentorForm.designation} 
@@ -1126,7 +1126,7 @@ const AdminPanel: React.FC = () => {
                                         accept="image/*" 
                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
                                         onChange={e => setRCMentorForm(f => ({ ...f, picture: e.target.files?.[0] || null }))} 
-                                        required={!editingRCMentorId}
+                                        
                                     />
                                     {editingRCMentorId && (
                                         <p className="text-blue-300 text-sm mt-1">Leave empty to keep current picture</p>

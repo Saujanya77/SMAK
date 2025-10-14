@@ -23,7 +23,7 @@ const Index = () => {
     fetchRCMembers();
     // Fetch Mentors
     const fetchMentors = async () => {
-      const querySnapshot = await getDocs(collection(db, "mentors"));
+      const querySnapshot = await getDocs(collection(db, "researchClubMentors"));
       setMentors(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     };
     fetchMentors();
@@ -31,7 +31,7 @@ const Index = () => {
   const handleBlogPopupOpen = () => setShowBlogPopup(true);
   const handleBlogPopupClose = () => setShowBlogPopup(false);
   const handleStartBlog = () => {
-  window.location.href = "/login";
+    window.location.href = "/login";
   };
   // Demo data for events/research activities
   const activities = [
@@ -79,10 +79,10 @@ const Index = () => {
   const handleRegister = () => {
     window.open("/register", "_blank");
   };
-  const TeamMemberCard = ({ name, position, institution, batch, imageUrl }: { 
-    name: string; 
-    position: string; 
-    institution: string; 
+  const TeamMemberCard = ({ name, position, institution, batch, imageUrl }: {
+    name: string;
+    position: string;
+    institution: string;
     batch: string;
     imageUrl: string;
   }) => (
@@ -91,11 +91,11 @@ const Index = () => {
         <div className="mb-4 mx-auto w-28 h-28">
           <div className="w-full h-full rounded-full bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/20 dark:to-blue-800/20 flex items-center justify-center overflow-hidden">
             {imageUrl ? (
-              <img 
-                src={imageUrl} 
+              <img
+                src={imageUrl}
                 alt={name}
                 className="w-24 h-24 object-cover rounded-full border-4 border-white dark:border-background ring-2 ring-blue-400 dark:ring-blue-500 shadow-lg mx-auto"
-                  style={{ aspectRatio: "1/1", objectPosition: (name === "Ansharah Khan" || name === "Pratik Gupta") ? "top center" : "center", background: "#e8efff" }}
+                style={{ aspectRatio: "1/1", objectPosition: (name === "Ansharah Khan" || name === "Pratik Gupta") ? "top center" : "center", background: "#e8efff" }}
               />
             ) : (
               <User className="h-12 w-12 text-blue-600" />
@@ -111,7 +111,7 @@ const Index = () => {
   );
 
   return (
-  <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <Navigation />
 
       {/* Hero Section */}
@@ -160,7 +160,7 @@ const Index = () => {
                   </div>
                   <h3 className="font-bold text-lg text-blue-700 group-hover:text-blue-900 mb-1">{activity.title}</h3>
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{activity.description}</p>
-                  <Button size="sm" className="w-full bg-blue-600 text-white font-semibold hover:bg-blue-700" onClick={e => {e.stopPropagation(); handleCardClick(activity);}}>
+                  <Button size="sm" className="w-full bg-blue-600 text-white font-semibold hover:bg-blue-700" onClick={e => { e.stopPropagation(); handleCardClick(activity); }}>
                     See Details
                   </Button>
                 </div>
@@ -200,7 +200,7 @@ const Index = () => {
           </div>
         )}
       </section>
-      
+
 
       {/* Committees Section */}
       <section id="committees" className="py-16">
@@ -211,28 +211,28 @@ const Index = () => {
               The SMAK Research Club is organized into national leadership, supported by four key committees
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { 
-                icon: Users, 
-                title: "Mentorship Program Committee", 
-                description: "Connecting students with experienced mentors to guide their research journey" 
+              {
+                icon: Users,
+                title: "Mentorship Program Committee",
+                description: "Connecting students with experienced mentors to guide their research journey"
               },
-              { 
-                icon: Network, 
-                title: "Outreach & Collaboration Committee", 
-                description: "Building partnerships and expanding our research network nationwide" 
+              {
+                icon: Network,
+                title: "Outreach & Collaboration Committee",
+                description: "Building partnerships and expanding our research network nationwide"
               },
-              { 
-                icon: FileText, 
-                title: "Journal Development Committee", 
-                description: "Developing and managing our research publications and journals" 
+              {
+                icon: FileText,
+                title: "Journal Development Committee",
+                description: "Developing and managing our research publications and journals"
               },
-              { 
-                icon: Calendar, 
-                title: "Events & Content Committee", 
-                description: "Organizing events, workshops, and creating educational content" 
+              {
+                icon: Calendar,
+                title: "Events & Content Committee",
+                description: "Organizing events, workshops, and creating educational content"
               }
             ].map((committee, index) => (
               <Card key={index} className="text-center h-full transition-all duration-300 hover:shadow-lg hover:scale-105">
@@ -309,18 +309,18 @@ const Index = () => {
             <p className="text-xl text-blue-100 mb-8">
               Be part of a nationwide community dedicated to advancing medical research and fostering academic excellence
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="secondary"
                 className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8"
               >
                 <Microscope className="mr-2 h-5 w-5" />
                 Membership Form
               </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="outline"
                 className="border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-semibold px-8"
               >
