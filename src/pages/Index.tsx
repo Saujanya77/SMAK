@@ -106,7 +106,7 @@ function GeminiChatbot() {
           <div className="flex items-center justify-between px-4 py-3 bg-blue-600 text-white">
             <div className="flex items-center space-x-2">
               <Sparkles className="h-5 w-5" />
-              <span className="font-bold">Gemini Chatbot</span>
+              <span className="font-bold">SMAKbot</span>
             </div>
             <button onClick={() => setOpen(false)} className="hover:bg-blue-700 rounded-full p-1">
               <X className="h-5 w-5" />
