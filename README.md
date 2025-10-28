@@ -1,12 +1,12 @@
 <<<<<<< HEAD
 
-# 🧠 SMAK – Society of Medical Academia and Knowledge
+# 🧠 SMAK – Society for Medical Academia and Knowledge
 
 Welcome to the official repository for the **SMAK Website** – a national platform for medical students to Learn, Lead, and Innovate.
 
 ## 🔍 About the Project
 
-**SMAK (Society of Medical Academia and Knowledge)** is a student-led initiative dedicated to fostering academic excellence, clinical insight, and a research-driven culture among medical students across India.
+**SMAK (Society for Medical Academia and Knowledge)** is a student-led initiative dedicated to fostering academic excellence, clinical insight, and a research-driven culture among medical students across India.
 
 This website serves as the digital hub for:
 - Event announcements
