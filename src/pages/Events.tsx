@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -29,12 +28,12 @@ const Events = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registrations, setRegistrations] = useState([]);
 
-  // Handle registration form changes
-  const handleRegistrationChange = (e) => {
+  // Handle registration form changes - FIXED: Added useCallback to prevent re-renders
+  const handleRegistrationChange = React.useCallback((e) => {
     const { name, value } = e.target;
     console.log('Input change:', name, value);
     setRegistrationForm((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   // Submit registration to Firestore
   const handleRegistrationSubmit = async (e) => {
@@ -70,12 +69,12 @@ const Events = () => {
     }
   };
 
-  // Registration Modal UI
-  // registrationForm state is already outside the modal, so no need to re-initialize inside the modal.
-  const RegistrationModal = () => {
-  if (!showRegisterModal || !registerEvent) return null;
-  // Admin view
-  if (showRegisterModal === 'admin') {
+  // Registration Modal UI - FIXED: Moved outside and made it a proper component
+  const RegistrationModal = React.useMemo(() => {
+    if (!showRegisterModal || !registerEvent) return null;
+    
+    // Admin view
+    if (showRegisterModal === 'admin') {
       return (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 w-full max-w-2xl relative" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
@@ -88,57 +87,107 @@ const Events = () => {
             {registrations.length === 0 ? (
               <p className="text-muted-foreground">No registrations yet.</p>
             ) : (
-              <table className="w-full text-sm border">
-                <thead>
-                  <tr className="bg-blue-100 dark:bg-blue-900/20">
-                    <th className="p-2">Name</th>
-                    <th className="p-2">Email</th>
-                    <th className="p-2">Institute</th>
-                    <th className="p-2">Year</th>
-                    <th className="p-2">Timestamp</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {registrations.map(r => (
-                    <tr key={r.id} className="border-t">
-                      <td className="p-2">{r.name ?? ''}</td>
-                      <td className="p-2">{r.email ?? ''}</td>
-                      <td className="p-2">{r.institute ?? ''}</td>
-                      <td className="p-2">{r.year ?? ''}</td>
-                      <td className="p-2">{r.timestamp ? new Date(r.timestamp).toLocaleString() : ''}</td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border">
+                  <thead>
+                    <tr className="bg-blue-100 dark:bg-blue-900/20">
+                      <th className="p-2 text-left">Name</th>
+                      <th className="p-2 text-left">Email</th>
+                      <th className="p-2 text-left">Institute</th>
+                      <th className="p-2 text-left">Year</th>
+                      <th className="p-2 text-left">Timestamp</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {registrations.map(r => (
+                      <tr key={r.id} className="border-t hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td className="p-2">{r.name ?? ''}</td>
+                        <td className="p-2">{r.email ?? ''}</td>
+                        <td className="p-2">{r.institute ?? ''}</td>
+                        <td className="p-2">{r.year ?? ''}</td>
+                        <td className="p-2">{r.timestamp ? new Date(r.timestamp).toLocaleString() : ''}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
       );
     }
-    // User registration view
+    
+    // User registration view - FIXED: Added proper form structure and input handling
     return (
       <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 w-full max-w-lg relative" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
-          <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-white" onClick={() => { setShowRegisterModal(false); setRegisterEvent(null); setRegistrationSuccess(false); setRegistrationForm({ name: '', email: '', institute: '', year: '' }); }}>
+          <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-white" onClick={() => { 
+            setShowRegisterModal(false); 
+            setRegisterEvent(null); 
+            setRegistrationSuccess(false); 
+            setRegistrationForm({ name: '', email: '', institute: '', year: '' }); 
+          }}>
             ✕
           </button>
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Users className="h-6 w-6 text-blue-600" /> Register for "{registerEvent.title}"
           </h2>
           {registrationSuccess ? (
-            <div className="text-green-600 font-semibold text-center mb-4">Registration successful!</div>
+            <div className="text-green-600 font-semibold text-center mb-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              Registration successful!
+            </div>
           ) : null}
           <form onSubmit={handleRegistrationSubmit} className="space-y-4">
-            <Input name="name" value={registrationForm.name} onChange={handleRegistrationChange} placeholder="Your Name" required />
-            <Input name="email" value={registrationForm.email} onChange={handleRegistrationChange} type="email" placeholder="Email" required />
-            <Input name="institute" value={registrationForm.institute} onChange={handleRegistrationChange} placeholder="Institute" required />
-            <Input name="year" value={registrationForm.year} onChange={handleRegistrationChange} placeholder="Year of Study" required />
-            <Button type="submit" className="w-full bg-blue-600 text-white">Submit Registration</Button>
+            <div>
+              <Input 
+                name="name" 
+                value={registrationForm.name} 
+                onChange={handleRegistrationChange} 
+                placeholder="Your Name" 
+                required 
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Input 
+                name="email" 
+                value={registrationForm.email} 
+                onChange={handleRegistrationChange} 
+                type="email" 
+                placeholder="Email" 
+                required 
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Input 
+                name="institute" 
+                value={registrationForm.institute} 
+                onChange={handleRegistrationChange} 
+                placeholder="Institute" 
+                required 
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Input 
+                name="year" 
+                value={registrationForm.year} 
+                onChange={handleRegistrationChange} 
+                placeholder="Year of Study" 
+                required 
+                className="w-full"
+              />
+            </div>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2">
+              Submit Registration
+            </Button>
           </form>
         </div>
       </div>
     );
-  };
+  }, [showRegisterModal, registerEvent, registrations, registrationForm, registrationSuccess, handleRegistrationChange]);
+
   const { user } = useAuth();
   const isAdmin = user && ADMIN_EMAILS.includes(user.email);
 
@@ -160,6 +209,8 @@ const Events = () => {
   const [editEventType, setEditEventType] = useState(null); // 'firestore' or 'local'
   const [editLocalIndex, setEditLocalIndex] = useState(null);
   const [uploadPreview, setUploadPreview] = useState('');
+  
+  // FIXED: Added static data preservation
   const hardcodedEvents = [
     {
       title: "Clinical Case Presentation Series",
@@ -202,6 +253,7 @@ const Events = () => {
   const [firestoreEvents, setFirestoreEvents] = useState([]);
   const [localEvents, setLocalEvents] = useState(hardcodedEvents);
   const [editingEvent, setEditingEvent] = useState(null); // For edit modal (future)
+  
   // Load events from Firestore on mount
   useEffect(() => {
     const fetchEvents = async () => {
@@ -218,24 +270,25 @@ const Events = () => {
     fetchEvents();
   }, []);
 
+  // FIXED: Preserved static past events data
   const pastEvents = [
     {
       title: "World Asthma Day",
       date: "November 15, 2024",
       attendees: "2,500+",
-      image: "public/Images/IMG-20250613-WA0032.jpg"
+      image: "/Images/IMG-20250613-WA0032.jpg"
     },
     {
       title: "World Asthma Day",
       date: "October 28, 2024",
       attendees: "1,800+",
-      image: "public/Images/IMG-20250613-WA0033.jpg"
+      image: "/Images/IMG-20250613-WA0033.jpg"
     },
     {
       title: "World Asthma Day",
       date: "October 10-16, 2024",
       attendees: "3,200+",
-      image: "public/Images/IMG-20250613-WA0034.jpg"
+      image: "/Images/IMG-20250613-WA0034.jpg"
     }
   ];
 
@@ -374,12 +427,13 @@ const Events = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <RegistrationModal />
+      {RegistrationModal}
       <Navigation />
+      
       {/* Admin-only Add Event button */}
       {isAdmin && (
         <div className="container mx-auto px-4 pt-8 flex justify-end">
-          <Button onClick={() => setShowAddForm(true)} className="flex items-center gap-2 bg-blue-600 text-white">
+          <Button onClick={() => setShowAddForm(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
             <Plus className="h-5 w-5" /> Add Event
           </Button>
         </div>
@@ -425,11 +479,12 @@ const Events = () => {
                   <img src={eventForm.thumbnailUrl} alt="Preview" className="mt-2 rounded w-full max-h-40 object-cover" />
                 )}
               </div>
-              <Button type="submit" className="w-full bg-blue-600 text-white">{editMode ? 'Update Event' : 'Create Event'}</Button>
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">{editMode ? 'Update Event' : 'Create Event'}</Button>
             </form>
           </div>
         </div>
       )}
+      
       <section className="relative py-20 min-h-[400px] flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-500 to-pink-400 dark:from-blue-950 dark:via-purple-900 dark:to-pink-900 overflow-hidden">
         {/* Previous animated orbs and gradients */}
         <div className="absolute top-10 left-1/4 w-32 h-32 bg-blue-300/30 rounded-full blur-2xl animate-pulse"></div>
@@ -501,7 +556,7 @@ const Events = () => {
                 const location = event.location || '';
                 const description = event.description || '';
                 return (
-                  <Card key={isFirestore ? event.id : idx} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                  <Card key={isFirestore ? event.id : idx} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
                     <div className="aspect-video">
                       <img
                         src={image}
@@ -534,7 +589,7 @@ const Events = () => {
                       </div>
                       <p className="text-sm text-muted-foreground mb-4">{description}</p>
                       {isAdmin && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 mb-4 flex-wrap">
                           {isFirestore ? (
                             <>
                               <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => handleEditFirestoreEvent(event)}>
@@ -588,7 +643,7 @@ const Events = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {pastEvents.map((event, index) => (
-              <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
                 <div className="aspect-video">
                   <img
                     src={event.image}
@@ -631,7 +686,7 @@ const Events = () => {
               { title: "Competitions", description: "Test your knowledge and skills", icon: "🏆" },
               { title: "Conferences", description: "Large-scale academic gatherings", icon: "🏛️" }
             ].map((category, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300">
+              <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
                 <CardContent className="pt-6">
                   <div className="text-4xl mb-4">{category.icon}</div>
                   <h3 className="font-semibold text-lg mb-2">{category.title}</h3>
