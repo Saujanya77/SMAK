@@ -333,144 +333,165 @@ function VideoLectures() {
     return url;
   };
 
-  const renderVideoPlayer = (video: VideoLecture) => {
-    if (video.isLocalVideo && video.videoUrl) {
-      return (
-        <video
-          controls
-          className="w-full h-full rounded-lg"
-          poster={video.thumbnail}
-          onTimeUpdate={e => {
-            const target = e.target as HTMLVideoElement;
-            if (target.duration > 0) {
-              const percent = (target.currentTime / target.duration) * 100;
-              setVideoProgress(percent);
-              localStorage.setItem(`video-progress-${video.id}`, String(percent));
-              setVideoProgressMap(prev => ({ ...prev, [video.id]: percent }));
-            }
-          }}
-          const handlePayment= async () => {
-    if (!paymentItem) return;
-    setUnlocking(true);
-    try {
-      // Call backend to create Razorpay order
-      const response = await fetch('http://localhost:5000/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: paymentItem.price || 99, // Default to 99 if price missing
-          currency: 'INR'
-        })
-      });
-      const order = await response.json();
-      if (!order.id) throw new Error('Order creation failed');
+const renderVideoPlayer = (video: VideoLecture) => {
+  if (!video) return null;
 
-      const options = {
-        key: 'rzp_test_1DP5mmOlF5G5ag', // Replace with your Razorpay key
-        amount: order.amount, // Amount in paise
-        currency: order.currency,
-        name: 'SMAK Edu Platform',
-        description: `Unlock ${paymentItem.type}: ${paymentItem.title}`,
-        image: 'https://your-logo-url.com/logo.png',
-        order_id: order.id, // Pass order_id from backend
-        handler: async (response: any) => {
-          // Payment successful
-          console.log('Payment successful:', response);
-          unlockItem(paymentItem.type, paymentItem.id);
-          alert(`Payment successful! ${paymentItem.title} has been unlocked.`);
-          setShowPaymentModal(false);
-          setPaymentItem(null);
-          setUnlocking(false);
-          if (paymentItem.type === 'video') {
-            loadVideos();
-          } else if (paymentItem.type === 'course') {
-            loadCourses();
+  // Local uploaded video player with progress tracking
+  if (video.isLocalVideo && video.videoUrl) {
+    return (
+      <video
+        controls
+        className="w-full h-full rounded-lg"
+        poster={video.thumbnail}
+        onTimeUpdate={e => {
+          const target = e.target as HTMLVideoElement;
+          if (target.duration > 0) {
+            const percent = (target.currentTime / target.duration) * 100;
+            setVideoProgress(percent);
+            localStorage.setItem(`video-progress-${video.id}`, String(percent));
+            setVideoProgressMap(prev => ({ ...prev, [video.id]: percent }));
           }
-        },
-        prefill: {
-          name: mockUser.name,
-          email: 'demo@example.com',
-          contact: '9999999999'
-        },
-        notes: {
-          address: 'SMAK Educational Institute'
-        },
-        theme: {
-          color: '#3399cc'
-        },
-        modal: {
-          ondismiss: () => {
-            setUnlocking(false);
-          }
-        }
-      };
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (error) {
-      console.error('Payment error:', error);
-      alert('Payment failed. Please try again.');
-      setUnlocking(false);
-    }
-  };
-  if (paymentItem.type === 'video') {
-    // Reload videos
-    loadVideos();
-  } else if (paymentItem.type === 'course') {
-    // Reload courses
-    loadCourses();
+        }}
+      >
+        <source src={video.videoUrl} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    );
   }
-},
-prefill: {
-  name: mockUser.name,
-    email: 'demo@example.com',
-      contact: '9999999999'
-},
-notes: {
-  address: 'SMAK Educational Institute'
-},
-theme: {
-  color: '#3399cc'
-},
-modal: {
-  ondismiss: () => {
-    setUnlocking(false);
+
+  // Embedded external players (YouTube, Vimeo, etc.)
+  if (video.isLink && video.videoUrl && isEmbedLink(video.videoUrl)) {
+    return (
+      <iframe
+        src={getEmbedUrl(video.videoUrl)}
+        className="w-full h-full rounded-lg"
+        allowFullScreen
+        title={video.title}
+      />
+    );
   }
-}
-      };
 
-const rzp = new window.Razorpay(options);
-rzp.open();
-    } catch (error) {
-  console.error('Payment error:', error);
-  alert('Payment failed. Please try again.');
-  setUnlocking(false);
-}
-  };
+  // Fallback for direct remote video URL
+  if (video.videoUrl) {
+    return (
+      <video controls className="w-full h-full rounded-lg" poster={video.thumbnail}>
+        <source src={video.videoUrl} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    );
+  }
+
+  return <div className="text-gray-500">No video available.</div>;
+};
 
 
-// Replace with your actual backend URL
-const backendUrl = 'http://localhost:5000/create-order';
+// Backend base URL (can be set with VITE_BACKEND_URL in env)
+const backendBase = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
-async function createRazorpayOrder(amount) {
-  const response = await fetch(backendUrl, {
+async function createRazorpayOrder(amount: number) {
+  const response = await fetch(`${backendBase}/create-order`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      amount,      // e.g. 99 for ₹99
+      amount, // e.g. 99 for ₹99
       currency: 'INR'
     })
   });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Order creation failed: ${text}`);
+  }
   const data = await response.json();
   return data; // Contains order.id, amount, etc.
 }
 
-// Usage:
-createRazorpayOrder(99).then(order => {
-  console.log('Order:', order);
-  // Pass order.id to Razorpay modal options
-});
+// Load Razorpay checkout script dynamically
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
+// Handle payment flow: create order, open checkout, verify payment via backend
+async function handlePayment() {
+  if (!paymentItem) return;
+  setUnlocking(true);
+  try {
+    const order = await createRazorpayOrder(paymentItem.price);
+
+    const loaded = await loadRazorpayScript();
+    if (!loaded) throw new Error('Failed to load Razorpay script');
+
+    const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || (window as any).RAZORPAY_KEY_ID || '';
+
+    const options = {
+      key: keyId, // Enter the Key ID generated from the Dashboard
+      amount: order.amount, // in paise
+      currency: order.currency || 'INR',
+      name: 'SMAK',
+      description: paymentItem.title,
+      order_id: order.id,
+      handler: async function (response: any) {
+        try {
+          // verify payment at backend
+          const verifyResp = await fetch(`${backendBase}/verify-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+              itemType: paymentItem.type,
+              itemId: paymentItem.id,
+              amount: paymentItem.price
+            })
+          });
+          const json = await verifyResp.json();
+          if (json && json.success) {
+            // Unlock the item locally
+            unlockItem(paymentItem.type, paymentItem.id);
+            setShowPaymentModal(false);
+            setPaymentItem(null);
+            // Optionally notify backend / save record
+          } else {
+            alert('Payment verification failed. Please contact support.');
+          }
+        } catch (err) {
+          console.error('Verification error:', err);
+          alert('Verification failed.');
+        } finally {
+          setUnlocking(false);
+        }
+      },
+      prefill: {
+        name: mockUser.name,
+        email: ''
+      },
+      theme: {
+        color: '#2563eb'
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', function (resp: any) {
+      console.error('Payment failed:', resp);
+      alert('Payment failed or was cancelled.');
+      setUnlocking(false);
+    });
+    rzp.open();
+  } catch (err) {
+    console.error('Payment error:', err);
+    alert('Unable to initiate payment. Please try again later.');
+    setUnlocking(false);
+  }
+}
 
 // Load videos and courses
 const loadVideos = async () => {

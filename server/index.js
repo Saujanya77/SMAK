@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import Razorpay from 'razorpay';
 import { GoogleGenAI } from "@google/genai";
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 dotenv.config();
 
 const app = express();
@@ -52,6 +55,49 @@ app.post('/create-order', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Verify Razorpay payment signature
+app.post('/verify-payment', async (req, res) => {
+    const { orderId, paymentId, signature, itemType, itemId, amount } = req.body;
+    if (!orderId || !paymentId || !signature) {
+        return res.status(400).json({ success: false, error: 'Missing parameters' });
+    }
+
+    try {
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(`${orderId}|${paymentId}`)
+            .digest('hex');
+
+        if (expectedSignature === signature) {
+            // Persist a record of this successful verification (append to payments.json)
+            try {
+                const record = {
+                    orderId,
+                    paymentId,
+                    itemType: itemType || null,
+                    itemId: itemId || null,
+                    amount: amount || null,
+                    timestamp: new Date().toISOString()
+                };
+                const paymentsPath = path.join(process.cwd(), 'server', 'payments.json');
+                const line = JSON.stringify(record) + '\n';
+                fs.appendFile(paymentsPath, line, (err) => {
+                    if (err) console.error('Failed to persist payment record:', err);
+                });
+            } catch (e) {
+                console.error('Error saving payment record:', e);
+            }
+            // Optionally you can capture the payment here or store records
+            return res.json({ success: true });
+        }
+
+        return res.status(400).json({ success: false, error: 'Invalid signature' });
+    } catch (err) {
+        console.error('Verify payment error:', err);
+        return res.status(500).json({ success: false, error: 'Server error' });
     }
 });
 
