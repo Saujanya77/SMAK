@@ -12,6 +12,7 @@ import AdminPanel from './pages/AdminPanel';
 
 import Index from "./pages/Index";
 import About from "./pages/About";
+import SmakAI from "./pages/SmakAI";
 import Events from "./pages/Events";
 import Journal from "./pages/Journal";
 import ResearchHub from "./pages/ResearchHub";
@@ -56,6 +57,7 @@ const App = () => (
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/smak-ai" element={<SmakAI />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/research-hub" element={<ResearchHub />} />

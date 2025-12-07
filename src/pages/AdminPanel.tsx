@@ -25,7 +25,7 @@ import { collection, getDocs, updateDoc, doc, addDoc, deleteDoc } from "firebase
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "../components/ui/button";
-import { Card } from "../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import BulkMemberUpload from "../components/BulkMemberUpload";
 
@@ -86,6 +86,25 @@ interface Achievement {
     label: string;
 }
 
+interface SmakAIEnquiry {
+    id: string;
+    fullName: string;
+    organisation: string;
+    designation: string;
+    email: string;
+    phone: string;
+    sector: string;
+    geography: string;
+    therapyArea: string;
+    projectType: string;
+    sampleSize: string;
+    startDate: string;
+    deliverables: string;
+    objective: string;
+    submittedAt: any;
+    status: string;
+}
+
 const AdminPanel: React.FC = () => {
     const adminTabs = [
         { key: 'journals', label: 'Journals' },
@@ -97,7 +116,8 @@ const AdminPanel: React.FC = () => {
         { key: 'achievements', label: 'Achievements' },
         { key: 'videos', label: 'Video Lectures' },
         { key: 'courses', label: 'Courses' },
-        { key: 'quizzes', label: 'Quizzes' }
+        { key: 'quizzes', label: 'Quizzes' },
+        { key: 'smakaienquiries', label: 'SMAK AI Enquiries' }
     ];
     
     // Research Club Members state
@@ -168,6 +188,10 @@ const AdminPanel: React.FC = () => {
     const [courseThumbnailFile, setCourseThumbnailFile] = useState<File | null>(null);
     const [savingCourse, setSavingCourse] = useState(false);
 
+    // SMAK AI Enquiries state
+    const [smakAIEnquiries, setSmakAIEnquiries] = useState<SmakAIEnquiry[]>([]);
+    const [loadingSMakAI, setLoadingSMakAI] = useState(false);
+
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -188,7 +212,7 @@ const AdminPanel: React.FC = () => {
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
     const [loadingVideos, setLoadingVideos] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes' | 'courses' | 'researchclubmembers' | 'researchclubmentors'>('journals');
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes' | 'courses' | 'researchclubmembers' | 'researchclubmentors' | 'smakaienquiries'>('journals');
 
     // Achievements state
     const defaultAchievements = [
@@ -329,12 +353,25 @@ const AdminPanel: React.FC = () => {
             setAchievements(achievementsList);
         };
 
+        const fetchSmakAIEnquiries = async () => {
+            setLoadingSMakAI(true);
+            try {
+                const querySnapshot = await getDocs(collection(db, "smakAIEnquiries"));
+                const enquiries = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as SmakAIEnquiry));
+                setSmakAIEnquiries(enquiries.sort((a, b) => b.submittedAt - a.submittedAt));
+            } catch (error) {
+                console.error("Error fetching SMAK AI enquiries:", error);
+            }
+            setLoadingSMakAI(false);
+        };
+
         fetchQuizzes();
         fetchPendingJournals();
         fetchPendingVideos();
         fetchPendingBlogs();
         fetchMembers();
         fetchAchievements();
+        fetchSmakAIEnquiries();
     }, []);
 
     // Quiz handlers
@@ -2429,6 +2466,122 @@ const AdminPanel: React.FC = () => {
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Bulk Members Upload</h2>
                         <BulkMemberUpload />
+                    </div>
+                )}
+
+                {/* SMAK AI Enquiries Section */}
+                {activeTab === 'smakaienquiries' && (
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">SMAK AI Project Enquiries</h2>
+                        {loadingSMakAI ? (
+                            <p className="text-gray-400">Loading enquiries...</p>
+                        ) : smakAIEnquiries.length === 0 ? (
+                            <p className="text-gray-400">No enquiries received yet.</p>
+                        ) : (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {smakAIEnquiries.map((enquiry) => (
+                                    <Card key={enquiry.id} className="bg-gray-800/50 border-blue-500/30 overflow-hidden hover:border-blue-400/60 transition-all duration-300">
+                                        <CardHeader className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-b border-blue-500/20">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <CardTitle className="text-lg text-white">{enquiry.fullName}</CardTitle>
+                                                    <p className="text-sm text-gray-400 mt-1">{enquiry.email}</p>
+                                                </div>
+                                                <Badge className={enquiry.status === 'new' ? 'bg-yellow-500/20 text-yellow-300' : 'bg-green-500/20 text-green-300'}>
+                                                    {enquiry.status}
+                                                </Badge>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent className="pt-6 space-y-4">
+                                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Organization</p>
+                                                    <p className="text-gray-200 mt-1">{enquiry.organisation}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Designation</p>
+                                                    <p className="text-gray-200 mt-1">{enquiry.designation}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Phone</p>
+                                                    <p className="text-gray-200 mt-1">{enquiry.phone}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Sector</p>
+                                                    <p className="text-gray-200 mt-1">{enquiry.sector}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Geography</p>
+                                                    <p className="text-gray-200 mt-1">{enquiry.geography}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Therapy Area</p>
+                                                    <p className="text-gray-200 mt-1">{enquiry.therapyArea}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Project Type</p>
+                                                    <p className="text-gray-200 mt-1">{enquiry.projectType}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Sample Size</p>
+                                                    <p className="text-gray-200 mt-1">{enquiry.sampleSize}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Start Date</p>
+                                                    <p className="text-gray-200 mt-1">{enquiry.startDate}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Deliverables</p>
+                                                    <p className="text-gray-200 mt-1 capitalize">{enquiry.deliverables}</p>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-500 text-xs uppercase font-semibold mb-2">Project Objective</p>
+                                                <p className="text-gray-300 text-sm bg-gray-900/50 p-3 rounded border border-gray-700">{enquiry.objective}</p>
+                                            </div>
+                                            <div className="pt-2 border-t border-gray-700">
+                                                <p className="text-gray-500 text-xs">
+                                                    Submitted: {enquiry.submittedAt?.toDate?.()?.toLocaleDateString() || 'N/A'}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2 pt-2">
+                                                <Button
+                                                    size="sm"
+                                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                                                    onClick={async () => {
+                                                        try {
+                                                            await updateDoc(doc(db, 'smakAIEnquiries', enquiry.id), { status: 'contacted' });
+                                                            setSmakAIEnquiries(prev => prev.map(e => e.id === enquiry.id ? { ...e, status: 'contacted' } : e));
+                                                        } catch (error) {
+                                                            console.error('Error updating status:', error);
+                                                        }
+                                                    }}
+                                                >
+                                                    Mark Contacted
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    className="flex-1"
+                                                    onClick={async () => {
+                                                        if (window.confirm('Delete this enquiry?')) {
+                                                            try {
+                                                                await deleteDoc(doc(db, 'smakAIEnquiries', enquiry.id));
+                                                                setSmakAIEnquiries(prev => prev.filter(e => e.id !== enquiry.id));
+                                                            } catch (error) {
+                                                                console.error('Error deleting enquiry:', error);
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

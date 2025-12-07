@@ -22,6 +22,7 @@ const Navigation = () => {
   const navItems = [
     { name: 'Home', path: '/', icon: null },
     { name: 'About SMAK', path: '/about', icon: null },
+    { name: 'SMAK AI', path: '/smak-ai', icon: null },
     { name: 'Events', path: '/events', icon: null },
     { name: 'Journal', path: '/journal', icon: FileText },
     { name: 'Clinical Corner', path: '/Homeclinicalcorner', icon: FileText },
@@ -65,40 +66,40 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+      <div className="w-full px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-
-          <Link to="/" className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-gray-100">
+          <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-gray-100">
               <img
                 src="https://i.postimg.cc/LXmZbsWJ/Logo.jpg"
                 alt="SMAK - Society For Medical Academia and Knowledge Logo"
-                className="w-10 h-10 object-contain"
+                className="w-8 h-8 object-contain"
               />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+            <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent hidden sm:inline">
               SMAK
             </span>
           </Link>
 
-          {/* Desktop Navigation - Using enhanced button style from second component */}
-          <div className="hidden lg:flex items-center space-x-1">
+          {/* Desktop Navigation - Horizontal scroll with better spacing */}
+          <div className="hidden lg:flex items-center gap-0.5 overflow-x-auto flex-1 max-w-4xl px-2 scrollbar-hide">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Button
                   key={item.name}
                   variant={isActive(item.path) ? "default" : "ghost"}
-                  className={`flex items-center space-x-2 ${isActive(item.path)
+                  size="sm"
+                  className={`flex items-center gap-1 whitespace-nowrap text-xs lg:text-sm font-medium px-2 lg:px-3 py-1.5 flex-shrink-0 ${isActive(item.path)
                       ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent hover:bg-blue-50 dark:hover:bg-blue-950/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-blue-50 dark:hover:bg-blue-950/20"
                     }`}
                   asChild
                 >
                   <Link to={item.path}>
-                    {Icon && <Icon className="h-4 w-4" />}
-                    <span className="text-sm font-medium">{item.name}</span>
+                    {Icon && <Icon className="h-3.5 w-3.5" />}
+                    <span>{item.name}</span>
                   </Link>
                 </Button>
               );
@@ -106,9 +107,9 @@ const Navigation = () => {
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-2">
-            {/* Search */}
-            <Button variant="ghost" size="icon">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {/* Search - Hidden on very small screens */}
+            <Button variant="ghost" size="icon" className="hidden sm:flex h-9 w-9">
               <Search className="h-4 w-4" />
             </Button>
 
@@ -116,6 +117,7 @@ const Navigation = () => {
             <Button
               variant="ghost"
               size="icon"
+              className="h-9 w-9"
               onClick={() => setTheme(theme === "light" ? "dark" : "light")}
             >
               {theme === "light" ? (
@@ -129,7 +131,7 @@ const Navigation = () => {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -149,59 +151,60 @@ const Navigation = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="hidden md:flex space-x-2">
-                <Button variant="ghost" asChild>
+              <div className="hidden md:flex gap-1.5">
+                <Button variant="ghost" size="sm" asChild className="h-8 text-xs lg:text-sm">
                   <Link to="/login">Login</Link>
                 </Button>
-                <Button asChild>
+                <Button size="sm" asChild className="h-8 text-xs lg:text-sm">
                   <Link to="/register">Register</Link>
                 </Button>
               </div>
             )}
 
-            {/* Mobile Menu Button - Enhanced from second component */}
+            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden h-9 w-9"
               onClick={() => setIsOpen(!isOpen)}
             >
-              {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
-        {/* Mobile Navigation - Enhanced with button styling from second component */}
+        {/* Mobile Navigation Menu */}
         {isOpen && (
-          <div className="lg:hidden py-4 border-t border-border">
-            <div className="flex flex-col space-y-2">
+          <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur max-h-[calc(100vh-4rem)] overflow-y-auto">
+            <div className="flex flex-col gap-1 p-3">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Button
                     key={item.name}
                     variant={isActive(item.path) ? "default" : "ghost"}
-                    className={`w-full justify-start space-x-2 ${isActive(item.path)
+                    size="sm"
+                    className={`w-full justify-start gap-2 text-sm ${isActive(item.path)
                         ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent hover:bg-blue-50 dark:hover:bg-blue-950/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-blue-50 dark:hover:bg-blue-950/20"
                       }`}
                     asChild
                     onClick={() => setIsOpen(false)}
                   >
                     <Link to={item.path}>
                       {Icon && <Icon className="h-4 w-4" />}
-                      <span className="text-sm font-medium">{item.name}</span>
+                      <span>{item.name}</span>
                     </Link>
                   </Button>
                 );
               })}
 
               {!isAuthenticated && (
-                <div className="flex flex-col space-y-2 pt-2 border-t border-border mt-2">
-                  <Button variant="ghost" asChild onClick={() => setIsOpen(false)}>
+                <div className="flex flex-col gap-2 pt-3 border-t border-border mt-2">
+                  <Button variant="ghost" size="sm" asChild onClick={() => setIsOpen(false)}>
                     <Link to="/login">Login</Link>
                   </Button>
-                  <Button asChild onClick={() => setIsOpen(false)}>
+                  <Button size="sm" asChild onClick={() => setIsOpen(false)}>
                     <Link to="/register">Register</Link>
                   </Button>
                 </div>
@@ -210,6 +213,15 @@ const Navigation = () => {
           </div>
         )}
       </div>
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </nav>
   );
 };
