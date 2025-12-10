@@ -214,9 +214,124 @@ function VideoLectures() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
-    // TODO: Implement upload logic
-    console.log('Submit form data:', formData);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      let thumbnailUrl = formData.thumbnail;
+      let notesUrl = formData.notes;
+      let videoUrl = formData.videoUrl;
+
+      // Upload thumbnail if file is provided
+      if (formData.thumbnailFile) {
+        const thumbnailRef = ref(storage, `thumbnails/${Date.now()}_${formData.thumbnailFile.name}`);
+        await uploadBytes(thumbnailRef, formData.thumbnailFile);
+        thumbnailUrl = await getDownloadURL(thumbnailRef);
+      }
+
+      // Upload notes if file is provided
+      if (formData.notesFile) {
+        const notesRef = ref(storage, `notes/${Date.now()}_${formData.notesFile.name}`);
+        await uploadBytes(notesRef, formData.notesFile);
+        notesUrl = await getDownloadURL(notesRef);
+      }
+
+      // Upload video file if provided (not a link)
+      if (!formData.isLink && formData.videoFile) {
+        const videoRef = ref(storage, `videos/${Date.now()}_${formData.videoFile.name}`);
+        const uploadTask = uploadBytesResumable(videoRef, formData.videoFile);
+
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(progress);
+          },
+          (error) => {
+            console.error('Upload error:', error);
+            throw error;
+          },
+          async () => {
+            videoUrl = await getDownloadURL(uploadTask.snapshot.ref);
+            
+            // Save to Firestore after video upload completes
+            await saveVideoToFirestore(videoUrl, thumbnailUrl, notesUrl);
+          }
+        );
+      } else {
+        // If it's a link or external video, save immediately
+        await saveVideoToFirestore(videoUrl, thumbnailUrl, notesUrl);
+      }
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      alert('Failed to upload video. Please try again.');
+      setUploading(false);
+    }
+  };
+
+  const saveVideoToFirestore = async (videoUrl: string | null, thumbnailUrl: string | null, notesUrl: string | null) => {
+    try {
+      const videoData = {
+        title: formData.title,
+        subject: formData.subject,
+        description: formData.description,
+        instructor: formData.instructor,
+        level: formData.level,
+        duration: formData.duration,
+        isLink: formData.isLink,
+        videoUrl: videoUrl || formData.videoUrl || formData.externalLink,
+        externalLink: formData.externalLink,
+        thumbnail: thumbnailUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3',
+        notes: formData.notes,
+        notesUrl: notesUrl,
+        isLocalVideo: !formData.isLink && !!formData.videoFile,
+        views: 0,
+        likes: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        status: 'pending',
+        uploadedBy: mockUser.name,
+        uploadedAt: serverTimestamp(),
+        locked: formData.locked,
+        price: formData.price || 99
+      };
+
+      await addDoc(collection(db, 'videoLectures'), videoData);
+      
+      alert('Video uploaded successfully! It will be visible after admin approval.');
+      
+      // Reset form
+      setFormData({
+        title: '',
+        subject: '',
+        description: '',
+        instructor: '',
+        level: '',
+        duration: '',
+        isLink: false,
+        videoUrl: '',
+        externalLink: '',
+        thumbnail: null,
+        notes: null,
+        videoFile: null,
+        thumbnailFile: null,
+        notesFile: null,
+        price: 99,
+        locked: false
+      });
+      setShowAddForm(false);
+      setUploadProgress(0);
+      
+      // Reload videos
+      await loadVideos();
+    } catch (error) {
+      console.error('Error saving to Firestore:', error);
+      alert('Failed to save video. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleVideoClick = async (video: VideoLecture) => {
@@ -629,17 +744,285 @@ return (
           </Button>
         </div>
 
-        {/* Add New Video Form - Same as before, shortened for brevity */}
+        {/* Add New Video Form */}
         {showAddForm && (
           <Card className="mb-8 border-2 border-blue-200/50 dark:border-blue-500/20 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 backdrop-blur-sm shadow-xl">
             <CardHeader className="pb-4">
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Upload New Video Lecture
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Upload New Video Lecture
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAddForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Form content remains the same as before */}
-              {/* ... */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Basic Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Video Title *
+                    </label>
+                    <Input
+                      value={formData.title}
+                      onChange={(e) => handleInputChange('title', e.target.value)}
+                      placeholder="e.g., Introduction to Anatomy"
+                      required
+                      className="bg-white dark:bg-gray-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Subject *
+                    </label>
+                    <Input
+                      value={formData.subject}
+                      onChange={(e) => handleInputChange('subject', e.target.value)}
+                      placeholder="e.g., Anatomy"
+                      required
+                      className="bg-white dark:bg-gray-800"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Description *
+                  </label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Describe what students will learn..."
+                    rows={4}
+                    required
+                    className="bg-white dark:bg-gray-800"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Instructor *
+                    </label>
+                    <Input
+                      value={formData.instructor}
+                      onChange={(e) => handleInputChange('instructor', e.target.value)}
+                      placeholder="Instructor name"
+                      required
+                      className="bg-white dark:bg-gray-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Level *
+                    </label>
+                    <select
+                      value={formData.level}
+                      onChange={(e) => handleInputChange('level', e.target.value)}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    >
+                      <option value="">Select level</option>
+                      <option value="Beginner">Beginner</option>
+                      <option value="Intermediate">Intermediate</option>
+                      <option value="Advanced">Advanced</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Duration *
+                    </label>
+                    <Input
+                      value={formData.duration}
+                      onChange={(e) => handleInputChange('duration', e.target.value)}
+                      placeholder="e.g., 45 min"
+                      required
+                      className="bg-white dark:bg-gray-800"
+                    />
+                  </div>
+                </div>
+
+                {/* Video Source Toggle */}
+                <div className="flex items-center space-x-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={!formData.isLink}
+                      onChange={() => handleInputChange('isLink', false)}
+                      className="text-blue-600"
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Upload Video File</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={formData.isLink}
+                      onChange={() => handleInputChange('isLink', true)}
+                      className="text-blue-600"
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">External Link (YouTube/Vimeo)</span>
+                  </label>
+                </div>
+
+                {/* Video Upload or Link */}
+                {formData.isLink ? (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Video URL *
+                    </label>
+                    <Input
+                      value={formData.externalLink}
+                      onChange={(e) => handleInputChange('externalLink', e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..."
+                      required
+                      className="bg-white dark:bg-gray-800"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Supports YouTube, Vimeo, and other embeddable video links
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Upload Video File *
+                    </label>
+                    <div className="flex items-center space-x-3">
+                      <label className="flex-1 flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-white dark:bg-gray-800">
+                        <Upload className="h-5 w-5 text-gray-400 mr-2" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {formData.videoFile ? formData.videoFile.name : 'Choose video file (MP4, WebM)'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={(e) => handleInputChange('videoFile', e.target.files?.[0])}
+                          className="hidden"
+                          required={!formData.isLink}
+                        />
+                      </label>
+                    </div>
+                    {uploadProgress > 0 && uploadProgress < 100 && (
+                      <div className="mt-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${uploadProgress}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{Math.round(uploadProgress)}% uploaded</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Thumbnail */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Thumbnail Image
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <label className="flex-1 flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-white dark:bg-gray-800">
+                      <Image className="h-5 w-5 text-gray-400 mr-2" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {formData.thumbnailFile ? formData.thumbnailFile.name : 'Choose thumbnail (optional)'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleInputChange('thumbnailFile', e.target.files?.[0])}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Lecture Notes (PDF)
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <label className="flex-1 flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-white dark:bg-gray-800">
+                      <FileText className="h-5 w-5 text-gray-400 mr-2" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {formData.notesFile ? formData.notesFile.name : 'Upload notes (optional)'}
+                      </span>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => handleInputChange('notesFile', e.target.files?.[0])}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Premium Content Settings */}
+                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      checked={formData.locked}
+                      onChange={(e) => handleInputChange('locked', e.target.checked)}
+                      className="w-4 h-4 text-orange-600"
+                    />
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Make this a premium (paid) video
+                    </label>
+                  </div>
+                  {formData.locked && (
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Price (₹)
+                      </label>
+                      <Input
+                        type="number"
+                        value={formData.price}
+                        onChange={(e) => handleInputChange('price', Number(e.target.value))}
+                        placeholder="99"
+                        min="1"
+                        className="bg-white dark:bg-gray-800 max-w-xs"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Submit Buttons */}
+                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowAddForm(false)}
+                    disabled={uploading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={uploading}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Uploading... {Math.round(uploadProgress)}%
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Video
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
             </CardContent>
           </Card>
         )}
