@@ -27,6 +27,8 @@ const MCQQuestionBank = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [quizzes, setQuizzes] = useState([]);
   const [showQuiz, setShowQuiz] = useState(null);
+  const [remainingTime, setRemainingTime] = useState<number | null>(null); // seconds
+  const [timerRunning, setTimerRunning] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState({});
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   
@@ -51,6 +53,9 @@ const MCQQuestionBank = () => {
   const handleStartQuiz = (quiz) => {
     setShowQuiz(quiz);
     setQuizAnswers({});
+    const durationMinutes = Number(quiz.duration || 10);
+    setRemainingTime(durationMinutes * 60);
+    setTimerRunning(true);
   };
 
   const handleQuizAnswer = (qIdx, optIdx) => {
@@ -59,6 +64,7 @@ const MCQQuestionBank = () => {
 
   const handleSubmitQuiz = () => {
     if (!showQuiz) return;
+    setTimerRunning(false);
     let score = 0;
     showQuiz.questions.forEach((q, idx) => {
       if (quizAnswers[idx] === q.correctAnswer) score++;
@@ -66,7 +72,23 @@ const MCQQuestionBank = () => {
     alert(`Quiz completed! Your score: ${score}/${showQuiz.questions.length}`);
     setShowQuiz(null);
     setQuizAnswers({});
+    setRemainingTime(null);
   };
+
+  // Countdown effect
+  useEffect(() => {
+    if (!timerRunning || remainingTime === null) return;
+    if (remainingTime <= 0) {
+      // Auto-submit when time is up
+      alert('Time is up! Submitting your quiz.');
+      handleSubmitQuiz();
+      return;
+    }
+    const interval = setInterval(() => {
+      setRemainingTime((prev) => (prev !== null ? prev - 1 : prev));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timerRunning, remainingTime]);
 
   const handleLogout = async () => {
     try {
@@ -357,6 +379,25 @@ const MCQQuestionBank = () => {
             <div className={`max-w-4xl mx-auto p-8 rounded-2xl shadow-2xl border backdrop-blur-sm ${
               isDarkMode ? 'bg-slate-800/50 border-blue-800/30' : 'bg-white/90 border-blue-200/30'
             }`}>
+              {/* Countdown Timer */}
+              <div className="flex items-center justify-between mb-4">
+                <div className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                  isDarkMode ? 'bg-blue-900/40 text-blue-200' : 'bg-blue-100 text-blue-700'
+                }`}>
+                  Duration: {showQuiz?.duration || 10} min
+                </div>
+                {remainingTime !== null && (
+                  <div className={`px-3 py-1.5 rounded-full text-sm font-bold ${
+                    remainingTime <= 30
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                      : isDarkMode
+                          ? 'bg-green-900/40 text-green-200'
+                          : 'bg-green-100 text-green-700'
+                  }`}>
+                    Time Left: {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, '0')}
+                  </div>
+                )}
+              </div>
               <div className="flex items-center gap-6 mb-8">
                 {showQuiz.thumbnail && (
                   <img 

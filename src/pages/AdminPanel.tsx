@@ -77,6 +77,7 @@ interface Quiz {
     questions?: any[];
     gformLink?: string;
     createdAt: any;
+    duration?: number; // in minutes
 }
 
 interface Achievement {
@@ -153,6 +154,7 @@ const AdminPanel: React.FC = () => {
         questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
         gformLink: '',
         type: 'manual',
+        duration: 10,
     });
     const [showEditModal, setShowEditModal] = useState(false);
 
@@ -164,6 +166,7 @@ const AdminPanel: React.FC = () => {
         thumbnailType: 'url',
         gformLink: '',
         questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
+        duration: 10,
     });
     const [quizMode, setQuizMode] = useState<'manual' | 'gform'>('manual');
     const [uploadingQuiz, setUploadingQuiz] = useState(false);
@@ -436,6 +439,7 @@ const AdminPanel: React.FC = () => {
                 questions: quizMode === 'manual' ? quizForm.questions : [],
                 gformLink: quizMode === 'gform' ? quizForm.gformLink : '',
                 createdAt: new Date(),
+                duration: quizForm.duration || 10,
             };
             await addDoc(collection(db, "quizzes"), quizData);
             setQuizForm({ 
@@ -443,7 +447,8 @@ const AdminPanel: React.FC = () => {
                 thumbnail: '', 
                 thumbnailType: 'url', 
                 gformLink: '', 
-                questions: [{ question: '', options: ['', ''], correctAnswer: 0 }] 
+                questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
+                duration: 10,
             });
             setShowQuizModal(false);
             
@@ -468,6 +473,7 @@ const AdminPanel: React.FC = () => {
             questions: quiz.questions || [{ question: '', options: ['', ''], correctAnswer: 0 }],
             gformLink: quiz.gformLink || '',
             type: quiz.type || 'manual',
+            duration: quiz.duration || 10,
         });
         setShowEditModal(true);
     };
@@ -529,6 +535,7 @@ const AdminPanel: React.FC = () => {
             const updateData: any = {
                 title: editQuizForm.title,
                 thumbnail: editQuizForm.thumbnail,
+                duration: editQuizForm.duration || 10,
             };
             if (editQuizForm.type === 'manual') {
                 updateData.questions = editQuizForm.questions;
@@ -1336,6 +1343,36 @@ const AdminPanel: React.FC = () => {
                                                 <option value="manual" className="bg-slate-800">Manual Creation</option>
                                                 <option value="gform" className="bg-slate-800">Google Form Link</option>
                                             </select>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="block font-semibold text-blue-200">Duration (minutes)</label>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                value={editQuizForm.duration ?? 10}
+                                                onChange={e => {
+                                                    const val = parseInt(e.target.value, 10);
+                                                    handleEditQuizFormChange('duration', isNaN(val) ? 10 : Math.max(1, val));
+                                                }}
+                                                placeholder="e.g., 10"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="block font-semibold text-blue-200">Duration (minutes)</label>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                value={quizForm.duration ?? 10}
+                                                onChange={e => {
+                                                    const val = parseInt(e.target.value, 10);
+                                                    handleQuizFormChange('duration', isNaN(val) ? 10 : Math.max(1, val));
+                                                }}
+                                                placeholder="e.g., 10"
+                                            />
                                         </div>
 
                                         {quizMode === 'gform' && (

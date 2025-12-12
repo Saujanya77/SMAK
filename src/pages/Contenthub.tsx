@@ -218,12 +218,12 @@ const ContentHub = () => {
             </Toggle>
           </div>
 
-          <button className="relative p-2.5 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
+          {/* <button className="relative p-2.5 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
             <Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
               <span className="text-xs text-white font-bold">3</span>
             </div>
-          </button>
+          </button> */}
 
           <div className="relative">
             <button
@@ -267,7 +267,7 @@ const ContentHub = () => {
                     <span>Admin Panel</span>
                   </button>
                 )}
-                <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
+                {/* <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
                   <User className="h-4 w-4" />
                   <span>View Profile</span>
                 </button>
@@ -278,7 +278,7 @@ const ContentHub = () => {
                 <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
                   <Coffee className="h-4 w-4" />
                   <span>Study Mode</span>
-                </button>
+                </button> */}
                 <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2">
                   <button
                     onClick={handleLogout}  // ✅ This will redirect to login
