@@ -256,7 +256,7 @@ const ClinicalCorner = () => {
                   </p>
                 </div>
                 {/* Admin Panel link for admin users only */}
-                {['admin@example.com', 'anotheradmin@example.com'].includes(user?.email) && (
+                {['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'].includes(user?.email) && (
                   <button
                     className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
                     onClick={() => { setProfileDropdownOpen(false); navigate('/adminpanel'); }}

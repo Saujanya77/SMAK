@@ -137,7 +137,7 @@ const Navigation = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {/* Show Admin Panel link only for admin users */}
-                  {['admin@example.com', 'anotheradmin@example.com'].includes(user?.email) && (
+                  {['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'].includes(user?.email) && (
                     <DropdownMenuItem asChild>
                       <Link to="/adminpanel">Admin Panel</Link>
                     </DropdownMenuItem>

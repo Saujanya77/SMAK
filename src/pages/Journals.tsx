@@ -355,7 +355,7 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
     );
 
   // Admin email list
-  const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com'];
+  const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'];
 
   // Delete journal function
   const handleDeleteJournal = async (journalId: string) => {
