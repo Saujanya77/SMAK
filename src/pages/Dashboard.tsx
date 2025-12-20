@@ -177,7 +177,7 @@ const MedicalDashboard = () => {
   // Enhanced Navigation Header Component
   const NavigationHeader = () => (
     <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40 shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3 gap-4">
         <div className="flex items-center space-x-4">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -523,24 +523,24 @@ const MedicalDashboard = () => {
     return (
       <div className="space-y-8">
         {/* Professional Welcome Banner */}
-        <div className="relative bg-blue-600 dark:bg-blue-700 rounded-2xl p-8 text-white overflow-hidden">
+        <div className="relative bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 sm:p-8 text-white overflow-hidden">
           <div className="absolute -top-4 -right-4 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
           <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
 
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex-1">
+          <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="flex-1 text-left">
               <div className="flex items-center space-x-3 mb-4">
                 <Stethoscope className="h-6 w-6 text-blue-100" />
                 <Brain className="h-6 w-6 text-blue-100" />
                 <BookOpen className="h-6 w-6 text-blue-100" />
               </div>
-              <h1 className="text-4xl font-bold mb-3">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-3 leading-tight">
                 Welcome back, {user?.name?.split(' ')[0]}! 👋
               </h1>
-              <p className="text-blue-100 mb-6 text-lg leading-relaxed">
+              <p className="text-blue-100 mb-6 text-base sm:text-lg leading-relaxed">
                 Ready to continue your medical learning journey? Here's what's new today.
               </p>
-              <div className="flex items-center space-x-6 text-sm">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
                 <div className="flex items-center space-x-2 bg-white/20 rounded-full px-4 py-2">
                   <Flame className="h-4 w-4 text-blue-100" />
                   <span className="font-semibold">7-day streak</span>
@@ -555,7 +555,8 @@ const MedicalDashboard = () => {
                 </div>
               </div>
             </div>
-            <div className="hidden lg:block">
+            <div className="w-full lg:w-auto flex justify-center lg:justify-end">
+              <div className="relative hidden lg:block">
               <div className="relative">
                 <img
                   src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=220&h=160&fit=crop&crop=center"
@@ -566,12 +567,13 @@ const MedicalDashboard = () => {
                   <CheckCircle className="h-4 w-4 text-blue-600" />
                 </div>
               </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
           {dashboardStats.map((stat, index) => (
             <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden">
               <div className="relative h-24 overflow-hidden">
@@ -609,7 +611,7 @@ const MedicalDashboard = () => {
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Quick Access</h2>
             <Zap className="h-6 w-6 text-blue-600" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickAccessItems.map((item, index) => (
               <Card
                 key={index}
@@ -658,7 +660,7 @@ const MedicalDashboard = () => {
         </div>
 
         {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Recent Activity */}
           <Card className="border-0 shadow-md overflow-hidden">
             <CardHeader className="bg-blue-50 dark:bg-slate-700">
@@ -756,7 +758,7 @@ const MedicalDashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {[
                 {
                   title: "Advanced Cardiac Life Support",
@@ -879,7 +881,7 @@ const MedicalDashboard = () => {
       <div className="flex-1 lg:ml-72">
         <NavigationHeader />
 
-        <main className="p-6">
+        <main className="p-4 sm:p-6 max-w-6xl mx-auto w-full">
           {renderPage()}
         </main>
       </div>
