@@ -207,7 +207,7 @@ const Journal = () => {
         </div>
       </section>
 
-      {/* Main Action Buttons */}
+      {/* Main Action Buttons
       <section className="py-16 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-950/10 dark:to-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -248,7 +248,7 @@ const Journal = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Highlighted Journals Section */}
       <section className="py-16">
@@ -321,7 +321,7 @@ const Journal = () => {
       </section>
 
       {/* Featured Articles */}
-      <section className="py-16 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-950/10 dark:to-background">
+      {/* <section className="py-16 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-950/10 dark:to-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-[image:var(--medical-gradient)] bg-clip-text text-blue-500">
@@ -383,10 +383,10 @@ const Journal = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Categories Filter */}
-      <section className="py-16">
+      {/* <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-[image:var(--medical-gradient)] bg-clip-text text-blue-500">
@@ -407,10 +407,10 @@ const Journal = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Recent Publications */}
-      <section className="py-16 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-950/10 dark:to-background">
+      {/* <section className="py-16 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-950/10 dark:to-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-[image:var(--medical-gradient)] bg-clip-text text-blue-500">
@@ -445,7 +445,7 @@ const Journal = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Editorial & Advisory Board Section */}
       <section className="py-16 bg-gradient-to-br from-medical-blue/5 via-background to-medical-green/5">
@@ -721,14 +721,14 @@ const Journal = () => {
           </div>
 
           <div className="text-center">
-            <Button
+            {/* <Button
               size="lg"
               onClick={() => navigate('/editorial-board')}
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 px-8 py-3 rounded-lg font-semibold"
             >
               <Users className="mr-2 h-5 w-5" />
               View Complete Board
-            </Button>
+            </Button> */}
           </div>
         </div>
       </section>
