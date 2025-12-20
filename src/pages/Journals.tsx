@@ -385,30 +385,31 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
       {/* Header */}
       <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 gap-2 md:gap-4">
+          <div className="flex items-center space-x-2 md:space-x-4 flex-wrap">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => window.history.back()}
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs md:text-sm px-2 md:px-4"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              <ArrowLeft className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Back</span>
             </Button>
-            <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
-            <h1 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Medical Journals</h1>
+            <div className="h-5 w-px bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
+            <h1 className="text-lg md:text-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Journals</h1>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="flex items-center space-x-2 md:space-x-4 flex-1 md:flex-none">
+            <div className="relative flex-1 md:flex-none">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-gray-400" />
               <Input
                 type="text"
-                placeholder="Search journals..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64 pl-10 bg-white/50 dark:bg-gray-800/50 border-gray-300/50 focus:border-blue-500 focus:ring-blue-500/20"
+                className="w-full md:w-64 pl-8 md:pl-10 text-sm bg-white/50 dark:bg-gray-800/50 border-gray-300/50 focus:border-blue-500 focus:ring-blue-500/20"
               />
             </div>
 
@@ -416,32 +417,32 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="text-gray-600 hover:text-gray-700 hover:bg-gray-100/50"
+              className="text-gray-600 hover:text-gray-700 hover:bg-gray-100/50 p-2"
             >
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {darkMode ? <Sun className="h-4 w-4 md:h-5 md:w-5" /> : <Moon className="h-4 w-4 md:h-5 md:w-5" />}
             </Button>
 
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-5 w-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></span>
+            <Button variant="ghost" size="sm" className="relative p-2 hidden sm:inline-flex">
+              <Bell className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 md:w-3 md:h-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></span>
             </Button>
 
             <div className="relative">
               <Button
                 variant="ghost"
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-1 md:space-x-2 p-2"
               >
-                <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-slate-600 flex items-center justify-center ring-2 ring-blue-100 dark:ring-slate-600">
-                  <span className="text-sm font-semibold text-blue-800 dark:text-white">
+                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-blue-100 dark:bg-slate-600 flex items-center justify-center ring-2 ring-blue-100 dark:ring-slate-600">
+                  <span className="text-xs md:text-sm font-semibold text-blue-800 dark:text-white">
                     {user?.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-3 w-3 md:h-4 md:w-4 hidden sm:inline" />
               </Button>
 
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 z-50">
+                <div className="absolute right-0 mt-2 w-48 md:w-56 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 z-50">
                   <div className="px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/50">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.name}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">{user?.college}</p>
@@ -479,39 +480,41 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
       </header>
 
       {/* Main Content */}
-      <div className="p-6">
+      <div className="p-3 md:p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Medical Journals</h2>
-              <p className="text-gray-600 dark:text-gray-400">Latest research papers and medical publications</p>
+          <div className="flex items-center justify-between mb-6 md:mb-8 flex-col sm:flex-row gap-4 sm:gap-0">
+            <div className="flex-1">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1 md:mb-2">Medical Journals</h2>
+              <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">Latest research papers and publications</p>
             </div>
             <Button
               onClick={() => setShowAddForm(true)}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg text-sm md:text-base px-3 md:px-4 whitespace-nowrap"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Journal
+              <Plus className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Add Journal</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </div>
 
           {/* Add New Journal Form */}
           {showAddForm && (
-            <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl">
+            <Card className="mb-6 md:mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-blue-200/50 shadow-xl">
               <CardHeader>
-                <CardTitle className="text-blue-800 dark:text-blue-300">Add New Journal Article</CardTitle>
+                <CardTitle className="text-base md:text-lg text-blue-800 dark:text-blue-300">Add New Journal Article</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 text-sm">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Article Title</label>
+                  <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Article Title</label>
                   <Input
                     placeholder="Enter article title"
                     value={newJournal.title}
                     onChange={(e) => setNewJournal(prev => ({ ...prev, title: e.target.value }))}
+                    className="text-sm"
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Authors</label>
                     <Input
@@ -616,83 +619,86 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
           )}
 
           {/* Journals List */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {filteredJournals.map((journal) => (
               <Card key={journal.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl hover:shadow-xl transition-all border-gray-200/50 hover:border-blue-300/50 group">
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row gap-6">
-                    <div className="lg:w-48 flex-shrink-0">
+                <CardContent className="p-3 md:p-6">
+                  <div className="flex flex-col sm:flex-row gap-3 md:gap-6">
+                    <div className="sm:w-32 md:w-40 lg:w-48 flex-shrink-0 w-full">
                       <img
                         src={journal.imageUrl}
                         alt={journal.title}
-                        className="w-full h-32 lg:h-40 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
+                        className="w-full h-24 sm:h-28 md:h-32 lg:h-40 object-cover rounded-lg md:rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&h=250&fit=crop";
                         }}
                       />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+                      <div className="flex items-start justify-between mb-2 md:mb-3 gap-2 flex-col sm:flex-row">
+                        <div className="flex items-center space-x-1 md:space-x-2 flex-wrap gap-1">
+                          <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50 text-xs md:text-sm">
                             {journal.category}
                           </Badge>
                           <Badge className={`${journal.impact === 'Very High Impact' ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                             journal.impact === 'High Impact' ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
                               journal.impact === 'Moderate Impact' ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
                                 'bg-gradient-to-r from-gray-500 to-slate-500'
-                            } text-white border-0`}>
+                            } text-white border-0 text-xs md:text-sm`}>
                             {journal.impact}
                           </Badge>
                         </div>
-                        <span className="text-sm text-gray-500">{journal.publishedDate}</span>
+                        <span className="text-xs md:text-sm text-gray-500 whitespace-nowrap">{journal.publishedDate}</span>
                       </div>
 
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-base md:text-xl font-semibold text-gray-900 dark:text-white mb-1 md:mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
                         {journal.title}
                       </h3>
 
-                      <p className="text-sm text-blue-600 dark:text-blue-400 mb-2 font-medium">
+                      <p className="text-xs md:text-sm text-blue-600 dark:text-blue-400 mb-1 md:mb-2 font-medium">
                         {journal.journal}
                       </p>
 
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                      <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-2 md:mb-3 line-clamp-1 md:line-clamp-none">
                         By {journal.authors}
                       </p>
 
-                      <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                      <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-3 md:mb-4 line-clamp-2 md:line-clamp-3">
                         {journal.abstract}
                       </p>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-6 text-sm text-gray-500">
+                      <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
+                        <div className="flex items-center space-x-3 md:space-x-6 text-xs md:text-sm text-gray-500">
                           <span className="flex items-center">
-                            <Eye className="h-4 w-4 mr-1" />
-                            {journal.citationCount} citations
+                            <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                            <span className="hidden sm:inline">{journal.citationCount} citations</span>
+                            <span className="sm:hidden">{journal.citationCount}</span>
                           </span>
                           <span className="flex items-center">
-                            <Download className="h-4 w-4 mr-1" />
-                            {journal.downloadCount} downloads
+                            <Download className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                            <span className="hidden sm:inline">{journal.downloadCount} downloads</span>
+                            <span className="sm:hidden">{journal.downloadCount}</span>
                           </span>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-1 md:space-x-2 w-full sm:w-auto flex-wrap justify-end gap-1">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleViewJournal(journal)}
+                            className="text-xs md:text-sm px-2 md:px-3"
                           >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
+                            <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                            <span className="hidden sm:inline">View</span>
                           </Button>
                           {journal.pdfUrl && (
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleViewPDF(journal)}
-                              className="text-green-600 border-green-300 hover:bg-green-50"
+                              className="text-green-600 border-green-300 hover:bg-green-50 text-xs md:text-sm px-2 md:px-3"
                             >
-                              <FileText className="h-4 w-4 mr-2" />
-                              PDF Preview
+                              <FileText className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                              <span className="hidden md:inline">PDF</span>
                             </Button>
                           )}
                           {journal.externalUrl && (
@@ -700,29 +706,30 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
                               variant="outline"
                               size="sm"
                               onClick={() => handleExternalLink(journal.externalUrl)}
+                              className="text-xs md:text-sm px-2 md:px-3 hidden md:inline-flex"
                             >
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              External Link
+                              <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                              Link
                             </Button>
                           )}
                           <Button
                             size="sm"
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs md:text-sm px-2 md:px-3"
                             onClick={() => handleDownload()}
                           >
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
+                            <Download className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                            <span className="hidden sm:inline">Download</span>
                           </Button>
                           {/* Admin-only delete button */}
                           {ADMIN_EMAILS.includes(user?.email) && (
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-red-300 text-red-600 hover:bg-red-50"
+                              className="border-red-300 text-red-600 hover:bg-red-50 px-2"
                               onClick={() => handleDeleteJournal(journal.id)}
                               title="Delete Journal"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           )}
                         </div>
@@ -735,10 +742,10 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
           </div>
 
           {filteredJournals.length === 0 && !loading && (
-            <div className="text-center py-12">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No journals found</h3>
-              <p className="text-gray-500 dark:text-gray-400">
+            <div className="text-center py-8 md:py-12">
+              <FileText className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mx-auto mb-3 md:mb-4" />
+              <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-white mb-1 md:mb-2">No journals found</h3>
+              <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">
                 {searchTerm ? 'Try adjusting your search terms.' : 'Start by adding your first journal article.'}
               </p>
             </div>
@@ -809,86 +816,86 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
 
       {/* PDF Viewer Modal */}
       <Dialog open={showPDFViewer} onOpenChange={() => setShowPDFViewer(false)}>
-        <DialogContent className="max-w-6xl max-h-[90vh] p-0">
+        <DialogContent className="max-w-2xl md:max-w-6xl max-h-[90vh] p-0 w-[95vw]">
           {selectedJournal && (
             <div className="h-[90vh] flex flex-col bg-gray-50 dark:bg-gray-900">
               {/* PDF Viewer Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                <div className="flex items-center space-x-4">
-                  <Button variant="ghost" size="sm" onClick={closePDFViewer}>
+              <div className="flex items-center justify-between p-2 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 gap-2 flex-wrap">
+                <div className="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
+                  <Button variant="ghost" size="sm" onClick={closePDFViewer} className="p-1">
                     <X className="h-4 w-4" />
                   </Button>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1 text-xs md:text-sm">
                       {selectedJournal.title}
                     </h3>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <Badge variant="outline" className="text-xs">
+                    <div className="flex items-center space-x-1 md:space-x-2 mt-1 flex-wrap gap-1">
+                      <Badge variant="outline" className="text-xs hidden sm:inline-flex">
                         {selectedJournal.category}
                       </Badge>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 line-clamp-1">
                         By {selectedJournal.authors}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={handleDownload}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
+                <div className="flex items-center space-x-1 md:space-x-2">
+                  <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs md:text-sm px-2 md:px-3">
+                    <Download className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                    <span className="hidden sm:inline">Download</span>
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleExternalLink(selectedJournal.externalUrl)}>
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    External Link
+                  <Button variant="outline" size="sm" onClick={() => handleExternalLink(selectedJournal.externalUrl)} className="text-xs md:text-sm px-2 md:px-3 hidden sm:inline-flex">
+                    <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                    Link
                   </Button>
                 </div>
               </div>
 
               {/* PDF Viewer Toolbar */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={prevPage} disabled={currentPage === 1}>
-                    <ChevronLeft className="h-4 w-4" />
+              <div className="flex items-center justify-between p-2 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 gap-2 flex-wrap">
+                <div className="flex items-center space-x-1 md:space-x-2">
+                  <Button variant="outline" size="sm" onClick={prevPage} disabled={currentPage === 1} className="p-1 md:p-2">
+                    <ChevronLeft className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[100px] text-center">
-                    Page {currentPage} of {totalPages}
+                  <span className="text-xs md:text-sm text-gray-600 dark:text-gray-400 min-w-[80px] md:min-w-[100px] text-center">
+                    Page {currentPage}/{totalPages}
                   </span>
-                  <Button variant="outline" size="sm" onClick={nextPage} disabled={currentPage === totalPages}>
-                    <ChevronRight className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={nextPage} disabled={currentPage === totalPages} className="p-1 md:p-2">
+                    <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 50}>
-                    <ZoomOut className="h-4 w-4" />
+                <div className="flex items-center space-x-1 md:space-x-2">
+                  <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 50} className="p-1 md:p-2">
+                    <ZoomOut className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[60px] text-center">
+                  <span className="text-xs md:text-sm text-gray-600 dark:text-gray-400 min-w-[45px] md:min-w-[60px] text-center">
                     {zoom}%
                   </span>
-                  <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 200}>
-                    <ZoomIn className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 200} className="p-1 md:p-2">
+                    <ZoomIn className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleRotate}>
-                    <RotateCw className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={handleRotate} className="p-1 md:p-2 hidden sm:inline-flex">
+                    <RotateCw className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
                 </div>
 
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex items-center space-x-2 md:space-x-4 text-xs md:text-sm text-gray-500 hidden sm:flex">
                   <span className="flex items-center">
-                    <Eye className="h-4 w-4 mr-1" />
-                    {selectedJournal.citationCount} citations
+                    <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                    {selectedJournal.citationCount}
                   </span>
                   <span className="flex items-center">
-                    <Download className="h-4 w-4 mr-1" />
-                    {selectedJournal.downloadCount} downloads
+                    <Download className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                    {selectedJournal.downloadCount}
                   </span>
                 </div>
               </div>
 
               {/* PDF Content Area */}
-              <div className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-800 p-4">
-                <div className="max-w-4xl mx-auto">
+              <div className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-800 p-2 md:p-4">
+                <div className="max-w-2xl md:max-w-4xl mx-auto">
                   {selectedJournal.pdfUrl ? (
                     /* Actual PDF Viewer for uploaded PDFs */
                     <div
