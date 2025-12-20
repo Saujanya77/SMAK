@@ -801,18 +801,18 @@ const AdminPanel: React.FC = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[rgb(15,23,42)] via-blue-900 to-[rgb(15,23,42)] text-white">
             {/* Navbar */}
-            <nav className="w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 shadow-lg border-b border-blue-300/20 backdrop-blur-sm">
+            <nav className="w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 shadow-lg border-b border-blue-300/20 backdrop-blur-sm">
                 <button
-                    className="flex items-center gap-2 text-white hover:text-blue-200 font-semibold text-lg transition-all duration-200 px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30"
+                    className="flex items-center justify-center gap-2 text-white hover:text-blue-200 font-semibold text-base sm:text-lg transition-all duration-200 px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 w-full sm:w-auto"
                     onClick={() => navigate("/dashboard")}
                 >
                     <ArrowLeft size={22} />
                     Back to Dashboard
                 </button>
-                <span className="text-2xl font-bold tracking-wide text-white bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Admin Panel</span>
-                <div>
+                <span className="text-2xl font-bold tracking-wide text-white bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent text-center sm:text-left">Admin Panel</span>
+                <div className="w-full sm:w-auto flex justify-end">
                     <button
-                        className="flex items-center gap-2 text-white hover:text-blue-200 font-semibold text-lg px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 transition-all duration-200"
+                        className="flex items-center justify-center gap-2 text-white hover:text-blue-200 font-semibold text-base sm:text-lg px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 transition-all duration-200 w-full sm:w-auto"
                         onClick={handleUserMenuOpen}
                     >
                         <User size={22} />
@@ -839,21 +839,23 @@ const AdminPanel: React.FC = () => {
             </nav>
 
             {/* Tab Navigation */}
-            <div className="flex justify-center mb-8 mt-8 animate-fade-in">
-                <div className="flex gap-2 bg-blue-800/30 backdrop-blur-sm rounded-xl p-2 border border-blue-600/30">
-                    {adminTabs.map((tab) => (
-                        <Button
-                            key={tab.key}
-                            variant={activeTab === tab.key ? 'default' : 'ghost'}
-                            onClick={() => setActiveTab(tab.key as any)}
-                            className={`px-4 py-2 rounded-lg transition-all duration-200 ${activeTab === tab.key
-                                ? 'bg-blue-600 text-white shadow-lg'
-                                : 'text-blue-200 hover:text-white hover:bg-blue-600/50'
-                                }`}
-                        >
-                            {tab.label}
-                        </Button>
-                    ))}
+            <div className="flex justify-center px-4 mb-8 mt-8 animate-fade-in">
+                <div className="w-full max-w-5xl bg-blue-800/30 backdrop-blur-sm rounded-xl p-2 border border-blue-600/30 overflow-x-auto whitespace-nowrap">
+                    <div className="flex gap-2">
+                        {adminTabs.map((tab) => (
+                            <Button
+                                key={tab.key}
+                                variant={activeTab === tab.key ? 'default' : 'ghost'}
+                                onClick={() => setActiveTab(tab.key as any)}
+                                className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 flex-shrink-0 text-sm sm:text-base ${activeTab === tab.key
+                                    ? 'bg-blue-600 text-white shadow-lg'
+                                    : 'text-blue-200 hover:text-white hover:bg-blue-600/50'
+                                    }`}
+                            >
+                                {tab.label}
+                            </Button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -863,8 +865,8 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'researchclubmembers' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Research Club Members</h2>
-                        <Card className="medical-card shadow-2xl max-w-4xl bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
-                            <form className="p-8 space-y-6" onSubmit={async e => {
+                        <Card className="medical-card shadow-2xl max-w-4xl w-full bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                            <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
                                 let pictureUrl = '';
                                 if (rcMemberForm.picture) {
@@ -1065,8 +1067,8 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'researchclubmentors' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Research Club Mentors</h2>
-                        <Card className="medical-card shadow-2xl max-w-4xl bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
-                            <form className="p-8 space-y-6" onSubmit={async e => {
+                        <Card className="medical-card shadow-2xl max-w-4xl w-full bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                            <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
                                 let pictureUrl = '';
                                 if (rcMentorForm.picture) {
@@ -1266,7 +1268,7 @@ const AdminPanel: React.FC = () => {
                 {/* Quizzes Section */}
                 {activeTab === 'quizzes' && (
                     <div className="space-y-6">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
                             <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Quiz Management</h2>
                             <Button
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-200 flex items-center gap-2"
@@ -1280,7 +1282,7 @@ const AdminPanel: React.FC = () => {
                         {/* Quiz Modal */}
                         {showQuizModal && (
                             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
-                                <div className="rounded-2xl p-8 max-w-2xl w-full relative border-2 border-blue-300/50 shadow-2xl bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white max-h-[90vh] overflow-y-auto">
+                                <div className="rounded-2xl p-6 sm:p-8 max-w-2xl w-full relative border-2 border-blue-300/50 shadow-2xl bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white max-h-[90vh] overflow-y-auto">
                                     <button
                                         className="absolute top-4 right-4 text-gray-300 hover:text-white text-2xl transition-colors duration-200 bg-blue-600/50 w-8 h-8 rounded-full flex items-center justify-center"
                                         onClick={() => setShowQuizModal(false)}
@@ -1511,7 +1513,7 @@ const AdminPanel: React.FC = () => {
                         <div className="grid gap-6 mt-8">
                             {quizzes.map((quiz) => (
                                 <div key={quiz.id} className="bg-blue-800/20 backdrop-blur-sm border border-blue-600/30 rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-200">
-                                    <div className="flex items-start gap-6">
+                                    <div className="flex flex-col sm:flex-row items-start gap-6">
                                         <img src={quiz.thumbnail} alt={quiz.title} className="w-32 h-32 object-cover rounded-xl shadow-lg" />
                                         <div className="flex-1">
                                             <div className="flex items-start justify-between mb-3">
@@ -1562,7 +1564,7 @@ const AdminPanel: React.FC = () => {
                         {/* Edit Quiz Modal */}
                         {showEditModal && (
                             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
-                                <div className="rounded-2xl p-8 max-w-2xl w-full relative border-2 border-blue-300/50 shadow-2xl bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white max-h-[90vh] overflow-y-auto">
+                                <div className="rounded-2xl p-6 sm:p-8 max-w-2xl w-full relative border-2 border-blue-300/50 shadow-2xl bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white max-h-[90vh] overflow-y-auto">
                                     <button
                                         className="absolute top-4 right-4 text-gray-300 hover:text-white text-2xl transition-colors duration-200 bg-blue-600/50 w-8 h-8 rounded-full flex items-center justify-center"
                                         onClick={() => setShowEditModal(false)}
@@ -1761,8 +1763,8 @@ const AdminPanel: React.FC = () => {
 
                 {/* Courses Section */}
                 {activeTab === 'courses' && (
-                    <Card className="medical-card shadow-2xl max-w-2xl mx-auto bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
-                        <form className="p-8 space-y-6" onSubmit={handleCourseSubmit}>
+                    <Card className="medical-card shadow-2xl max-w-2xl w-full mx-auto bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                        <form className="p-6 sm:p-8 space-y-6" onSubmit={handleCourseSubmit}>
                             <h2 className="text-3xl font-bold text-white mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Create Course</h2>
                             <div className="space-y-4">
                                 <label className="block font-semibold text-blue-200">Course Name</label>
@@ -1830,7 +1832,7 @@ const AdminPanel: React.FC = () => {
                                     >
                                         ×
                                     </button>
-                                    <div className="mb-4 flex gap-6 mt-4">
+                                    <div className="mb-4 flex flex-col sm:flex-row gap-4 sm:gap-6 mt-4">
                                         <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
                                             <input type="radio" name={`sectionType-${idx}`} value="video" checked={section.sectionType === 'video'} onChange={() => {
                                                 setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, sectionType: 'video' } : s));
@@ -1847,7 +1849,7 @@ const AdminPanel: React.FC = () => {
                                     {section.sectionType === 'video' && (
                                         <div className="space-y-4">
                                             <label className="block font-medium text-blue-200">Video Link</label>
-                                            <div className="flex gap-2">
+                                            <div className="flex flex-col sm:flex-row gap-3">
                                                 <input
                                                     type="text"
                                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1870,7 +1872,7 @@ const AdminPanel: React.FC = () => {
                                     {section.sectionType === 'quiz' && (
                                         <div className="space-y-4">
                                             <label className="block font-medium text-blue-200">Quiz Type</label>
-                                            <div className="flex gap-6 mb-4">
+                                            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-4">
                                                 <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
                                                     <input type="radio" name={`quizType-${idx}`} value="manual" checked={section.quizType === 'manual'} onChange={() => {
                                                         setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizType: 'manual' } : s));
@@ -2188,8 +2190,8 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'achievements' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Achievements</h2>
-                        <Card className="medical-card shadow-2xl max-w-2xl bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
-                            <form className="p-8 space-y-6" onSubmit={handleAchievementSubmit}>
+                        <Card className="medical-card shadow-2xl max-w-2xl w-full bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                            <form className="p-6 sm:p-8 space-y-6" onSubmit={handleAchievementSubmit}>
                                 <h3 className="text-xl font-semibold text-blue-200 mb-4">Add New Achievement</h3>
                                 <div className="grid md:grid-cols-3 gap-6">
                                     <div className="space-y-4">
@@ -2312,8 +2314,8 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'members' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Team Members</h2>
-                        <Card className="medical-card shadow-2xl max-w-4xl bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
-                            <form className="p-8 space-y-6" onSubmit={handleMemberSubmit}>
+                        <Card className="medical-card shadow-2xl max-w-4xl w-full bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                            <form className="p-6 sm:p-8 space-y-6" onSubmit={handleMemberSubmit}>
                                 <h3 className="text-xl font-semibold text-blue-200 mb-4">
                                     {editingMemberId ? 'Edit Member' : 'Add New Member'}
                                 </h3>
@@ -2530,7 +2532,7 @@ const AdminPanel: React.FC = () => {
                                             </div>
                                         </CardHeader>
                                         <CardContent className="pt-6 space-y-4">
-                                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                                                 <div>
                                                     <p className="text-gray-500 text-xs uppercase font-semibold">Organization</p>
                                                     <p className="text-gray-200 mt-1">{enquiry.organisation}</p>
