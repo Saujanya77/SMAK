@@ -799,20 +799,20 @@ const AdminPanel: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[rgb(15,23,42)] via-blue-900 to-[rgb(15,23,42)] text-white">
+        <div className="min-h-screen text-slate-900 dark:text-white bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-[rgb(15,23,42)] dark:via-blue-900 dark:to-[rgb(15,23,42)]">
             {/* Navbar */}
-            <nav className="w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 shadow-lg border-b border-blue-300/20 backdrop-blur-sm">
+            <nav className="w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-4 bg-white/85 text-slate-900 dark:text-white dark:bg-gradient-to-r dark:from-blue-600 dark:via-blue-700 dark:to-blue-900 shadow-lg border-b border-slate-200 dark:border-blue-300/20 backdrop-blur-sm">
                 <button
-                    className="flex items-center justify-center gap-2 text-white hover:text-blue-200 font-semibold text-base sm:text-lg transition-all duration-200 px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 w-full sm:w-auto"
+                    className="flex items-center justify-center gap-2 text-slate-800 dark:text-white hover:text-blue-700 dark:hover:text-blue-200 font-semibold text-base sm:text-lg transition-all duration-200 px-4 py-2 rounded-lg bg-blue-100/80 dark:bg-blue-500/20 hover:bg-blue-200 dark:hover:bg-blue-500/30 border border-blue-300 dark:border-blue-400/30 w-full sm:w-auto"
                     onClick={() => navigate("/dashboard")}
                 >
                     <ArrowLeft size={22} />
                     Back to Dashboard
                 </button>
-                <span className="text-2xl font-bold tracking-wide text-white bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent text-center sm:text-left">Admin Panel</span>
+                <span className="text-2xl font-bold tracking-wide text-slate-900 dark:text-white bg-gradient-to-r from-slate-900 to-blue-700 dark:from-white dark:to-blue-200 bg-clip-text text-transparent text-center sm:text-left">Admin Panel</span>
                 <div className="w-full sm:w-auto flex justify-end">
                     <button
-                        className="flex items-center justify-center gap-2 text-white hover:text-blue-200 font-semibold text-base sm:text-lg px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 transition-all duration-200 w-full sm:w-auto"
+                        className="flex items-center justify-center gap-2 text-slate-800 dark:text-white hover:text-blue-700 dark:hover:text-blue-200 font-semibold text-base sm:text-lg px-4 py-2 rounded-lg bg-blue-100/80 dark:bg-blue-500/20 hover:bg-blue-200 dark:hover:bg-blue-500/30 border border-blue-300 dark:border-blue-400/30 transition-all duration-200 w-full sm:w-auto"
                         onClick={handleUserMenuOpen}
                     >
                         <User size={22} />
@@ -840,7 +840,7 @@ const AdminPanel: React.FC = () => {
 
             {/* Tab Navigation */}
             <div className="flex justify-center px-4 mb-8 mt-8 animate-fade-in">
-                <div className="w-full max-w-5xl bg-blue-800/30 backdrop-blur-sm rounded-xl p-2 border border-blue-600/30 overflow-x-auto whitespace-nowrap">
+                <div className="w-full max-w-5xl bg-white/80 dark:bg-blue-800/30 backdrop-blur-sm rounded-xl p-2 border border-slate-200 dark:border-blue-600/30 overflow-x-auto whitespace-nowrap shadow-sm">
                     <div className="flex gap-2">
                         {adminTabs.map((tab) => (
                             <Button
@@ -849,7 +849,7 @@ const AdminPanel: React.FC = () => {
                                 onClick={() => setActiveTab(tab.key as any)}
                                 className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 flex-shrink-0 text-sm sm:text-base ${activeTab === tab.key
                                     ? 'bg-blue-600 text-white shadow-lg'
-                                    : 'text-blue-200 hover:text-white hover:bg-blue-600/50'
+                                    : 'text-slate-700 dark:text-blue-200 hover:text-blue-700 dark:hover:text-white hover:bg-blue-100/70 dark:hover:bg-blue-600/50'
                                     }`}
                             >
                                 {tab.label}
@@ -865,7 +865,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'researchclubmembers' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Research Club Members</h2>
-                        <Card className="medical-card shadow-2xl max-w-4xl w-full bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                        <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
                                 let pictureUrl = '';
@@ -900,12 +900,12 @@ const AdminPanel: React.FC = () => {
                                 const querySnapshot = await getDocs(collection(db, "researchClubMembers"));
                                 setRCMembers(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember)));
                             }}>
-                                <h3 className="text-xl font-semibold text-blue-200 mb-4">
+                                <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">
                                     {editingRCMemberId ? 'Edit Research Club Member' : 'Add New Research Club Member'}
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Name *</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Name *</label>
                                         <input 
                                             type="text" 
                                             
@@ -916,7 +916,7 @@ const AdminPanel: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Institution </label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Institution </label>
                                         <input 
                                             type="text" 
                                             
@@ -929,7 +929,7 @@ const AdminPanel: React.FC = () => {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Email </label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Email </label>
                                         <input 
                                             type="email" 
                                             
@@ -940,7 +940,7 @@ const AdminPanel: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Phone</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Phone</label>
                                         <input 
                                             type="text" 
                                             placeholder="Phone Number" 
@@ -951,7 +951,7 @@ const AdminPanel: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-blue-200">Designation/Role </label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Designation/Role </label>
                                     <input 
                                         type="text" 
                                         
@@ -962,7 +962,7 @@ const AdminPanel: React.FC = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-blue-200">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">
                                         Profile Picture {!editingRCMemberId && '*'}
                                     </label>
                                     <input 
@@ -1067,7 +1067,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'researchclubmentors' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Research Club Mentors</h2>
-                        <Card className="medical-card shadow-2xl max-w-4xl w-full bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                        <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
                                 let pictureUrl = '';
@@ -1102,12 +1102,12 @@ const AdminPanel: React.FC = () => {
                                 const querySnapshot = await getDocs(collection(db, "researchClubMentors"));
                                 setRCMentors(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember)));
                             }}>
-                                <h3 className="text-xl font-semibold text-blue-200 mb-4">
+                                <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">
                                     {editingRCMentorId ? 'Edit Research Club Mentor' : 'Add New Research Club Mentor'}
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Name *</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Name *</label>
                                         <input 
                                             type="text" 
                                             
@@ -1118,7 +1118,7 @@ const AdminPanel: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Institution </label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Institution </label>
                                         <input 
                                             type="text" 
                                             
@@ -1131,7 +1131,7 @@ const AdminPanel: React.FC = () => {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Email </label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Email </label>
                                         <input 
                                             type="email" 
                                             
@@ -1142,7 +1142,7 @@ const AdminPanel: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-blue-200">Phone</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Phone</label>
                                         <input 
                                             type="text" 
                                             placeholder="Phone Number" 
@@ -1153,7 +1153,7 @@ const AdminPanel: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-blue-200">Designation/Role </label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Designation/Role </label>
                                     <input 
                                         type="text" 
                                         
@@ -1164,7 +1164,7 @@ const AdminPanel: React.FC = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-blue-200">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">
                                         Profile Picture {!editingRCMentorId && '*'}
                                     </label>
                                     <input 
@@ -1282,7 +1282,7 @@ const AdminPanel: React.FC = () => {
                         {/* Quiz Modal */}
                         {showQuizModal && (
                             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
-                                <div className="rounded-2xl p-6 sm:p-8 max-w-2xl w-full relative border-2 border-blue-300/50 shadow-2xl bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white max-h-[90vh] overflow-y-auto">
+                                <div className="rounded-2xl p-6 sm:p-8 max-w-2xl w-full relative border-2 border-blue-200 dark:border-blue-300/50 shadow-2xl bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-blue-900 dark:to-slate-900 text-slate-900 dark:text-white max-h-[90vh] overflow-y-auto">
                                     <button
                                         className="absolute top-4 right-4 text-gray-300 hover:text-white text-2xl transition-colors duration-200 bg-blue-600/50 w-8 h-8 rounded-full flex items-center justify-center"
                                         onClick={() => setShowQuizModal(false)}
@@ -1293,7 +1293,7 @@ const AdminPanel: React.FC = () => {
                                     <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Create New Quiz</h3>
                                     <form onSubmit={handleQuizSubmit} className="space-y-6">
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-blue-200">Quiz Title</label>
+                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Title</label>
                                             <input
                                                 type="text"
                                                 className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -1305,7 +1305,7 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-blue-200">Thumbnail</label>
+                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Thumbnail</label>
                                             <div className="flex gap-4 mb-3">
                                                 <label className="flex items-center gap-2 cursor-pointer">
                                                     <input type="radio" name="thumbnailType" value="url" checked={quizForm.thumbnailType === 'url'} onChange={() => handleQuizFormChange('thumbnailType', 'url')} className="text-blue-500" />
@@ -1336,7 +1336,7 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-blue-200">Quiz Type</label>
+                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Type</label>
                                             <select
                                                 className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={quizMode}
@@ -1348,7 +1348,7 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="block font-semibold text-blue-200">Duration (minutes)</label>
+                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Duration (minutes)</label>
                                             <input
                                                 type="number"
                                                 min={1}
@@ -1363,7 +1363,7 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="block font-semibold text-blue-200">Duration (minutes)</label>
+                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Duration (minutes)</label>
                                             <input
                                                 type="number"
                                                 min={1}
@@ -1379,7 +1379,7 @@ const AdminPanel: React.FC = () => {
 
                                         {quizMode === 'gform' && (
                                             <div className="space-y-4">
-                                                <label className="block font-semibold text-blue-200">Google Form Link</label>
+                                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Google Form Link</label>
                                                 <input
                                                     type="url"
                                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -1393,7 +1393,7 @@ const AdminPanel: React.FC = () => {
 
                                         {quizMode === 'manual' && (
                                             <div className="space-y-4">
-                                                <label className="block font-semibold text-blue-200">Questions</label>
+                                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Questions</label>
                                                 <div className="space-y-4 max-h-96 overflow-y-auto p-2">
                                                     <DragDropContext onDragEnd={result => {
                                                         if (!result.destination) return;
@@ -1417,7 +1417,7 @@ const AdminPanel: React.FC = () => {
                                                                                     required
                                                                                 />
                                                                                 <div className="space-y-3">
-                                                                                    <label className="block font-semibold text-blue-200 text-sm">Options</label>
+                                                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Options</label>
                                                                                     {q.options.map((opt, oIdx) => (
                                                                                         <div key={oIdx} className="flex items-center gap-2">
                                                                                             <input
@@ -1448,7 +1448,7 @@ const AdminPanel: React.FC = () => {
                                                                                     </button>
                                                                                 </div>
                                                                                 <div className="space-y-2">
-                                                                                    <label className="block font-semibold text-blue-200 text-sm">Correct Answer (option index)</label>
+                                                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Correct Answer (option index)</label>
                                                                                     <input
                                                                                         type="number"
                                                                                         min="0"
@@ -1512,13 +1512,13 @@ const AdminPanel: React.FC = () => {
                         {/* Quiz List */}
                         <div className="grid gap-6 mt-8">
                             {quizzes.map((quiz) => (
-                                <div key={quiz.id} className="bg-blue-800/20 backdrop-blur-sm border border-blue-600/30 rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-200">
+                                <div key={quiz.id} className="bg-white/85 dark:bg-blue-800/20 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 rounded-2xl p-6 hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-200 text-slate-900 dark:text-white">
                                     <div className="flex flex-col sm:flex-row items-start gap-6">
                                         <img src={quiz.thumbnail} alt={quiz.title} className="w-32 h-32 object-cover rounded-xl shadow-lg" />
                                         <div className="flex-1">
                                             <div className="flex items-start justify-between mb-3">
                                                 <div>
-                                                    <h4 className="font-bold text-xl text-white mb-2">{quiz.title}</h4>
+                                                    <h4 className="font-bold text-xl text-slate-900 dark:text-white mb-2">{quiz.title}</h4>
                                                     <Badge className={`${quiz.type === 'manual' ? 'bg-green-500/20 text-green-300' : 'bg-blue-500/20 text-blue-300'} border-0`}>
                                                         {quiz.type === 'manual' ? 'Manual Quiz' : 'Google Form'}
                                                     </Badge>
@@ -1564,7 +1564,7 @@ const AdminPanel: React.FC = () => {
                         {/* Edit Quiz Modal */}
                         {showEditModal && (
                             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
-                                <div className="rounded-2xl p-6 sm:p-8 max-w-2xl w-full relative border-2 border-blue-300/50 shadow-2xl bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white max-h-[90vh] overflow-y-auto">
+                                <div className="rounded-2xl p-6 sm:p-8 max-w-2xl w-full relative border-2 border-blue-200 dark:border-blue-300/50 shadow-2xl bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-blue-900 dark:to-slate-900 text-slate-900 dark:text-white max-h-[90vh] overflow-y-auto">
                                     <button
                                         className="absolute top-4 right-4 text-gray-300 hover:text-white text-2xl transition-colors duration-200 bg-blue-600/50 w-8 h-8 rounded-full flex items-center justify-center"
                                         onClick={() => setShowEditModal(false)}
@@ -1575,7 +1575,7 @@ const AdminPanel: React.FC = () => {
                                     <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Edit Quiz</h3>
                                     <form onSubmit={handleSaveEditedQuiz} className="space-y-6">
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-blue-200">Quiz Title</label>
+                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Title</label>
                                             <input
                                                 type="text"
                                                 className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -1586,7 +1586,7 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-blue-200">Thumbnail</label>
+                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Thumbnail</label>
                                             <div className="flex gap-4 mb-3">
                                                 <label className="flex items-center gap-2 cursor-pointer">
                                                     <input type="radio" name="editThumbnailType" value="url" checked={editQuizForm.thumbnailType === 'url'} onChange={() => handleEditQuizFormChange('thumbnailType', 'url')} className="text-blue-500" />
@@ -1617,7 +1617,7 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-blue-200">Quiz Type</label>
+                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Type</label>
                                             <select
                                                 className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={editQuizForm.type}
@@ -1630,7 +1630,7 @@ const AdminPanel: React.FC = () => {
 
                                         {editQuizForm.type === 'gform' && (
                                             <div className="space-y-4">
-                                                <label className="block font-semibold text-blue-200">Google Form Link</label>
+                                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Google Form Link</label>
                                                 <input
                                                     type="url"
                                                     className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -1644,7 +1644,7 @@ const AdminPanel: React.FC = () => {
 
                                         {editQuizForm.type === 'manual' && (
                                             <div className="space-y-4">
-                                                <label className="block font-semibold text-blue-200">Questions</label>
+                                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Questions</label>
                                                 <div className="space-y-4 max-h-96 overflow-y-auto p-2">
                                                     <DragDropContext onDragEnd={result => {
                                                         if (!result.destination) return;
@@ -1668,7 +1668,7 @@ const AdminPanel: React.FC = () => {
                                                                                     required
                                                                                 />
                                                                                 <div className="space-y-3">
-                                                                                    <label className="block font-semibold text-blue-200 text-sm">Options</label>
+                                                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Options</label>
                                                                                     {q.options.map((opt, oIdx) => (
                                                                                         <div key={oIdx} className="flex items-center gap-2">
                                                                                             <input
@@ -1699,7 +1699,7 @@ const AdminPanel: React.FC = () => {
                                                                                     </button>
                                                                                 </div>
                                                                                 <div className="space-y-2">
-                                                                                    <label className="block font-semibold text-blue-200 text-sm">Correct Answer (option index)</label>
+                                                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Correct Answer (option index)</label>
                                                                                     <input
                                                                                         type="number"
                                                                                         min="0"
@@ -1763,11 +1763,11 @@ const AdminPanel: React.FC = () => {
 
                 {/* Courses Section */}
                 {activeTab === 'courses' && (
-                    <Card className="medical-card shadow-2xl max-w-2xl w-full mx-auto bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                    <Card className="medical-card shadow-2xl max-w-2xl w-full mx-auto bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                         <form className="p-6 sm:p-8 space-y-6" onSubmit={handleCourseSubmit}>
                             <h2 className="text-3xl font-bold text-white mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Create Course</h2>
                             <div className="space-y-4">
-                                <label className="block font-semibold text-blue-200">Course Name</label>
+                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Course Name</label>
                                 <input
                                     type="text"
                                     required
@@ -1778,7 +1778,7 @@ const AdminPanel: React.FC = () => {
                                 />
                             </div>
                             <div className="space-y-4">
-                                <label className="block font-semibold text-blue-200">Course Description</label>
+                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Course Description</label>
                                 <textarea
                                     required
                                     placeholder="Course Description"
@@ -1788,7 +1788,7 @@ const AdminPanel: React.FC = () => {
                                 />
                             </div>
                             <div className="space-y-4">
-                                <label className="block font-semibold text-blue-200">Course Thumbnail</label>
+                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Course Thumbnail</label>
                                 <div className="flex gap-4 mb-3">
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input type="radio" name="courseThumbnailType" value="url" checked={courseThumbnailType === 'url'} onChange={() => setCourseThumbnailType('url')} className="text-blue-500" />
@@ -1818,10 +1818,10 @@ const AdminPanel: React.FC = () => {
                                 )}
                             </div>
                             <hr className="my-6 border-blue-500/30" />
-                            <h3 className="font-semibold text-blue-200 text-xl mb-4">Add Section</h3>
+                            <h3 className="font-semibold text-slate-900 dark:text-blue-100 text-xl mb-4">Add Section</h3>
                             {courseSections.map((section, idx) => (
-                                <Card key={idx} className="border border-blue-600/30 p-6 mb-4 rounded-xl bg-blue-800/20 backdrop-blur-sm relative">
-                                    <span className="font-medium text-blue-200 text-lg">Section {idx + 1}</span>
+                                <Card key={idx} className="border border-slate-200 dark:border-blue-600/30 p-6 mb-4 rounded-xl bg-white/85 dark:bg-blue-800/20 backdrop-blur-sm relative text-slate-900 dark:text-white">
+                                    <span className="font-medium text-slate-800 dark:text-blue-100 text-lg">Section {idx + 1}</span>
                                     {/* Cross (delete) button */}
                                     <button
                                         type="button"
@@ -1833,13 +1833,13 @@ const AdminPanel: React.FC = () => {
                                         ×
                                     </button>
                                     <div className="mb-4 flex flex-col sm:flex-row gap-4 sm:gap-6 mt-4">
-                                        <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
+                                        <label className="flex items-center gap-3 text-slate-700 dark:text-blue-100 cursor-pointer">
                                             <input type="radio" name={`sectionType-${idx}`} value="video" checked={section.sectionType === 'video'} onChange={() => {
                                                 setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, sectionType: 'video' } : s));
                                             }} className="text-blue-500" />
                                             Add Video
                                         </label>
-                                        <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
+                                        <label className="flex items-center gap-3 text-slate-700 dark:text-blue-100 cursor-pointer">
                                             <input type="radio" name={`sectionType-${idx}`} value="quiz" checked={section.sectionType === 'quiz'} onChange={() => {
                                                 setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, sectionType: 'quiz' } : s));
                                             }} className="text-blue-500" />
@@ -1848,7 +1848,7 @@ const AdminPanel: React.FC = () => {
                                     </div>
                                     {section.sectionType === 'video' && (
                                         <div className="space-y-4">
-                                            <label className="block font-medium text-blue-200">Video Link</label>
+                                            <label className="block font-medium text-slate-700 dark:text-blue-100">Video Link</label>
                                             <div className="flex flex-col sm:flex-row gap-3">
                                                 <input
                                                     type="text"
@@ -1871,15 +1871,15 @@ const AdminPanel: React.FC = () => {
                                     )}
                                     {section.sectionType === 'quiz' && (
                                         <div className="space-y-4">
-                                            <label className="block font-medium text-blue-200">Quiz Type</label>
+                                            <label className="block font-medium text-slate-700 dark:text-blue-100">Quiz Type</label>
                                             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-4">
-                                                <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
+                                                <label className="flex items-center gap-3 text-slate-700 dark:text-blue-100 cursor-pointer">
                                                     <input type="radio" name={`quizType-${idx}`} value="manual" checked={section.quizType === 'manual'} onChange={() => {
                                                         setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizType: 'manual' } : s));
                                                     }} className="text-blue-500" />
                                                     Manual Form
                                                 </label>
-                                                <label className="flex items-center gap-3 text-blue-200 cursor-pointer">
+                                                <label className="flex items-center gap-3 text-slate-700 dark:text-blue-100 cursor-pointer">
                                                     <input type="radio" name={`quizType-${idx}`} value="gform" checked={section.quizType === 'gform'} onChange={() => {
                                                         setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizType: 'gform' } : s));
                                                     }} className="text-blue-500" />
@@ -1888,7 +1888,7 @@ const AdminPanel: React.FC = () => {
                                             </div>
                                             {section.quizType === 'manual' && (
                                                 <div className="space-y-4">
-                                                    <label className="block font-semibold text-blue-200">Quiz Title</label>
+                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Title</label>
                                                     <input
                                                         type="text"
                                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -1897,7 +1897,7 @@ const AdminPanel: React.FC = () => {
                                                         required
                                                         placeholder="Enter quiz title..."
                                                     />
-                                                    <label className="block font-semibold text-blue-200">Thumbnail</label>
+                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100">Thumbnail</label>
                                                     <input
                                                         type="text"
                                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -1905,7 +1905,7 @@ const AdminPanel: React.FC = () => {
                                                         onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizThumbnail: e.target.value } : s))}
                                                         placeholder="Enter thumbnail URL..."
                                                     />
-                                                    <label className="block font-semibold text-blue-200">Questions</label>
+                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100">Questions</label>
                                                     <DragDropContext onDragEnd={result => {
                                                         if (!result.destination) return;
                                                         const reordered = Array.from(section.questions);
@@ -1930,7 +1930,7 @@ const AdminPanel: React.FC = () => {
                                                                                     }}
                                                                                     required
                                                                                 />
-                                                                                <label className="block font-semibold text-blue-200 text-sm">Options</label>
+                                                                                <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Options</label>
                                                                                 {q.options.map((opt, oIdx) => (
                                                                                     <div key={oIdx} className="flex items-center gap-2">
                                                                                         <input
@@ -1981,7 +1981,7 @@ const AdminPanel: React.FC = () => {
                                                                                 >
                                                                                     <Plus size={16} /> Add Option
                                                                                 </button>
-                                                                                <label className="block font-semibold text-blue-200 text-sm">Correct Answer (option index)</label>
+                                                                                <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Correct Answer (option index)</label>
                                                                                 <input
                                                                                     type="number"
                                                                                     min="0"
@@ -2027,7 +2027,7 @@ const AdminPanel: React.FC = () => {
                                             )}
                                             {section.quizType === 'gform' && (
                                                 <div className="space-y-4">
-                                                    <label className="block font-medium text-blue-200">Google Form Link</label>
+                                                    <label className="block font-medium text-slate-700 dark:text-blue-100">Google Form Link</label>
                                                     <input
                                                         type="text"
                                                         className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -2103,7 +2103,7 @@ const AdminPanel: React.FC = () => {
                             return (
                                 <div className="grid gap-6">
                                     {pendingItems.map((item) => (
-                                        <Card key={item.id} className="medical-card text-white p-6 card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
+                                        <Card key={item.id} className="medical-card text-slate-900 dark:text-white p-6 card-hover bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-200">
                                             {(item.imageUrl || item.thumbnail || item.image) && (
                                                 <img
                                                     src={item.imageUrl || item.thumbnail || item.image}
@@ -2114,8 +2114,8 @@ const AdminPanel: React.FC = () => {
                                                     }}
                                                 />
                                             )}
-                                            <h2 className="text-xl font-semibold mb-3 text-white">{item.title}</h2>
-                                            <div className="mb-3 text-sm text-blue-200 space-y-1">
+                                            <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">{item.title}</h2>
+                                            <div className="mb-3 text-sm text-slate-700 dark:text-blue-200 space-y-1">
                                                 {'authors' in item && <div><span className="font-semibold">Authors:</span> {item.authors}</div>}
                                                 {'instructor' in item && <div><span className="font-semibold">Instructor:</span> {item.instructor}</div>}
                                                 {'author' in item && <div><span className="font-semibold">Author:</span> {item.author}</div>}
@@ -2126,8 +2126,8 @@ const AdminPanel: React.FC = () => {
                                                 {'publishedDate' in item && <div><span className="font-semibold">Published:</span> {item.publishedDate}</div>}
                                             </div>
                                             <div className="mb-4">
-                                                <span className="font-semibold text-blue-200">Description:</span>
-                                                <p className="text-blue-100 mt-1 line-clamp-3">
+                                                <span className="font-semibold text-slate-700 dark:text-blue-200">Description:</span>
+                                                <p className="text-slate-600 dark:text-blue-100 mt-1 line-clamp-3">
                                                     {item.abstract || item.description || item.excerpt}
                                                 </p>
                                             </div>
@@ -2190,12 +2190,12 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'achievements' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Achievements</h2>
-                        <Card className="medical-card shadow-2xl max-w-2xl w-full bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                        <Card className="medical-card shadow-2xl max-w-2xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleAchievementSubmit}>
-                                <h3 className="text-xl font-semibold text-blue-200 mb-4">Add New Achievement</h3>
+                                <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Add New Achievement</h3>
                                 <div className="grid md:grid-cols-3 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-blue-200">Icon <span className="text-red-400">*</span></label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Icon <span className="text-red-500">*</span></label>
                                         <select
                                             required
                                             className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -2209,7 +2209,7 @@ const AdminPanel: React.FC = () => {
                                         </select>
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-blue-200">Value <span className="text-red-400">*</span></label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Value <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
@@ -2220,7 +2220,7 @@ const AdminPanel: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-blue-200">Label <span className="text-red-400">*</span></label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Label <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
@@ -2253,13 +2253,13 @@ const AdminPanel: React.FC = () => {
 
                         <div className="grid md:grid-cols-2 gap-6 mt-8">
                             {staticAchievements.map((a, idx) => (
-                                <Card key={"static-" + idx} className="medical-card text-white p-6 flex items-center gap-6 card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
+                                <Card key={"static-" + idx} className="medical-card text-slate-900 dark:text-white p-6 flex items-center gap-6 card-hover bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-200">
                                     <div className="h-16 w-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/30 to-cyan-500/30 mr-4 shadow-lg">
                                         <span className="text-2xl font-bold">{a.icon}</span>
                                     </div>
                                     <div className="flex-1">
-                                        <div className="font-bold text-2xl text-white">{a.value}</div>
-                                        <div className="text-blue-200">{a.label}</div>
+                                        <div className="font-bold text-2xl text-slate-900 dark:text-white">{a.value}</div>
+                                        <div className="text-slate-600 dark:text-blue-200">{a.label}</div>
                                     </div>
                                     <div className="flex gap-2">
                                         <Button
@@ -2280,13 +2280,13 @@ const AdminPanel: React.FC = () => {
                                 </Card>
                             ))}
                             {achievements.map((a, idx) => (
-                                <Card key={a.id || idx} className="medical-card text-white p-6 flex items-center gap-6 card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
+                                <Card key={a.id || idx} className="medical-card text-slate-900 dark:text-white p-6 flex items-center gap-6 card-hover bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-200">
                                     <div className="h-16 w-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/30 to-cyan-500/30 mr-4 shadow-lg">
                                         <span className="text-2xl font-bold">{a.icon}</span>
                                     </div>
                                     <div className="flex-1">
-                                        <div className="font-bold text-2xl text-white">{a.value}</div>
-                                        <div className="text-blue-200">{a.label}</div>
+                                        <div className="font-bold text-2xl text-slate-900 dark:text-white">{a.value}</div>
+                                        <div className="text-slate-600 dark:text-blue-200">{a.label}</div>
                                     </div>
                                     <div className="flex gap-2">
                                         <Button
@@ -2314,14 +2314,14 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'members' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Team Members</h2>
-                        <Card className="medical-card shadow-2xl max-w-4xl w-full bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30">
+                        <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleMemberSubmit}>
-                                <h3 className="text-xl font-semibold text-blue-200 mb-4">
+                                <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">
                                     {editingMemberId ? 'Edit Member' : 'Add New Member'}
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-blue-200">Name <span className="text-red-400">*</span></label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Name <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
@@ -2332,7 +2332,7 @@ const AdminPanel: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-blue-200">Institution/College <span className="text-red-400">*</span></label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Institution/College <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
@@ -2345,7 +2345,7 @@ const AdminPanel: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-blue-200">Profile Picture <span className="text-red-400">*</span></label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Profile Picture <span className="text-red-500">*</span></label>
                                     <input
                                         type="file"
                                         required
@@ -2357,7 +2357,7 @@ const AdminPanel: React.FC = () => {
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-blue-200">Email</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Email</label>
                                         <input
                                             type="email"
                                             placeholder="Email address"
@@ -2367,7 +2367,7 @@ const AdminPanel: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-blue-200">Phone (with country code)</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Phone (with country code)</label>
                                         <input
                                             type="tel"
                                             placeholder="+91 9876543210"
@@ -2379,7 +2379,7 @@ const AdminPanel: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-blue-200">Designation</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Designation</label>
                                     <input
                                         type="text"
                                         placeholder="Designation/Role"
@@ -2411,12 +2411,12 @@ const AdminPanel: React.FC = () => {
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
                             {staticMembers.map((m, idx) => (
-                                <Card key={"static-" + idx} className="medical-card text-white p-6 flex flex-col items-center text-center card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
+                                <Card key={"static-" + idx} className="medical-card text-slate-900 dark:text-white p-6 flex flex-col items-center text-center card-hover bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-200">
                                     <img src={m.pictureUrl} alt={m.name} className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50" />
                                     <div className="flex-1 w-full">
-                                        <div className="font-bold text-lg text-white mb-2">{m.name}</div>
-                                        <div className="text-blue-200 text-sm mb-1">{m.institution}</div>
-                                        <div className="text-blue-300 text-sm font-semibold mb-4">{m.designation}</div>
+                                        <div className="font-bold text-lg text-slate-900 dark:text-white mb-2">{m.name}</div>
+                                        <div className="text-slate-600 dark:text-blue-200 text-sm mb-1">{m.institution}</div>
+                                        <div className="text-slate-500 dark:text-blue-300 text-sm font-semibold mb-4">{m.designation}</div>
                                     </div>
                                     <div className="flex gap-2 w-full">
                                         <Button
@@ -2453,13 +2453,13 @@ const AdminPanel: React.FC = () => {
                                 </Card>
                             ))}
                             {members.map((m, idx) => (
-                                <Card key={m.id || idx} className="medical-card text-white p-6 flex flex-col items-center text-center card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
+                                <Card key={m.id || idx} className="medical-card text-slate-900 dark:text-white p-6 flex flex-col items-center text-center card-hover bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-200">
                                     <img src={m.pictureUrl || m.picture} alt={m.name} className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50" />
                                     <div className="flex-1 w-full">
-                                        <div className="font-bold text-lg text-white mb-2">{m.name}</div>
-                                        <div className="text-blue-200 text-sm mb-1">{m.institution}</div>
-                                        <div className="text-blue-300 text-sm mb-1">{m.email}</div>
-                                        <div className="text-blue-300 text-sm font-semibold mb-4">{m.designation}</div>
+                                        <div className="font-bold text-lg text-slate-900 dark:text-white mb-2">{m.name}</div>
+                                        <div className="text-slate-600 dark:text-blue-200 text-sm mb-1">{m.institution}</div>
+                                        <div className="text-slate-600 dark:text-blue-300 text-sm mb-1">{m.email}</div>
+                                        <div className="text-slate-500 dark:text-blue-300 text-sm font-semibold mb-4">{m.designation}</div>
                                     </div>
                                     <div className="flex gap-2 w-full">
                                         <Button
@@ -2519,14 +2519,14 @@ const AdminPanel: React.FC = () => {
                         ) : (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 {smakAIEnquiries.map((enquiry) => (
-                                    <Card key={enquiry.id} className="bg-gray-800/50 border-blue-500/30 overflow-hidden hover:border-blue-400/60 transition-all duration-300">
-                                        <CardHeader className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-b border-blue-500/20">
+                                    <Card key={enquiry.id} className="bg-white/90 dark:bg-gray-800/50 border border-slate-200 dark:border-blue-500/30 overflow-hidden hover:border-blue-300 dark:hover:border-blue-400/60 transition-all duration-300 text-slate-900 dark:text-white">
+                                        <CardHeader className="bg-blue-50/80 dark:bg-gradient-to-r dark:from-blue-600/20 dark:to-purple-600/20 border-b border-slate-200 dark:border-blue-500/20">
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
-                                                    <CardTitle className="text-lg text-white">{enquiry.fullName}</CardTitle>
-                                                    <p className="text-sm text-gray-400 mt-1">{enquiry.email}</p>
+                                                    <CardTitle className="text-lg text-slate-900 dark:text-white">{enquiry.fullName}</CardTitle>
+                                                    <p className="text-sm text-slate-600 dark:text-gray-400 mt-1">{enquiry.email}</p>
                                                 </div>
-                                                <Badge className={enquiry.status === 'new' ? 'bg-yellow-500/20 text-yellow-300' : 'bg-green-500/20 text-green-300'}>
+                                                <Badge className={enquiry.status === 'new' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300' : 'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300'}>
                                                     {enquiry.status}
                                                 </Badge>
                                             </div>
@@ -2534,52 +2534,52 @@ const AdminPanel: React.FC = () => {
                                         <CardContent className="pt-6 space-y-4">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Organization</p>
-                                                    <p className="text-gray-200 mt-1">{enquiry.organisation}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Organization</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1">{enquiry.organisation}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Designation</p>
-                                                    <p className="text-gray-200 mt-1">{enquiry.designation}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Designation</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1">{enquiry.designation}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Phone</p>
-                                                    <p className="text-gray-200 mt-1">{enquiry.phone}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Phone</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1">{enquiry.phone}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Sector</p>
-                                                    <p className="text-gray-200 mt-1">{enquiry.sector}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Sector</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1">{enquiry.sector}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Geography</p>
-                                                    <p className="text-gray-200 mt-1">{enquiry.geography}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Geography</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1">{enquiry.geography}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Therapy Area</p>
-                                                    <p className="text-gray-200 mt-1">{enquiry.therapyArea}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Therapy Area</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1">{enquiry.therapyArea}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Project Type</p>
-                                                    <p className="text-gray-200 mt-1">{enquiry.projectType}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Project Type</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1">{enquiry.projectType}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Sample Size</p>
-                                                    <p className="text-gray-200 mt-1">{enquiry.sampleSize}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Sample Size</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1">{enquiry.sampleSize}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Start Date</p>
-                                                    <p className="text-gray-200 mt-1">{enquiry.startDate}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Start Date</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1">{enquiry.startDate}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500 text-xs uppercase font-semibold">Deliverables</p>
-                                                    <p className="text-gray-200 mt-1 capitalize">{enquiry.deliverables}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold">Deliverables</p>
+                                                    <p className="text-slate-800 dark:text-gray-200 mt-1 capitalize">{enquiry.deliverables}</p>
                                                 </div>
                                             </div>
                                             <div>
-                                                <p className="text-gray-500 text-xs uppercase font-semibold mb-2">Project Objective</p>
-                                                <p className="text-gray-300 text-sm bg-gray-900/50 p-3 rounded border border-gray-700">{enquiry.objective}</p>
+                                                <p className="text-slate-500 dark:text-gray-500 text-xs uppercase font-semibold mb-2">Project Objective</p>
+                                                <p className="text-slate-800 dark:text-gray-300 text-sm bg-slate-100 dark:bg-gray-900/50 p-3 rounded border border-slate-200 dark:border-gray-700">{enquiry.objective}</p>
                                             </div>
-                                            <div className="pt-2 border-t border-gray-700">
-                                                <p className="text-gray-500 text-xs">
+                                            <div className="pt-2 border-t border-slate-200 dark:border-gray-700">
+                                                <p className="text-slate-500 dark:text-gray-500 text-xs">
                                                     Submitted: {enquiry.submittedAt?.toDate?.()?.toLocaleDateString() || 'N/A'}
                                                 </p>
                                             </div>
