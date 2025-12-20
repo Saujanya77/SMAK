@@ -501,7 +501,7 @@ const renderVideoPlayer = (video: VideoLecture) => {
 
 
 // Backend base URL (can be set with VITE_BACKEND_URL in env)
-const backendBase = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const backendBase = import.meta.env.VITE_BACKEND_URL || 'https://smak-server.vercel.app';
 
 async function createRazorpayOrder(amount: number) {
   const response = await fetch(`${backendBase}/create-order`, {
