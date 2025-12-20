@@ -2,14 +2,32 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Microscope, Brain, Globe, Users, Award, Target, Heart, Stethoscope, Shield } from 'lucide-react';
+import { BookOpen, Microscope, Brain, Globe, Users, Award, Target, Heart, Stethoscope, Shield, Plus, Edit, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { db } from '@/firebase';
+import { collection, addDoc, deleteDoc, doc, getDocs, updateDoc } from 'firebase/firestore';
+
+const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'];
 
 const About = () => {
+  const { user } = useAuth();
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email || '');
+  
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [currentPartner, setCurrentPartner] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
+  
+  // Admin state for partners
+  const [showPartnerModal, setShowPartnerModal] = useState(false);
+  const [partnerForm, setPartnerForm] = useState({ name: '', image: '', gradient: 'from-blue-500 to-indigo-500' });
+  const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
+  
+  // Admin state for leadership
+  const [showLeaderModal, setShowLeaderModal] = useState(false);
+  const [leaderForm, setLeaderForm] = useState({ name: '', role: '', college: '', image: '', objectPosition: '' });
+  const [editingLeaderId, setEditingLeaderId] = useState<string | null>(null);
 
   const values = [
     {
@@ -110,17 +128,77 @@ const About = () => {
     }
   ];
 
-  const partners = [
-    { name: "AIIMS Delhi", logo: "🏥", gradient: "from-blue-500 to-indigo-500" },
-    { name: "JIPMER", logo: "🏥", gradient: "from-indigo-500 to-purple-500" },
-    { name: "PGIMER", logo: "🏥", gradient: "from-purple-500 to-pink-500" },
-    { name: "Lady Hardinge", logo: "🏥", gradient: "from-pink-500 to-rose-500" },
-    { name: "Grant Medical", logo: "🏥", gradient: "from-rose-500 to-red-500" },
-    { name: "KGMU", logo: "🏥", gradient: "from-red-500 to-orange-500" },
-    { name: "MAMC", logo: "🏥", gradient: "from-orange-500 to-yellow-500" },
-    { name: "UCMS", logo: "🏥", gradient: "from-yellow-500 to-green-500" }
-  ];
+  const [partners, setPartners] = useState([
+    { id: '1', name: "AIIMS Delhi", image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=200&h=200&fit=crop", gradient: "from-blue-500 to-indigo-500" },
+    { id: '2', name: "JIPMER", image: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=200&h=200&fit=crop", gradient: "from-indigo-500 to-purple-500" },
+    { id: '3', name: "PGIMER", image: "https://images.unsplash.com/photo-1519494140681-8b17d830a3e9?w=200&h=200&fit=crop", gradient: "from-purple-500 to-pink-500" },
+    { id: '4', name: "Lady Hardinge", image: "https://images.unsplash.com/photo-1564939558297-fc396f18e5c7?w=200&h=200&fit=crop", gradient: "from-pink-500 to-rose-500" },
+    { id: '5', name: "Grant Medical", image: "https://images.unsplash.com/photo-1486825586573-7131f7991bdd?w=200&h=200&fit=crop", gradient: "from-rose-500 to-red-500" },
+    { id: '6', name: "KGMU", image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=200&h=200&fit=crop", gradient: "from-red-500 to-orange-500" },
+    { id: '7', name: "MAMC", image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=200&h=200&fit=crop", gradient: "from-orange-500 to-yellow-500" },
+    { id: '8', name: "UCMS", image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=200&h=200&fit=crop", gradient: "from-yellow-500 to-green-500" }
+  ]);
+  
+  const [leadershipTeam, setLeadershipTeam] = useState([
+    {
+      id: '1',
+      name: "Samudra Chaudhari",
+      role: "Founder",
+      college: "SMAK",
+      image: "https://i.postimg.cc/65tpg88S/Whats-App-Image-2025-08-13-at-13-39-13-32477921.jpg",
+      objectPosition: "center 20%"
+    },
+    {
+      id: '2',
+      name: "Khushal Pal",
+      role: "Co-Founder",
+      college: "SMAK",
+      image: "https://i.postimg.cc/DwYfS5xk/Whats-App-Image-2025-08-13-at-13-39-13-89a66ab2.jpg",
+      objectPosition: ""
+    },
+    {
+      id: '3',
+      name: "Disha Agrawala",
+      role: "Executive Director",
+      college: "SMAK",
+      image: "https://i.postimg.cc/VN8d4JBK/Whats-App-Image-2025-08-13-at-13-01-49-0a36118b.jpg",
+      objectPosition: ""
+    },
+    {
+      id: '4',
+      name: "Piyush Mishra",
+      role: "Director of Operations",
+      college: "SMAK",
+      image: " ",
+      objectPosition: ""
+    }
+  ]);
 
+  // Fetch partners and leadership from Firestore
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch partners
+        const partnersSnapshot = await getDocs(collection(db, 'partners'));
+        if (!partnersSnapshot.empty) {
+          const partnersData = partnersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setPartners(partnersData as any);
+        }
+        
+        // Fetch leadership
+        const leadershipSnapshot = await getDocs(collection(db, 'leadership'));
+        if (!leadershipSnapshot.empty) {
+          const leadershipData = leadershipSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setLeadershipTeam(leadershipData as any);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    
+    fetchData();
+  }, []);
+  
   // Auto-advance testimonials (right to left)
   useEffect(() => {
     const timer = setInterval(() => {
@@ -136,6 +214,68 @@ const About = () => {
     }, 2500);
     return () => clearInterval(timer);
   }, [partners.length]);
+  
+  // Partner CRUD functions
+  const handleAddPartner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingPartnerId) {
+        await updateDoc(doc(db, 'partners', editingPartnerId), partnerForm);
+        setPartners(prev => prev.map(p => p.id === editingPartnerId ? { ...p, ...partnerForm } : p));
+      } else {
+        const docRef = await addDoc(collection(db, 'partners'), partnerForm);
+        setPartners(prev => [...prev, { id: docRef.id, ...partnerForm }]);
+      }
+      setShowPartnerModal(false);
+      setPartnerForm({ name: '', logo: '🏥', gradient: 'from-blue-500 to-indigo-500' });
+      setEditingPartnerId(null);
+    } catch (error) {
+      console.error('Error saving partner:', error);
+      alert('Failed to save partner');
+    }
+  };
+  
+  const handleDeletePartner = async (id: string) => {
+    if (!window.confirm('Delete this partner institution?')) return;
+    try {
+      await deleteDoc(doc(db, 'partners', id));
+      setPartners(prev => prev.filter(p => p.id !== id));
+    } catch (error) {
+      console.error('Error deleting partner:', error);
+      alert('Failed to delete partner');
+    }
+  };
+  
+  // Leadership CRUD functions
+  const handleAddLeader = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingLeaderId) {
+        await updateDoc(doc(db, 'leadership', editingLeaderId), leaderForm);
+        setLeadershipTeam(prev => prev.map(l => l.id === editingLeaderId ? { ...l, ...leaderForm } : l));
+      } else {
+        const docRef = await addDoc(collection(db, 'leadership'), leaderForm);
+        setLeadershipTeam(prev => [...prev, { id: docRef.id, ...leaderForm }]);
+      }
+      setShowLeaderModal(false);
+      setLeaderForm({ name: '', role: '', college: '', image: '', objectPosition: '' });
+      setEditingLeaderId(null);
+    } catch (error) {
+      console.error('Error saving leader:', error);
+      alert('Failed to save leader');
+    }
+  };
+  
+  const handleDeleteLeader = async (id: string) => {
+    if (!window.confirm('Delete this leadership member?')) return;
+    try {
+      await deleteDoc(doc(db, 'leadership', id));
+      setLeadershipTeam(prev => prev.filter(l => l.id !== id));
+    } catch (error) {
+      console.error('Error deleting leader:', error);
+      alert('Failed to delete leader');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-white dark:from-gray-900 dark:via-blue-900/10 dark:to-gray-900">
@@ -420,9 +560,23 @@ const About = () => {
       <section className="py-24 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/30 dark:from-gray-900/50 dark:via-gray-800 dark:to-indigo-900/30 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Our Partner Institutions
-            </h2>
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Our Partner Institutions
+              </h2>
+              {isAdmin && (
+                <Button
+                  onClick={() => {
+                    setShowPartnerModal(true);
+                    setEditingPartnerId(null);
+                    setPartnerForm({ name: '', image: '', gradient: 'from-blue-500 to-indigo-500' });
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3"
+                >
+                  <Plus size={24} />
+                </Button>
+              )}
+            </div>
             <p className="text-2xl text-gray-600 dark:text-gray-400">
               Proud to collaborate with India's premier medical colleges
             </p>
@@ -436,9 +590,35 @@ const About = () => {
               >
                 {[...partners, ...partners].map((partner, index) => (
                   <div key={index} className="w-1/4 flex-shrink-0 px-4">
-                    <Card className="text-center p-8 hover:shadow-2xl transition-all duration-700 hover:scale-110 hover:-translate-y-4 group cursor-pointer border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-                      <div className={`w-20 h-20 mx-auto mb-6 bg-gradient-to-br ${partner.gradient} rounded-full flex items-center justify-center text-4xl group-hover:scale-125 transition-transform duration-500 shadow-lg group-hover:shadow-xl`}>
-                        {partner.logo}
+                    <Card className="text-center p-8 hover:shadow-2xl transition-all duration-700 hover:scale-110 hover:-translate-y-4 group cursor-pointer border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm relative">
+                      {isAdmin && index < partners.length && (
+                        <div className="absolute top-2 right-2 flex gap-2 z-10">
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setEditingPartnerId(partner.id);
+                              setPartnerForm({ name: partner.name, image: partner.image, gradient: partner.gradient });
+                              setShowPartnerModal(true);
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg"
+                          >
+                            <Edit size={14} />
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleDeletePartner(partner.id)}
+                            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
+                      )}
+                      <div className={`w-20 h-20 mx-auto mb-6 bg-gradient-to-br ${partner.gradient} rounded-full flex items-center justify-center overflow-hidden group-hover:scale-125 transition-transform duration-500 shadow-lg group-hover:shadow-xl`}>
+                        <img 
+                          src={partner.image} 
+                          alt={partner.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <h3 className="font-medium text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 dark:text-gray-200">{partner.name}</h3>
                     </Card>
@@ -454,51 +634,67 @@ const About = () => {
       <section className="py-24 relative">
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Leadership Team
-            </h2>
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Leadership Team
+              </h2>
+              {isAdmin && (
+                <Button
+                  onClick={() => {
+                    setShowLeaderModal(true);
+                    setEditingLeaderId(null);
+                    setLeaderForm({ name: '', role: '', college: '', image: '', objectPosition: '' });
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3"
+                >
+                  <Plus size={24} />
+                </Button>
+              )}
+            </div>
             <p className="text-2xl text-gray-600 dark:text-gray-400">
               Meet the dedicated individuals leading SMAK's mission
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            {[ 
-              {
-                name: "Samudra Chaudhari",
-                role: "Founder",
-                college: "SMAK",
-                image: "https://i.postimg.cc/65tpg88S/Whats-App-Image-2025-08-13-at-13-39-13-32477921.jpg",
-                objectPosition: "center 20%"
-              },
-              {
-                name: "Khushal Pal",
-                role: "Co-Founder",
-                college: "SMAK",
-                image: "https://i.postimg.cc/DwYfS5xk/Whats-App-Image-2025-08-13-at-13-39-13-89a66ab2.jpg"
-              },
-              {
-                name: "Disha Agrawala",
-                role: "Executive Director",
-                college: "SMAK",
-                image: "https://i.postimg.cc/VN8d4JBK/Whats-App-Image-2025-08-13-at-13-01-49-0a36118b.jpg"
-              },
-              {
-                name: "Piyush Mishra",
-                role: "Director of Operations",
-                college: "SMAK",
-                image: " "
-              }
-            ].map((member, index) => (
+            {leadershipTeam.map((member, index) => (
               <Card key={index} className="group text-center hover:shadow-2xl transition-all duration-700 hover:scale-105 hover:-translate-y-6 cursor-pointer border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm overflow-hidden">
                 <CardContent className="pt-10 pb-8 relative">
+                  {isAdmin && (
+                    <div className="absolute top-4 right-4 flex gap-2 z-20">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setEditingLeaderId(member.id);
+                          setLeaderForm({ 
+                            name: member.name, 
+                            role: member.role, 
+                            college: member.college, 
+                            image: member.image,
+                            objectPosition: member.objectPosition || ''
+                          });
+                          setShowLeaderModal(true);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg"
+                      >
+                        <Edit size={14} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleDeleteLeader(member.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <div className="relative mb-8">
                     <img 
                       src={member.image} 
                       alt={member.name}
                       className="w-40 h-40 rounded-full mx-auto object-cover group-hover:scale-110 transition-transform duration-500 shadow-xl border-4 border-blue-100 dark:border-blue-400 group-hover:border-blue-200 dark:group-hover:border-blue-300"
-                      style={member.name === "Samudra Chaudhari" ? { objectPosition: member.objectPosition || "center 20%", objectFit: 'cover', background: '#e8efff', padding: '4px' } : { background: '#e8efff' }}
+                      style={member.objectPosition ? { objectPosition: member.objectPosition, objectFit: 'cover', background: '#e8efff', padding: '4px' } : { background: '#e8efff' }}
                     />
                     <div className="absolute inset-0 rounded-full bg-gradient-to-t from-blue-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   </div>
@@ -543,6 +739,156 @@ const About = () => {
 
         </div>
       </section>
+
+      {/* Partner Modal */}
+      {showPartnerModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full relative">
+            <button
+              onClick={() => setShowPartnerModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <X size={24} />
+            </button>
+            <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+              {editingPartnerId ? 'Edit Partner' : 'Add Partner Institution'}
+            </h3>
+            <form onSubmit={handleAddPartner} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Institution Name</label>
+                <input
+                  type="text"
+                  required
+                  value={partnerForm.name}
+                  onChange={e => setPartnerForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="e.g., AIIMS Delhi"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Image URL</label>
+                <input
+                  type="text"
+                  required
+                  value={partnerForm.image}
+                  onChange={e => setPartnerForm(prev => ({ ...prev, image: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Gradient Colors</label>
+                <select
+                  required
+                  value={partnerForm.gradient}
+                  onChange={e => setPartnerForm(prev => ({ ...prev, gradient: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="from-blue-500 to-indigo-500">Blue to Indigo</option>
+                  <option value="from-indigo-500 to-purple-500">Indigo to Purple</option>
+                  <option value="from-purple-500 to-pink-500">Purple to Pink</option>
+                  <option value="from-pink-500 to-rose-500">Pink to Rose</option>
+                  <option value="from-rose-500 to-red-500">Rose to Red</option>
+                  <option value="from-red-500 to-orange-500">Red to Orange</option>
+                  <option value="from-orange-500 to-yellow-500">Orange to Yellow</option>
+                  <option value="from-yellow-500 to-green-500">Yellow to Green</option>
+                  <option value="from-green-500 to-emerald-500">Green to Emerald</option>
+                  <option value="from-cyan-500 to-blue-500">Cyan to Blue</option>
+                </select>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+                  {editingPartnerId ? 'Update' : 'Add'} Partner
+                </Button>
+                <Button type="button" onClick={() => setShowPartnerModal(false)} className="flex-1 bg-gray-500 hover:bg-gray-600 text-white">
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Leadership Modal */}
+      {showLeaderModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setShowLeaderModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <X size={24} />
+            </button>
+            <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+              {editingLeaderId ? 'Edit Leader' : 'Add Leadership Member'}
+            </h3>
+            <form onSubmit={handleAddLeader} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Name</label>
+                <input
+                  type="text"
+                  required
+                  value={leaderForm.name}
+                  onChange={e => setLeaderForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Full name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Role</label>
+                <input
+                  type="text"
+                  required
+                  value={leaderForm.role}
+                  onChange={e => setLeaderForm(prev => ({ ...prev, role: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="e.g., Founder"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">College/Organization</label>
+                <input
+                  type="text"
+                  required
+                  value={leaderForm.college}
+                  onChange={e => setLeaderForm(prev => ({ ...prev, college: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="e.g., SMAK"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Image URL</label>
+                <input
+                  type="text"
+                  required
+                  value={leaderForm.image}
+                  onChange={e => setLeaderForm(prev => ({ ...prev, image: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Object Position (optional)</label>
+                <input
+                  type="text"
+                  value={leaderForm.objectPosition}
+                  onChange={e => setLeaderForm(prev => ({ ...prev, objectPosition: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="e.g., center 20%"
+                />
+              </div>
+              <div className="flex gap-3 mt-6">
+                <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+                  {editingLeaderId ? 'Update' : 'Add'} Leader
+                </Button>
+                <Button type="button" onClick={() => setShowLeaderModal(false)} className="flex-1 bg-gray-500 hover:bg-gray-600 text-white">
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

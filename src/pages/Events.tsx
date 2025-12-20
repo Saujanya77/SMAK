@@ -9,7 +9,7 @@ import { Calendar, Clock, MapPin, Users, Plus, Upload, Image, Edit, Trash2 } fro
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 
 const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'];
 
@@ -253,6 +253,7 @@ const Events = () => {
   const [firestoreEvents, setFirestoreEvents] = useState([]);
   const [localEvents, setLocalEvents] = useState(hardcodedEvents);
   const [editingEvent, setEditingEvent] = useState(null); // For edit modal (future)
+  const [categoryFilter, setCategoryFilter] = useState('All');
   
   // Load events from Firestore on mount
   useEffect(() => {
@@ -270,8 +271,26 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  // FIXED: Preserved static past events data
-  const pastEvents = [
+  // Load past events from Firestore on mount
+  useEffect(() => {
+    const fetchPastEvents = async () => {
+      try {
+        const pastCol = collection(db, 'pastEvents');
+        const q = query(pastCol, orderBy('date', 'desc'));
+        const snapshot = await getDocs(q);
+        const events = snapshot.docs.map(d => ({ id: d.id, ...(d.data() as { title: string; date: string; attendees: string; image: string }) }));
+        if (events.length) {
+          setPastEvents(events);
+        }
+      } catch (err) {
+        console.error('Error loading past events:', err);
+      }
+    };
+    fetchPastEvents();
+  }, []);
+
+  // Past events state (initial static data, replaced by Firestore if available)
+  const [pastEvents, setPastEvents] = useState([
     {
       title: "World Asthma Day",
       date: "November 15, 2024",
@@ -290,7 +309,16 @@ const Events = () => {
       attendees: "3,200+",
       image: "/Images/IMG-20250613-WA0034.jpg"
     }
-  ];
+  ]);
+
+  // Admin: Add Past Event modal state
+  const [showAddPastForm, setShowAddPastForm] = useState(false);
+  const [pastEventForm, setPastEventForm] = useState({
+    title: '',
+    date: '',
+    attendees: '',
+    image: ''
+  });
 
   // Handle form changes
   const handleFormChange = (e) => {
@@ -366,6 +394,44 @@ const Events = () => {
     setUploadPreview('');
   };
 
+  // Past events: add
+  const handlePastFormChange = (e) => {
+    const { name, value } = e.target;
+    setPastEventForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddPastEvent = async (e) => {
+    e.preventDefault();
+    try {
+      const pastCol = collection(db, 'pastEvents');
+      const docRef = await addDoc(pastCol, pastEventForm);
+      setPastEvents(prev => [{ id: docRef.id, ...pastEventForm }, ...prev]);
+      setShowAddPastForm(false);
+      setPastEventForm({ title: '', date: '', attendees: '', image: '' });
+    } catch (err) {
+      console.error('Error adding past event:', err);
+      alert('Failed to add past event.');
+    }
+  };
+
+  // Past events: delete (Firestore)
+  const handleDeletePastFirestoreEvent = async (id) => {
+    if (!window.confirm('Delete this past event?')) return;
+    try {
+      await deleteDoc(doc(db, 'pastEvents', id));
+      setPastEvents(prev => prev.filter(ev => ev.id !== id));
+    } catch (err) {
+      console.error('Error deleting past event:', err);
+      alert('Failed to delete past event.');
+    }
+  };
+
+  // Past events: delete (local/static)
+  const handleDeletePastLocalEvent = (index) => {
+    if (!window.confirm('Delete this past event?')) return;
+    setPastEvents(prev => prev.filter((_, i) => i !== index));
+  };
+
   // Delete Firestore event
   const handleDeleteFirestoreEvent = async (id) => {
     if (!window.confirm('Delete this event?')) return;
@@ -436,6 +502,27 @@ const Events = () => {
           <Button onClick={() => setShowAddForm(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
             <Plus className="h-5 w-5" /> Add Event
           </Button>
+        </div>
+      )}
+
+      {/* Add Past Event Form (admin) */}
+      {isAdmin && showAddPastForm && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 w-full max-w-lg relative" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+            <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-white" onClick={() => { setShowAddPastForm(false); }}>
+              ✕
+            </button>
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <Calendar className="h-6 w-6 text-blue-600" /> Add Past Event
+            </h2>
+            <form onSubmit={handleAddPastEvent} className="space-y-4">
+              <Input name="title" value={pastEventForm.title} onChange={handlePastFormChange} placeholder="Event Title" required />
+              <Input name="date" value={pastEventForm.date} onChange={handlePastFormChange} placeholder="Date (e.g., Nov 15, 2024)" required />
+              <Input name="attendees" value={pastEventForm.attendees} onChange={handlePastFormChange} placeholder="Attendees (e.g., 2,500+)" required />
+              <Input name="image" value={pastEventForm.image} onChange={handlePastFormChange} placeholder="Image URL" required />
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">Add Past Event</Button>
+            </form>
+          </div>
         </div>
       )}
 
@@ -533,10 +620,29 @@ const Events = () => {
             </p>
           </div>
 
+          {(() => {
+            const categories = Array.from(new Set([...firestoreEvents, ...localEvents].map(e => e.type).filter(Boolean)));
+            return (
+              <div className="flex justify-center mb-8">
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="All">All Categories</option>
+                  {categories.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            );
+          })()}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Combine and sort events: Firestore first, then hardcoded, sorted by date desc */}
             {(() => {
               const combined = [...firestoreEvents, ...localEvents]
+                .filter(e => categoryFilter === 'All' || (e.type || '') === categoryFilter)
                 .slice()
                 .sort((a, b) => {
                   const dateA = new Date(a.date).getTime();
@@ -639,11 +745,20 @@ const Events = () => {
             <p className="text-lg text-muted-foreground">
               Celebrating our successful events and their impact
             </p>
+            {isAdmin && (
+              <div className="mt-6 flex justify-center">
+                <Button onClick={() => setShowAddPastForm(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+                  <Plus className="h-5 w-5" /> Add Past Event
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {pastEvents.map((event, index) => (
-              <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+            {pastEvents.map((event, index) => {
+              const isFirestore = !!(event as any).id;
+              return (
+              <Card key={isFirestore ? (event as any).id : index} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
                 <div className="aspect-video">
                   <img
                     src={event.image}
@@ -663,40 +778,27 @@ const Events = () => {
                     <Users className="h-4 w-4 mr-2" />
                     {event.attendees} Attendees
                   </div>
+                  {isAdmin && (
+                    <div className="mt-4">
+                      {isFirestore ? (
+                        <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => handleDeletePastFirestoreEvent((event as any).id)}>
+                          <Trash2 className="h-4 w-4" /> Delete
+                        </Button>
+                      ) : (
+                        <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => handleDeletePastLocalEvent(index)}>
+                          <Trash2 className="h-4 w-4" /> Delete
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-            ))}
+            );})}
           </div>
         </div>
       </section>
 
-      {/* Event Categories */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-              Event Categories
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { title: "Webinars", description: "Expert-led online sessions", icon: "🎥" },
-              { title: "Workshops", description: "Hands-on learning experiences", icon: "🔬" },
-              { title: "Competitions", description: "Test your knowledge and skills", icon: "🏆" },
-              { title: "Conferences", description: "Large-scale academic gatherings", icon: "🏛️" }
-            ].map((category, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
-                <CardContent className="pt-6">
-                  <div className="text-4xl mb-4">{category.icon}</div>
-                  <h3 className="font-semibold text-lg mb-2">{category.title}</h3>
-                  <p className="text-sm text-muted-foreground">{category.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       <Footer />
     </div>
