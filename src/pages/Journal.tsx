@@ -19,37 +19,11 @@ import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Calendar, User, Eye, Download, PenTool, Sparkles, BookOpen, Users, FileText } from 'lucide-react';
+import { Calendar, User, Eye, Download, Sparkles, BookOpen, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Journal = () => {
-  const [showPublishPopup, setShowPublishPopup] = useState(false);
   const navigate = useNavigate();
-
-  const mainButtons = [
-    {
-      title: "Editorial & Advisory Board",
-      description: "Meet our distinguished panel of editors, mentors, and national experts",
-      icon: Users,
-      path: "/editorial-board",
-      color: "bg-medical-blue"
-    },
-    {
-      title: "Submit Manuscript",
-      description: "Unified portal for students and professionals to submit quality content",
-      icon: FileText,
-
-      color: "bg-medical-green"
-    },
-    {
-      title: "About SJMSR",
-      description: "Our mission, vision, and commitment to medical research excellence",
-      icon: BookOpen,
-      path: "/about",
-      color: "bg-medical-blue-light"
-    }
-  ];
 
   const [highlightedJournals, setHighlightedJournals] = useState<Journal[]>([]);
   const [loadingJournals, setLoadingJournals] = useState(true);
@@ -66,15 +40,6 @@ const Journal = () => {
     };
     fetchApprovedJournals();
   }, []);
-
-  // Example function to submit a new journal (status: 'pending')
-  const submitJournal = async (journalData: any) => {
-    await addDoc(collection(db, "journals"), {
-      ...journalData,
-      status: "pending"
-    });
-    // Optionally show a message to the user
-  };
 
   const featuredArticles = [
     {
@@ -148,20 +113,6 @@ const Journal = () => {
     "Mental Health"
   ];
 
-  const handlePublishClick = () => {
-    setShowPublishPopup(true);
-  };
-
-  const handleGetStarted = () => {
-    setShowPublishPopup(false);
-    navigate('/submit');
-  };
-
-  const handleViewGuidelines = () => {
-    setShowPublishPopup(false);
-    navigate('/Guidelines');
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -192,17 +143,6 @@ const Journal = () => {
             <p className="text-lg mb-8 max-w-2xl mx-auto text-white/90 drop-shadow-md">
               "To build a national platform integrating student innovation with expert mentorship, enabling publication of high-impact clinical, academic, and research-based medical content."
             </p>
-            <div className="flex justify-center">
-              <Button
-                size="lg"
-                onClick={handlePublishClick}
-                variant="secondary"
-                className="bg-blue-950 text-white hover:bg-white/90 hover:text-blue-900 transition-smooth font-bold shadow-lg"
-              >
-                <PenTool className="mr-2 h-5 w-5" />
-                Submit Manuscript
-              </Button>
-            </div>
           </div>
         </div>
       </section>
@@ -733,151 +673,6 @@ const Journal = () => {
         </div>
       </section>
 
-      {/* Submit Manuscript Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-950/10 dark:to-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-[image:var(--medical-gradient)] bg-clip-text text-blue-500">
-              📝 Submit Your Manuscript
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8">
-              A unified portal for both students and professionals to submit quality content
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Submission Guidelines */}
-            <Card className="overflow-hidden hover:shadow-[var(--shadow-elegant)] transition-all duration-300">
-              <CardHeader>
-                <div className="w-16 h-16 mx-auto mb-4 bg-medical-blue/10 rounded-full flex items-center justify-center">
-                  <FileText className="h-8 w-8 text-medical-blue" />
-                </div>
-                <CardTitle className="text-center text-xl">Submission Guidelines</CardTitle>
-                <CardDescription className="text-center">
-                  Complete guidelines for manuscript preparation and submission
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center"><span className="w-2 h-2 bg-medical-blue rounded-full mr-2"></span>Manuscript formatting requirements</li>
-                  <li className="flex items-center"><span className="w-2 h-2 bg-medical-blue rounded-full mr-2"></span>Reference style guidelines</li>
-                  <li className="flex items-center"><span className="w-2 h-2 bg-medical-blue rounded-full mr-2"></span>Word count and structure</li>
-                  <li className="flex items-center"><span className="w-2 h-2 bg-medical-blue rounded-full mr-2"></span>Upload portal instructions</li>
-                </ul>
-                <Button
-                  onClick={() => window.open("/Guidelines", "_blank")}
-                  className="w-full mt-4 bg-[image:var(--medical-gradient)]"
-                >
-                  View Guidelines
-                </Button>
-
-              </CardContent>
-            </Card>
-
-            {/* Upload Portal */}
-            <Card className="overflow-hidden hover:shadow-[var(--shadow-elegant)] transition-all duration-300">
-              <CardHeader>
-                <div className="w-16 h-16 mx-auto mb-4 bg-medical-green/10 rounded-full flex items-center justify-center">
-                  <PenTool className="h-8 w-8 text-medical-green" />
-                </div>
-                <CardTitle className="text-center text-xl">Upload Portal</CardTitle>
-                <CardDescription className="text-center">
-                  Submit via Google Form or integrated submission tool
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border-l-2 border-medical-green">
-                    <div className="font-medium text-sm">Direct Upload</div>
-                    <div className="text-xs text-muted-foreground">Use our integrated submission portal</div>
-                  </div>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border-l-2 border-medical-blue">
-                    <div className="font-medium text-sm">Google Form</div>
-                    <div className="text-xs text-muted-foreground">Alternative submission method</div>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full mt-4"
-                  onClick={() => window.open("/login", "_blank")}
-                >
-                  <PenTool className="mr-2 h-4 w-4" />
-                  Start Submission
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Article Types */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-center mb-8 bg-[image:var(--medical-gradient)] bg-clip-text text-blue-500">
-              Article Types We Accept
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { type: "Original Research", desc: "Novel findings & studies", icon: "🔬", color: "blue" },
-                { type: "Case Reports", desc: "Unique clinical cases", icon: "📋", color: "green" },
-                { type: "Clinical Reviews", desc: "Literature analysis", icon: "📚", color: "purple" },
-                { type: "Editorials", desc: "Expert opinions", icon: "✍️", color: "orange" },
-                { type: "Letters to Editor", desc: "Brief communications", icon: "✉️", color: "teal" },
-                { type: "Medical Education Articles", desc: "Educational content", icon: "🎓", color: "indigo" },
-                { type: "Clinical Images", desc: "Visual case studies", icon: "🖼️", color: "pink" }
-              ].map((article, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl mb-2">{article.icon}</div>
-                    <div className="font-semibold text-sm mb-1">{article.type}</div>
-                    <div className="text-xs text-muted-foreground">{article.desc}</div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Compliance Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-l-4 border-medical-blue">
-              <CardHeader>
-                <CardTitle className="text-lg">Licensing and Declarations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li>• Copyright and licensing agreements</li>
-                  <li>• Conflict of interest declarations</li>
-                  <li>• Author contribution statements</li>
-                  <li>• Funding acknowledgments</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-l-4 border-medical-green">
-              <CardHeader>
-                <CardTitle className="text-lg">Ethical Compliance Checklist</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li>• IRB/Ethics committee approval</li>
-                  <li>• Informed consent documentation</li>
-                  <li>• Data privacy compliance</li>
-                  <li>• Research integrity standards</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center mt-12">
-            <Button
-              size="lg"
-              onClick={handlePublishClick}
-              className="bg-[image:var(--medical-gradient)] hover:opacity-90"
-            >
-              <FileText className="mr-2 h-5 w-5" />
-              Submit Manuscript
-            </Button>
-          </div>
-        </div>
-      </section>
-
       {/* About SJMSR Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -990,106 +785,6 @@ const Journal = () => {
           </div>
         </div>
       </section>
-
-      {/* Floating Publish Button */}
-      <div className="fixed bottom-8 right-8 z-50">
-        <Button
-          onClick={handlePublishClick}
-          size="lg"
-          className="bg-[image:var(--medical-gradient)] hover:opacity-90 shadow-[var(--shadow-elegant)] hover:shadow-[var(--shadow-glow)] transition-all duration-300 rounded-full px-6 py-3 text-white font-semibold"
-        >
-          <PenTool className="mr-2 h-5 w-5" />
-          Publish Journal
-          <Sparkles className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Updated Publish Popup */}
-      <Dialog open={showPublishPopup} onOpenChange={setShowPublishPopup}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <div className="text-center">
-              <div className="text-4xl mb-3">📝✨</div>
-              <DialogTitle className="text-2xl font-bold bg-[image:var(--medical-gradient)] bg-clip-text text-blue-500 mb-2">
-                Share Your Research
-              </DialogTitle>
-              <p className="text-muted-foreground text-sm">
-                Join our community of medical researchers and share your valuable insights with the world.
-              </p>
-            </div>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-3 bg-medical-blue/10 rounded-lg">
-                <div className="text-2xl mb-1">🏆</div>
-                <div className="text-sm font-medium">Peer Reviewed</div>
-                <div className="text-xs text-muted-foreground">Quality assured</div>
-              </div>
-              <div className="p-3 bg-medical-green/10 rounded-lg">
-                <div className="text-2xl mb-1">🌍</div>
-                <div className="text-sm font-medium">Global Reach</div>
-                <div className="text-xs text-muted-foreground">Worldwide access</div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="font-semibold text-sm">Article Types We Accept:</h3>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2 bg-blue-50 dark:bg-blue-950/20 rounded border-l-2 border-medical-blue">
-                  <div className="font-medium">Original Research</div>
-                  <div className="text-muted-foreground">Novel findings & studies</div>
-                </div>
-                <div className="p-2 bg-green-50 dark:bg-green-950/20 rounded border-l-2 border-medical-green">
-                  <div className="font-medium">Case Reports</div>
-                  <div className="text-muted-foreground">Unique clinical cases</div>
-                </div>
-                <div className="p-2 bg-purple-50 dark:bg-purple-950/20 rounded border-l-2 border-purple-500">
-                  <div className="font-medium">Clinical Reviews</div>
-                  <div className="text-muted-foreground">Literature analysis</div>
-                </div>
-                <div className="p-2 bg-orange-50 dark:bg-orange-950/20 rounded border-l-2 border-orange-500">
-                  <div className="font-medium">Editorials</div>
-                  <div className="text-muted-foreground">Expert opinions</div>
-                </div>
-                <div className="p-2 bg-teal-50 dark:bg-teal-950/20 rounded border-l-2 border-teal-500">
-                  <div className="font-medium">Letters to Editor</div>
-                  <div className="text-muted-foreground">Brief communications</div>
-                </div>
-                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/20 rounded border-l-2 border-indigo-500">
-                  <div className="font-medium">Clinical Images</div>
-                  <div className="text-muted-foreground">Visual case studies</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex space-x-2">
-              <Button
-                onClick={() => navigate('/Guidelines')}
-                className="flex-1 bg-[image:var(--medical-gradient)] hover:opacity-90"
-                size="lg"
-              >
-                Submission Guidelines
-              </Button>
-
-            </div>
-
-            <Button
-              onClick={() => navigate('/login')}
-              variant="outline"
-              size="lg"
-              className="w-full"
-            >
-              <BookOpen className="mr-2 h-4 w-4" />
-              Get Started
-            </Button>
-
-            <p className="text-xs text-center text-muted-foreground">
-              Explore our journal platform and publication opportunities
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <Footer />
     </div>

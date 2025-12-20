@@ -419,7 +419,7 @@ const Events = () => {
     if (!window.confirm('Delete this past event?')) return;
     try {
       await deleteDoc(doc(db, 'pastEvents', id));
-      setPastEvents(prev => prev.filter(ev => ev.id !== id));
+      setPastEvents(prev => prev.filter(ev => (ev as any).id !== id));
     } catch (err) {
       console.error('Error deleting past event:', err);
       alert('Failed to delete past event.');
