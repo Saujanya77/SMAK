@@ -9,6 +9,15 @@ export default {
 		"./app/**/*.{ts,tsx}",
 		"./src/**/*.{ts,tsx}",
 	],
+	safelist: [
+		'text-amber-600',
+		'text-amber-500',
+		'text-amber-700',
+		'bg-amber-600',
+		'bg-amber-500',
+		'bg-amber-100',
+		'border-amber-600',
+	],
 	prefix: "",
 	theme: {
 		container: {
