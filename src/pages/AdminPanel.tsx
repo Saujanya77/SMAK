@@ -1077,7 +1077,7 @@ const AdminPanel: React.FC = () => {
                 {/* Research Club Members Section */}
                 {activeTab === 'researchclubmembers' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Research Club Members</h2>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">Manage Research Club Members</h2>
                         <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
@@ -1279,7 +1279,7 @@ const AdminPanel: React.FC = () => {
                 {/* Research Club Mentors Section */}
                 {activeTab === 'researchclubmentors' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Research Club Mentors</h2>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">Manage Research Club Mentors</h2>
                         <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
@@ -1482,7 +1482,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'quizzes' && (
                     <div className="space-y-6">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                            <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Quiz Management</h2>
+                            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">Quiz Management</h2>
                             <Button
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-200 flex items-center gap-2"
                                 onClick={() => setShowQuizModal(true)}
@@ -2289,7 +2289,7 @@ const AdminPanel: React.FC = () => {
                 {/* Approval Cards - Journals, Blogs, Videos */}
                 {['videos', 'journals', 'blogs'].includes(activeTab) && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent mb-6">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent mb-6">
                             Pending {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} for Approval
                         </h2>
 
@@ -2402,7 +2402,7 @@ const AdminPanel: React.FC = () => {
                 {/* Achievements Section */}
                 {activeTab === 'achievements' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Achievements</h2>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">Manage Achievements</h2>
                         <Card className="medical-card shadow-2xl max-w-2xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleAchievementSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Add New Achievement</h3>
@@ -2526,7 +2526,7 @@ const AdminPanel: React.FC = () => {
                 {/* Members Section */}
                 {activeTab === 'members' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Team Members</h2>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">Manage Team Members</h2>
                         <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleMemberSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">
@@ -2716,7 +2716,7 @@ const AdminPanel: React.FC = () => {
                 {/* Bulk Members Section */}
                 {activeTab === 'bulkmembers' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Bulk Members Upload</h2>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">Bulk Members Upload</h2>
                         <BulkMemberUpload />
                     </div>
                 )}
@@ -2724,7 +2724,7 @@ const AdminPanel: React.FC = () => {
                 {/* Testimonials Section */}
                 {activeTab === 'testimonials' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Student Testimonials</h2>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">Manage Student Testimonials</h2>
                         <Card className="medical-card shadow-2xl max-w-3xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleTestimonialSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Add New Testimonial</h3>
@@ -2851,7 +2851,7 @@ const AdminPanel: React.FC = () => {
                 {/* Partners Section */}
                 {activeTab === 'partners' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Partner Institutions</h2>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">Manage Partner Institutions</h2>
                         <Card className="medical-card shadow-2xl max-w-2xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handlePartnerSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Add New Partner</h3>
@@ -2929,7 +2929,7 @@ const AdminPanel: React.FC = () => {
                 {/* Contact Information Section */}
                 {activeTab === 'contactinfo' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Contact Information</h2>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">Manage Contact Information</h2>
                         <Card className="medical-card shadow-2xl max-w-3xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleContactInfoSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Update Contact Information</h3>
@@ -3065,7 +3065,7 @@ const AdminPanel: React.FC = () => {
                 {/* SMAK AI Enquiries Section */}
                 {activeTab === 'smakaienquiries' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">SMAK AI Project Enquiries</h2>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">SMAK AI Project Enquiries</h2>
                         {loadingSMakAI ? (
                             <p className="text-gray-700 dark:text-gray-400">Loading enquiries...</p>
                         ) : smakAIEnquiries.length === 0 ? (
