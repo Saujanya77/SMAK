@@ -50,10 +50,10 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-gray-300 hover:text-blue-400 transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-blue-400 transition-colors">Terms of Service</a></li>
+              <li><Link to="/privacy-policy" className="text-gray-300 hover:text-blue-400 transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-gray-300 hover:text-blue-400 transition-colors">Terms of Service</Link></li>
               <li><Link to="/contact" className="text-gray-300 hover:text-blue-400 transition-colors">Contact Us</Link></li>
-              <li><a href="#" className="text-gray-300 hover:text-blue-400 transition-colors">Help Center</a></li>
+              <li><Link to="/contact" className="text-gray-300 hover:text-blue-400 transition-colors">Help Center</Link></li>
             </ul>
           </div>
 
@@ -63,7 +63,7 @@ const Footer = () => {
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-blue-400" />
-                <span className="text-gray-300">contact@smak.in.net</span>
+                <span className="text-gray-300">contact@smak.in</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-blue-400" />

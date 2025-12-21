@@ -21,6 +21,8 @@ import Collaborate from "./pages/Collaborate";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -60,6 +62,8 @@ const App = () => (
                 <Route path="/smak-ai" element={<SmakAI />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/journal" element={<Journal />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<Terms />} />
                 <Route path="/research-hub" element={<ResearchHub />} />
                 <Route path="/members" element={<Members />} />
                 <Route path="/collaborate" element={<Collaborate />} />
