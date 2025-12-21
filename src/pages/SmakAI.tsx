@@ -199,15 +199,6 @@ const SmakAI = () => {
             <p className="text-xl text-blue-50 dark:text-blue-100 mb-8 font-semibold drop-shadow-lg leading-relaxed">
               SMAK AI is the data and AI wing of the Society for Medical Academia & Knowledge. We combine medical students, clinicians and data scientists with the Medicean RWE platform to run real-world evidence (RWE) studies, digital health surveys and adherence programs for pharma, medtech, healthtech, NGOs and hospitals.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold shadow-lg">
-                Discuss a Project
-              </Button>
-              <Button variant="outline" className="border-2 border-white text-white hover:bg-white/20 px-8 py-3 text-lg font-semibold">
-                <Download className="h-5 w-5 mr-2" />
-                Download Capability Deck
-              </Button>
-            </div>
           </div>
         </div>
       </section>

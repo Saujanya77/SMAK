@@ -125,9 +125,9 @@ const MedicalDashboard = () => {
       subItems: [
         { id: 'video-lectures', label: 'Video Lectures', icon: Video, route: '/video-lectures' },
         { id: 'subject-notes', label: 'Subject-wise Notes', icon: BookOpen, route: '/SubjectNotes' },
-        { id: 'mcq-bank', label: 'MCQ & Q-Bank', icon: HelpCircle, route: '/mcq-bank' },
       ]
     },
+    { id: 'mcq-tests', label: 'Quiz Club', icon: HelpCircle, route: '/mcq-bank' },
     {
       id: 'clinical-corner',
       label: 'Clinical Corner',
@@ -467,7 +467,7 @@ const MedicalDashboard = () => {
         additionalIcon: Microscope
       },
       {
-        title: "MCQ Bank",
+        title: "Quiz Club",
         description: "Practice questions and mock tests",
         icon: HelpCircle,
         route: "/mcq-bank",

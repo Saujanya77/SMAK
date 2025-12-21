@@ -12,12 +12,23 @@ import {
   LogOut,
   BookOpen,
   Clock,
-  BarChart3
+  BarChart3,
+  Trophy,
+  Target,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useNavigate } from 'react-router-dom';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from "@/contexts/AuthContext.tsx";
@@ -31,6 +42,8 @@ const MCQQuestionBank = () => {
   const [timerRunning, setTimerRunning] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState({});
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [showScoreDialog, setShowScoreDialog] = useState(false);
+  const [quizScore, setQuizScore] = useState({ score: 0, total: 0, percentage: 0 });
   
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -69,7 +82,14 @@ const MCQQuestionBank = () => {
     showQuiz.questions.forEach((q, idx) => {
       if (quizAnswers[idx] === q.correctAnswer) score++;
     });
-    alert(`Quiz completed! Your score: ${score}/${showQuiz.questions.length}`);
+    const total = showQuiz.questions.length;
+    const percentage = Math.round((score / total) * 100);
+    setQuizScore({ score, total, percentage });
+    setShowScoreDialog(true);
+  };
+
+  const handleCloseScoreDialog = () => {
+    setShowScoreDialog(false);
     setShowQuiz(null);
     setQuizAnswers({});
     setRemainingTime(null);
@@ -80,7 +100,6 @@ const MCQQuestionBank = () => {
     if (!timerRunning || remainingTime === null) return;
     if (remainingTime <= 0) {
       // Auto-submit when time is up
-      alert('Time is up! Submitting your quiz.');
       handleSubmitQuiz();
       return;
     }
@@ -574,6 +593,158 @@ const MCQQuestionBank = () => {
           )}
         </div>
       </div>
+
+      {/* Score Dialog */}
+      <Dialog open={showScoreDialog} onOpenChange={setShowScoreDialog}>
+        <DialogContent className={`sm:max-w-md ${
+          isDarkMode 
+            ? 'bg-slate-900 border-blue-800/30' 
+            : 'bg-white border-blue-200/30'
+        }`}>
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              <div className="flex flex-col items-center gap-4 mb-4">
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center ${
+                  quizScore.percentage >= 70 
+                    ? 'bg-green-100 dark:bg-green-900/30' 
+                    : quizScore.percentage >= 40 
+                      ? 'bg-yellow-100 dark:bg-yellow-900/30' 
+                      : 'bg-red-100 dark:bg-red-900/30'
+                }`}>
+                  {quizScore.percentage >= 70 ? (
+                    <Trophy className={`h-10 w-10 ${
+                      isDarkMode ? 'text-green-400' : 'text-green-600'
+                    }`} />
+                  ) : quizScore.percentage >= 40 ? (
+                    <Target className={`h-10 w-10 ${
+                      isDarkMode ? 'text-yellow-400' : 'text-yellow-600'
+                    }`} />
+                  ) : (
+                    <BookOpen className={`h-10 w-10 ${
+                      isDarkMode ? 'text-red-400' : 'text-red-600'
+                    }`} />
+                  )}
+                </div>
+                <h2 className={`text-2xl font-bold ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {quizScore.percentage >= 70 
+                    ? 'Excellent Work!' 
+                    : quizScore.percentage >= 40 
+                      ? 'Good Effort!' 
+                      : 'Keep Practicing!'}
+                </h2>
+              </div>
+            </DialogTitle>
+            <DialogDescription className="text-center space-y-6">
+              {/* Score Display */}
+              <div className={`p-6 rounded-xl border-2 ${
+                quizScore.percentage >= 70 
+                  ? isDarkMode 
+                    ? 'bg-green-900/20 border-green-600/30' 
+                    : 'bg-green-50 border-green-200'
+                  : quizScore.percentage >= 40 
+                    ? isDarkMode 
+                      ? 'bg-yellow-900/20 border-yellow-600/30' 
+                      : 'bg-yellow-50 border-yellow-200'
+                    : isDarkMode 
+                      ? 'bg-red-900/20 border-red-600/30' 
+                      : 'bg-red-50 border-red-200'
+              }`}>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className={`text-5xl font-bold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {quizScore.score}
+                  </span>
+                  <span className={`text-3xl ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    / {quizScore.total}
+                  </span>
+                </div>
+                <p className={`text-sm ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Correct Answers
+                </p>
+              </div>
+
+              {/* Percentage */}
+              <div className={`p-4 rounded-lg ${
+                isDarkMode ? 'bg-slate-800/50' : 'bg-gray-100'
+              }`}>
+                <p className={`text-sm mb-2 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Your Score
+                </p>
+                <p className={`text-4xl font-bold ${
+                  quizScore.percentage >= 70 
+                    ? isDarkMode ? 'text-green-400' : 'text-green-600'
+                    : quizScore.percentage >= 40 
+                      ? isDarkMode ? 'text-yellow-400' : 'text-yellow-600'
+                      : isDarkMode ? 'text-red-400' : 'text-red-600'
+                }`}>
+                  {quizScore.percentage}%
+                </p>
+              </div>
+
+              {/* Performance indicators */}
+              <div className="space-y-2">
+                {quizScore.percentage >= 70 ? (
+                  <div className={`flex items-center gap-2 p-3 rounded-lg ${
+                    isDarkMode ? 'bg-green-900/20' : 'bg-green-50'
+                  }`}>
+                    <CheckCircle2 className={`h-5 w-5 ${
+                      isDarkMode ? 'text-green-400' : 'text-green-600'
+                    }`} />
+                    <span className={`text-sm ${
+                      isDarkMode ? 'text-green-300' : 'text-green-700'
+                    }`}>
+                      Outstanding performance! Keep it up!
+                    </span>
+                  </div>
+                ) : quizScore.percentage >= 40 ? (
+                  <div className={`flex items-center gap-2 p-3 rounded-lg ${
+                    isDarkMode ? 'bg-yellow-900/20' : 'bg-yellow-50'
+                  }`}>
+                    <Target className={`h-5 w-5 ${
+                      isDarkMode ? 'text-yellow-400' : 'text-yellow-600'
+                    }`} />
+                    <span className={`text-sm ${
+                      isDarkMode ? 'text-yellow-300' : 'text-yellow-700'
+                    }`}>
+                      Good try! Review and practice more.
+                    </span>
+                  </div>
+                ) : (
+                  <div className={`flex items-center gap-2 p-3 rounded-lg ${
+                    isDarkMode ? 'bg-red-900/20' : 'bg-red-50'
+                  }`}>
+                    <XCircle className={`h-5 w-5 ${
+                      isDarkMode ? 'text-red-400' : 'text-red-600'
+                    }`} />
+                    <span className={`text-sm ${
+                      isDarkMode ? 'text-red-300' : 'text-red-700'
+                    }`}>
+                      Don't give up! Practice makes perfect.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <Button
+                onClick={handleCloseScoreDialog}
+                className="w-full rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg"
+              >
+                Back to Quizzes
+              </Button>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

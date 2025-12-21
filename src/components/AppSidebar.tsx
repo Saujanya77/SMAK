@@ -12,7 +12,8 @@ import {
   LogOut,
   ChevronDown,
   ChevronRight,
-  Home
+  Home,
+  GraduationCap
 } from "lucide-react";
 
 const AppSidebar = () => {
@@ -48,6 +49,12 @@ const AppSidebar = () => {
       color: "text-green-600"
     },
     {
+      title: "Quiz Club",
+      icon: GraduationCap,
+      route: "/mcq-tests",
+      color: "text-orange-600"
+    },
+    {
       title: "Clinical Corner",
       icon: Stethoscope,
       route: "/clinical-corner",
@@ -69,7 +76,6 @@ const AppSidebar = () => {
       subItems: [
         { title: "Video Lectures", route: "/video-lectures" },
         { title: "Study Notes", route: "/study-notes" },
-        { title: "MCQ Tests", route: "/mcq-tests" },
         { title: "Question Bank", route: "/question-bank" }
       ]
     }

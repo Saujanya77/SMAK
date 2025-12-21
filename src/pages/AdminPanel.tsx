@@ -1077,7 +1077,7 @@ const AdminPanel: React.FC = () => {
                 {/* Research Club Members Section */}
                 {activeTab === 'researchclubmembers' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Research Club Members</h2>
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Research Club Members</h2>
                         <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
@@ -1118,23 +1118,23 @@ const AdminPanel: React.FC = () => {
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Name *</label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Name *</label>
                                         <input 
                                             type="text" 
                                             
                                             placeholder="Full Name" 
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMemberForm.name} 
                                             onChange={e => setRCMemberForm(f => ({ ...f, name: e.target.value }))} 
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Institution </label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Institution </label>
                                         <input 
                                             type="text" 
                                             
                                             placeholder="Institution/College" 
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMemberForm.institution} 
                                             onChange={e => setRCMemberForm(f => ({ ...f, institution: e.target.value }))} 
                                         />
@@ -1142,46 +1142,46 @@ const AdminPanel: React.FC = () => {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Email </label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Email </label>
                                         <input 
                                             type="email" 
                                             
                                             placeholder="Email Address" 
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMemberForm.email} 
                                             onChange={e => setRCMemberForm(f => ({ ...f, email: e.target.value }))} 
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Phone</label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Phone</label>
                                         <input 
                                             type="text" 
                                             placeholder="Phone Number" 
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMemberForm.phone} 
                                             onChange={e => setRCMemberForm(f => ({ ...f, phone: e.target.value }))} 
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Designation/Role </label>
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Designation/Role </label>
                                     <input 
                                         type="text" 
                                         
                                         placeholder="Designation/Role" 
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                         value={rcMemberForm.designation} 
                                         onChange={e => setRCMemberForm(f => ({ ...f, designation: e.target.value }))} 
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">
                                         Profile Picture {!editingRCMemberId && '*'}
                                     </label>
                                     <input 
                                         type="file" 
                                         accept="image/*" 
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
                                         onChange={e => setRCMemberForm(f => ({ ...f, picture: e.target.files?.[0] || null }))} 
                                         
                                     />
@@ -1219,7 +1219,7 @@ const AdminPanel: React.FC = () => {
                             </h3>
                             {rcMembers.length === 0 ? (
                                 <Card className="text-center py-12 bg-blue-800/20 backdrop-blur-sm border border-blue-600/30 rounded-2xl">
-                                    <div className="text-blue-300 text-lg">No research club members found.</div>
+                                    <div className="text-gray-600 dark:text-blue-300 text-lg">No research club members found.</div>
                                 </Card>
                             ) : (
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1279,7 +1279,7 @@ const AdminPanel: React.FC = () => {
                 {/* Research Club Mentors Section */}
                 {activeTab === 'researchclubmentors' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Research Club Mentors</h2>
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Research Club Mentors</h2>
                         <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
@@ -1320,23 +1320,23 @@ const AdminPanel: React.FC = () => {
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Name *</label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Name *</label>
                                         <input 
                                             type="text" 
                                             
                                             placeholder="Full Name" 
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMentorForm.name} 
                                             onChange={e => setRCMentorForm(f => ({ ...f, name: e.target.value }))} 
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Institution </label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Institution </label>
                                         <input 
                                             type="text" 
                                             
                                             placeholder="Institution/College" 
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMentorForm.institution} 
                                             onChange={e => setRCMentorForm(f => ({ ...f, institution: e.target.value }))} 
                                         />
@@ -1344,46 +1344,46 @@ const AdminPanel: React.FC = () => {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Email </label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Email </label>
                                         <input 
                                             type="email" 
                                             
                                             placeholder="Email Address" 
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMentorForm.email} 
                                             onChange={e => setRCMentorForm(f => ({ ...f, email: e.target.value }))} 
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Phone</label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Phone</label>
                                         <input 
                                             type="text" 
                                             placeholder="Phone Number" 
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                             value={rcMentorForm.phone} 
                                             onChange={e => setRCMentorForm(f => ({ ...f, phone: e.target.value }))} 
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Designation/Role </label>
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Designation/Role </label>
                                     <input 
                                         type="text" 
                                         
                                         placeholder="Designation/Role" 
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                         value={rcMentorForm.designation} 
                                         onChange={e => setRCMentorForm(f => ({ ...f, designation: e.target.value }))} 
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">
                                         Profile Picture {!editingRCMentorId && '*'}
                                     </label>
                                     <input 
                                         type="file" 
                                         accept="image/*" 
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
                                         onChange={e => setRCMentorForm(f => ({ ...f, picture: e.target.files?.[0] || null }))} 
                                         
                                     />
@@ -1421,7 +1421,7 @@ const AdminPanel: React.FC = () => {
                             </h3>
                             {rcMentors.length === 0 ? (
                                 <Card className="text-center py-12 bg-blue-800/20 backdrop-blur-sm border border-blue-600/30 rounded-2xl">
-                                    <div className="text-blue-300 text-lg">No research club mentors found.</div>
+                                    <div className="text-gray-600 dark:text-blue-300 text-lg">No research club mentors found.</div>
                                 </Card>
                             ) : (
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1482,7 +1482,7 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'quizzes' && (
                     <div className="space-y-6">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                            <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Quiz Management</h2>
+                            <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Quiz Management</h2>
                             <Button
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-200 flex items-center gap-2"
                                 onClick={() => setShowQuizModal(true)}
@@ -1506,10 +1506,10 @@ const AdminPanel: React.FC = () => {
                                     <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Create New Quiz</h3>
                                     <form onSubmit={handleQuizSubmit} className="space-y-6">
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Title</label>
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Quiz Title</label>
                                             <input
                                                 type="text"
-                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={quizForm.title}
                                                 onChange={e => handleQuizFormChange('title', e.target.value)}
                                                 required
@@ -1518,7 +1518,7 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Thumbnail</label>
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Thumbnail</label>
                                             <div className="flex gap-4 mb-3">
                                                 <label className="flex items-center gap-2 cursor-pointer">
                                                     <input type="radio" name="thumbnailType" value="url" checked={quizForm.thumbnailType === 'url'} onChange={() => handleQuizFormChange('thumbnailType', 'url')} className="text-blue-500" />
@@ -1532,7 +1532,7 @@ const AdminPanel: React.FC = () => {
                                             {quizForm.thumbnailType === 'url' && (
                                                 <input
                                                     type="text"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                     value={quizForm.thumbnail}
                                                     onChange={e => handleQuizFormChange('thumbnail', e.target.value)}
                                                     placeholder="Enter thumbnail URL..."
@@ -1542,16 +1542,16 @@ const AdminPanel: React.FC = () => {
                                                 <input
                                                     type="file"
                                                     accept="image/*"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
                                                     onChange={e => handleQuizFormChange('thumbnail', e.target.files?.[0])}
                                                 />
                                             )}
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Type</label>
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Quiz Type</label>
                                             <select
-                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={quizMode}
                                                 onChange={e => setQuizMode(e.target.value as 'manual' | 'gform')}
                                             >
@@ -1561,11 +1561,11 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Duration (minutes)</label>
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Duration (minutes)</label>
                                             <input
                                                 type="number"
                                                 min={1}
-                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={editQuizForm.duration ?? 10}
                                                 onChange={e => {
                                                     const val = parseInt(e.target.value, 10);
@@ -1576,11 +1576,11 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Duration (minutes)</label>
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Duration (minutes)</label>
                                             <input
                                                 type="number"
                                                 min={1}
-                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={quizForm.duration ?? 10}
                                                 onChange={e => {
                                                     const val = parseInt(e.target.value, 10);
@@ -1592,10 +1592,10 @@ const AdminPanel: React.FC = () => {
 
                                         {quizMode === 'gform' && (
                                             <div className="space-y-4">
-                                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Google Form Link</label>
+                                                <label className="block font-semibold text-gray-900 dark:text-blue-100">Google Form Link</label>
                                                 <input
                                                     type="url"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                     value={quizForm.gformLink}
                                                     onChange={e => handleQuizFormChange('gformLink', e.target.value)}
                                                     required
@@ -1606,7 +1606,7 @@ const AdminPanel: React.FC = () => {
 
                                         {quizMode === 'manual' && (
                                             <div className="space-y-4">
-                                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Questions</label>
+                                                <label className="block font-semibold text-gray-900 dark:text-blue-100">Questions</label>
                                                 <div className="space-y-4 max-h-96 overflow-y-auto p-2">
                                                     <DragDropContext onDragEnd={result => {
                                                         if (!result.destination) return;
@@ -1623,19 +1623,19 @@ const AdminPanel: React.FC = () => {
                                                                             <div className="bg-blue-800/20 border border-blue-600/30 rounded-xl p-4 space-y-4 hover:border-blue-500/50 transition-all duration-200">
                                                                                 <input
                                                                                     type="text"
-                                                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                                                     placeholder="Enter question..."
                                                                                     value={q.question}
                                                                                     onChange={e => handleQuizQuestionChange(idx, 'question', e.target.value)}
                                                                                     required
                                                                                 />
                                                                                 <div className="space-y-3">
-                                                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Options</label>
+                                                                                    <label className="block font-semibold text-gray-900 dark:text-blue-100 text-sm">Options</label>
                                                                                     {q.options.map((opt, oIdx) => (
                                                                                         <div key={oIdx} className="flex items-center gap-2">
                                                                                             <input
                                                                                                 type="text"
-                                                                                                className="flex-1 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                                className="flex-1 bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                                                                 placeholder={`Option ${oIdx + 1}`}
                                                                                                 value={opt}
                                                                                                 onChange={e => handleQuizOptionChange(idx, oIdx, e.target.value)}
@@ -1661,14 +1661,14 @@ const AdminPanel: React.FC = () => {
                                                                                     </button>
                                                                                 </div>
                                                                                 <div className="space-y-2">
-                                                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Correct Answer (option index)</label>
+                                                                                    <label className="block font-semibold text-gray-900 dark:text-blue-100 text-sm">Correct Answer (option number)</label>
                                                                                     <input
                                                                                         type="number"
-                                                                                        min="0"
-                                                                                        max={q.options.length - 1}
-                                                                                        className="w-20 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                                        value={q.correctAnswer}
-                                                                                        onChange={e => handleQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value))}
+                                                                                        min="1"
+                                                                                        max={q.options.length}
+                                                                                        className="w-20 bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                        value={q.correctAnswer + 1}
+                                                                                        onChange={e => handleQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value) - 1)}
                                                                                         required
                                                                                     />
                                                                                 </div>
@@ -1788,10 +1788,10 @@ const AdminPanel: React.FC = () => {
                                     <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Edit Quiz</h3>
                                     <form onSubmit={handleSaveEditedQuiz} className="space-y-6">
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Title</label>
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Quiz Title</label>
                                             <input
                                                 type="text"
-                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={editQuizForm.title}
                                                 onChange={e => handleEditQuizFormChange('title', e.target.value)}
                                                 required
@@ -1799,7 +1799,7 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Thumbnail</label>
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Thumbnail</label>
                                             <div className="flex gap-4 mb-3">
                                                 <label className="flex items-center gap-2 cursor-pointer">
                                                     <input type="radio" name="editThumbnailType" value="url" checked={editQuizForm.thumbnailType === 'url'} onChange={() => handleEditQuizFormChange('thumbnailType', 'url')} className="text-blue-500" />
@@ -1813,7 +1813,7 @@ const AdminPanel: React.FC = () => {
                                             {editQuizForm.thumbnailType === 'url' && (
                                                 <input
                                                     type="text"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                     value={editQuizForm.thumbnail}
                                                     onChange={e => handleEditQuizFormChange('thumbnail', e.target.value)}
                                                     placeholder="Enter thumbnail URL..."
@@ -1823,16 +1823,16 @@ const AdminPanel: React.FC = () => {
                                                 <input
                                                     type="file"
                                                     accept="image/*"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
                                                     onChange={e => handleEditQuizFormChange('thumbnail', e.target.files?.[0])}
                                                 />
                                             )}
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Type</label>
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Quiz Type</label>
                                             <select
-                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={editQuizForm.type}
                                                 onChange={e => handleEditQuizFormChange('type', e.target.value)}
                                             >
@@ -1843,10 +1843,10 @@ const AdminPanel: React.FC = () => {
 
                                         {editQuizForm.type === 'gform' && (
                                             <div className="space-y-4">
-                                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Google Form Link</label>
+                                                <label className="block font-semibold text-gray-900 dark:text-blue-100">Google Form Link</label>
                                                 <input
                                                     type="url"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                     value={editQuizForm.gformLink}
                                                     onChange={e => handleEditQuizFormChange('gformLink', e.target.value)}
                                                     required
@@ -1857,7 +1857,7 @@ const AdminPanel: React.FC = () => {
 
                                         {editQuizForm.type === 'manual' && (
                                             <div className="space-y-4">
-                                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Questions</label>
+                                                <label className="block font-semibold text-gray-900 dark:text-blue-100">Questions</label>
                                                 <div className="space-y-4 max-h-96 overflow-y-auto p-2">
                                                     <DragDropContext onDragEnd={result => {
                                                         if (!result.destination) return;
@@ -1874,19 +1874,19 @@ const AdminPanel: React.FC = () => {
                                                                             <div className="bg-blue-800/20 border border-blue-600/30 rounded-xl p-4 space-y-4 hover:border-blue-500/50 transition-all duration-200">
                                                                                 <input
                                                                                     type="text"
-                                                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                                                     placeholder="Enter question..."
                                                                                     value={q.question}
                                                                                     onChange={e => handleEditQuizQuestionChange(idx, 'question', e.target.value)}
                                                                                     required
                                                                                 />
                                                                                 <div className="space-y-3">
-                                                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Options</label>
+                                                                                    <label className="block font-semibold text-gray-900 dark:text-blue-100 text-sm">Options</label>
                                                                                     {q.options.map((opt, oIdx) => (
                                                                                         <div key={oIdx} className="flex items-center gap-2">
                                                                                             <input
                                                                                                 type="text"
-                                                                                                className="flex-1 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                                className="flex-1 bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                                                                 placeholder={`Option ${oIdx + 1}`}
                                                                                                 value={opt}
                                                                                                 onChange={e => handleEditQuizOptionChange(idx, oIdx, e.target.value)}
@@ -1912,14 +1912,14 @@ const AdminPanel: React.FC = () => {
                                                                                     </button>
                                                                                 </div>
                                                                                 <div className="space-y-2">
-                                                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Correct Answer (option index)</label>
+                                                                                    <label className="block font-semibold text-gray-900 dark:text-blue-100 text-sm">Correct Answer (option number)</label>
                                                                                     <input
                                                                                         type="number"
-                                                                                        min="0"
-                                                                                        max={q.options.length - 1}
-                                                                                        className="w-20 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                                        value={q.correctAnswer}
-                                                                                        onChange={e => handleEditQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value))}
+                                                                                        min="1"
+                                                                                        max={q.options.length}
+                                                                                        className="w-20 bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                        value={q.correctAnswer + 1}
+                                                                                        onChange={e => handleEditQuizQuestionChange(idx, 'correctAnswer', Number(e.target.value) - 1)}
                                                                                         required
                                                                                     />
                                                                                 </div>
@@ -1980,28 +1980,28 @@ const AdminPanel: React.FC = () => {
                         <form className="p-6 sm:p-8 space-y-6" onSubmit={handleCourseSubmit}>
                             <h2 className="text-3xl font-bold text-white mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Create Course</h2>
                             <div className="space-y-4">
-                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Course Name</label>
+                                <label className="block font-semibold text-gray-900 dark:text-blue-100">Course Name</label>
                                 <input
                                     type="text"
                                     required
                                     placeholder="Course Name"
                                     value={courseName}
                                     onChange={e => setCourseName(e.target.value)}
-                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                 />
                             </div>
                             <div className="space-y-4">
-                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Course Description</label>
+                                <label className="block font-semibold text-gray-900 dark:text-blue-100">Course Description</label>
                                 <textarea
                                     required
                                     placeholder="Course Description"
                                     value={courseDescription}
                                     onChange={e => setCourseDescription(e.target.value)}
-                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[100px]"
+                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[100px]"
                                 />
                             </div>
                             <div className="space-y-4">
-                                <label className="block font-semibold text-slate-800 dark:text-blue-100">Course Thumbnail</label>
+                                <label className="block font-semibold text-gray-900 dark:text-blue-100">Course Thumbnail</label>
                                 <div className="flex gap-4 mb-3">
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input type="radio" name="courseThumbnailType" value="url" checked={courseThumbnailType === 'url'} onChange={() => setCourseThumbnailType('url')} className="text-blue-500" />
@@ -2015,7 +2015,7 @@ const AdminPanel: React.FC = () => {
                                 {courseThumbnailType === 'url' && (
                                     <input
                                         type="text"
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                         value={courseThumbnail}
                                         onChange={e => setCourseThumbnail(e.target.value)}
                                         placeholder="Enter thumbnail URL..."
@@ -2026,7 +2026,7 @@ const AdminPanel: React.FC = () => {
                                         type="file"
                                         accept="image/*"
                                         onChange={e => setCourseThumbnailFile(e.target.files?.[0] || null)}
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
                                     />
                                 )}
                             </div>
@@ -2034,7 +2034,7 @@ const AdminPanel: React.FC = () => {
                             <h3 className="font-semibold text-slate-900 dark:text-blue-100 text-xl mb-4">Add Section</h3>
                             {courseSections.map((section, idx) => (
                                 <Card key={idx} className="border border-slate-200 dark:border-blue-600/30 p-6 mb-4 rounded-xl bg-white/85 dark:bg-blue-800/20 backdrop-blur-sm relative text-slate-900 dark:text-white">
-                                    <span className="font-medium text-slate-800 dark:text-blue-100 text-lg">Section {idx + 1}</span>
+                                    <span className="font-medium text-gray-900 dark:text-blue-100 text-lg">Section {idx + 1}</span>
                                     {/* Cross (delete) button */}
                                     <button
                                         type="button"
@@ -2046,13 +2046,13 @@ const AdminPanel: React.FC = () => {
                                         ×
                                     </button>
                                     <div className="mb-4 flex flex-col sm:flex-row gap-4 sm:gap-6 mt-4">
-                                        <label className="flex items-center gap-3 text-slate-700 dark:text-blue-100 cursor-pointer">
+                                        <label className="flex items-center gap-3 text-gray-900 dark:text-blue-100 cursor-pointer">
                                             <input type="radio" name={`sectionType-${idx}`} value="video" checked={section.sectionType === 'video'} onChange={() => {
                                                 setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, sectionType: 'video' } : s));
                                             }} className="text-blue-500" />
                                             Add Video
                                         </label>
-                                        <label className="flex items-center gap-3 text-slate-700 dark:text-blue-100 cursor-pointer">
+                                        <label className="flex items-center gap-3 text-gray-900 dark:text-blue-100 cursor-pointer">
                                             <input type="radio" name={`sectionType-${idx}`} value="quiz" checked={section.sectionType === 'quiz'} onChange={() => {
                                                 setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, sectionType: 'quiz' } : s));
                                             }} className="text-blue-500" />
@@ -2061,11 +2061,11 @@ const AdminPanel: React.FC = () => {
                                     </div>
                                     {section.sectionType === 'video' && (
                                         <div className="space-y-4">
-                                            <label className="block font-medium text-slate-700 dark:text-blue-100">Video Link</label>
+                                            <label className="block font-medium text-gray-900 dark:text-blue-100">Video Link</label>
                                             <div className="flex flex-col sm:flex-row gap-3">
                                                 <input
                                                     type="text"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     placeholder="Paste video link here"
                                                     value={section.videoLink || ''}
                                                     onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, videoLink: e.target.value } : s))}
@@ -2084,15 +2084,15 @@ const AdminPanel: React.FC = () => {
                                     )}
                                     {section.sectionType === 'quiz' && (
                                         <div className="space-y-4">
-                                            <label className="block font-medium text-slate-700 dark:text-blue-100">Quiz Type</label>
+                                            <label className="block font-medium text-gray-900 dark:text-blue-100">Quiz Type</label>
                                             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-4">
-                                                <label className="flex items-center gap-3 text-slate-700 dark:text-blue-100 cursor-pointer">
+                                                <label className="flex items-center gap-3 text-gray-900 dark:text-blue-100 cursor-pointer">
                                                     <input type="radio" name={`quizType-${idx}`} value="manual" checked={section.quizType === 'manual'} onChange={() => {
                                                         setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizType: 'manual' } : s));
                                                     }} className="text-blue-500" />
                                                     Manual Form
                                                 </label>
-                                                <label className="flex items-center gap-3 text-slate-700 dark:text-blue-100 cursor-pointer">
+                                                <label className="flex items-center gap-3 text-gray-900 dark:text-blue-100 cursor-pointer">
                                                     <input type="radio" name={`quizType-${idx}`} value="gform" checked={section.quizType === 'gform'} onChange={() => {
                                                         setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizType: 'gform' } : s));
                                                     }} className="text-blue-500" />
@@ -2101,24 +2101,24 @@ const AdminPanel: React.FC = () => {
                                             </div>
                                             {section.quizType === 'manual' && (
                                                 <div className="space-y-4">
-                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100">Quiz Title</label>
+                                                    <label className="block font-semibold text-gray-900 dark:text-blue-100">Quiz Title</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                         value={section.quizTitle || ''}
                                                         onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizTitle: e.target.value } : s))}
                                                         required
                                                         placeholder="Enter quiz title..."
                                                     />
-                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100">Thumbnail</label>
+                                                    <label className="block font-semibold text-gray-900 dark:text-blue-100">Thumbnail</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                         value={section.quizThumbnail || ''}
                                                         onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizThumbnail: e.target.value } : s))}
                                                         placeholder="Enter thumbnail URL..."
                                                     />
-                                                    <label className="block font-semibold text-slate-800 dark:text-blue-100">Questions</label>
+                                                    <label className="block font-semibold text-gray-900 dark:text-blue-100">Questions</label>
                                                     <DragDropContext onDragEnd={result => {
                                                         if (!result.destination) return;
                                                         const reordered = Array.from(section.questions);
@@ -2134,7 +2134,7 @@ const AdminPanel: React.FC = () => {
                                                                             <div className="bg-blue-800/20 border border-blue-600/30 rounded-xl p-4 space-y-4 mb-2">
                                                                                 <input
                                                                                     type="text"
-                                                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                                                     placeholder="Enter question..."
                                                                                     value={q.question}
                                                                                     onChange={e => {
@@ -2143,12 +2143,12 @@ const AdminPanel: React.FC = () => {
                                                                                     }}
                                                                                     required
                                                                                 />
-                                                                                <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Options</label>
+                                                                                <label className="block font-semibold text-gray-900 dark:text-blue-100 text-sm">Options</label>
                                                                                 {q.options.map((opt, oIdx) => (
                                                                                     <div key={oIdx} className="flex items-center gap-2">
                                                                                         <input
                                                                                             type="text"
-                                                                                            className="flex-1 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                            className="flex-1 bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                                                             placeholder={`Option ${oIdx + 1}`}
                                                                                             value={opt}
                                                                                             onChange={e => {
@@ -2194,15 +2194,15 @@ const AdminPanel: React.FC = () => {
                                                                                 >
                                                                                     <Plus size={16} /> Add Option
                                                                                 </button>
-                                                                                <label className="block font-semibold text-slate-800 dark:text-blue-100 text-sm">Correct Answer (option index)</label>
+                                                                                <label className="block font-semibold text-gray-900 dark:text-blue-100 text-sm">Correct Answer (option number)</label>
                                                                                 <input
                                                                                     type="number"
-                                                                                    min="0"
-                                                                                    max={q.options.length - 1}
-                                                                                    className="w-20 bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                                    value={q.correctAnswer}
+                                                                                    min="1"
+                                                                                    max={q.options.length}
+                                                                                    className="w-20 bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                                    value={q.correctAnswer + 1}
                                                                                     onChange={e => {
-                                                                                        const updatedQuestions = section.questions.map((qq, qqIdx) => qqIdx === qIdx ? { ...qq, correctAnswer: Number(e.target.value) } : qq);
+                                                                                        const updatedQuestions = section.questions.map((qq, qqIdx) => qqIdx === qIdx ? { ...qq, correctAnswer: Number(e.target.value) - 1 } : qq);
                                                                                         setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, questions: updatedQuestions } : s));
                                                                                     }}
                                                                                     required
@@ -2240,10 +2240,10 @@ const AdminPanel: React.FC = () => {
                                             )}
                                             {section.quizType === 'gform' && (
                                                 <div className="space-y-4">
-                                                    <label className="block font-medium text-slate-700 dark:text-blue-100">Google Form Link</label>
+                                                    <label className="block font-medium text-gray-900 dark:text-blue-100">Google Form Link</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-lg px-3 py-2 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                         placeholder="Paste Google Form link here"
                                                         value={section.gformLink || ''}
                                                         onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, gformLink: e.target.value } : s))}
@@ -2289,7 +2289,7 @@ const AdminPanel: React.FC = () => {
                 {/* Approval Cards - Journals, Blogs, Videos */}
                 {['videos', 'journals', 'blogs'].includes(activeTab) && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-6">
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent mb-6">
                             Pending {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} for Approval
                         </h2>
 
@@ -2308,7 +2308,7 @@ const AdminPanel: React.FC = () => {
                             if (pendingItems.length === 0) {
                                 return (
                                     <Card className="text-center py-12 bg-blue-800/20 backdrop-blur-sm border border-blue-600/30 rounded-2xl">
-                                        <div className="text-blue-300 text-lg">No pending {activeTab} for approval.</div>
+                                        <div className="text-red-500 text-lg">No pending {activeTab} for approval.</div>
                                     </Card>
                                 );
                             }
@@ -2377,7 +2377,7 @@ const AdminPanel: React.FC = () => {
                                                 <div className="flex gap-2 ml-auto">
                                                     <Button
                                                         onClick={() => activeTab === 'videos' ? handleApproveVideo(item.id) : activeTab === 'journals' ? handleApproveJournal(item.id) : handleApproveBlog(item.id)}
-                                                        className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 transition-all duration-200"
+                                                        className="bg-green-900 hover:bg-green-700 text-white flex items-center gap-2 transition-all duration-200"
                                                     >
                                                         <CheckCircle size={16} />
                                                         Approve
@@ -2402,16 +2402,16 @@ const AdminPanel: React.FC = () => {
                 {/* Achievements Section */}
                 {activeTab === 'achievements' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Achievements</h2>
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Achievements</h2>
                         <Card className="medical-card shadow-2xl max-w-2xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleAchievementSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Add New Achievement</h3>
                                 <div className="grid md:grid-cols-3 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Icon <span className="text-red-500">*</span></label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Icon <span className="text-red-500">*</span></label>
                                         <select
                                             required
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={achievementForm.icon}
                                             onChange={e => setAchievementForm(f => ({ ...f, icon: e.target.value }))}
                                         >
@@ -2422,23 +2422,23 @@ const AdminPanel: React.FC = () => {
                                         </select>
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Value <span className="text-red-500">*</span></label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Value <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
                                             placeholder="Achievement Value"
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={achievementForm.value}
                                             onChange={e => setAchievementForm(f => ({ ...f, value: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Label <span className="text-red-500">*</span></label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Label <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
                                             placeholder="Achievement Label"
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={achievementForm.label}
                                             onChange={e => setAchievementForm(f => ({ ...f, label: e.target.value }))}
                                         />
@@ -2526,7 +2526,7 @@ const AdminPanel: React.FC = () => {
                 {/* Members Section */}
                 {activeTab === 'members' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Team Members</h2>
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Team Members</h2>
                         <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleMemberSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">
@@ -2534,23 +2534,23 @@ const AdminPanel: React.FC = () => {
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Name <span className="text-red-500">*</span></label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Name <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
                                             placeholder="Full name"
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={memberForm.name}
                                             onChange={e => setMemberForm(f => ({ ...f, name: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Institution/College <span className="text-red-500">*</span></label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Institution/College <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
                                             placeholder="Institution/College"
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={memberForm.institution}
                                             onChange={e => setMemberForm(f => ({ ...f, institution: e.target.value }))}
                                         />
@@ -2558,33 +2558,33 @@ const AdminPanel: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Profile Picture <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Profile Picture <span className="text-red-500">*</span></label>
                                     <input
                                         type="file"
                                         required
                                         accept="image/*"
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
                                         onChange={e => setMemberForm(f => ({ ...f, picture: e.target.files?.[0] || null }))}
                                     />
                                 </div>
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Email</label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Email</label>
                                         <input
                                             type="email"
                                             placeholder="Email address"
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={memberForm.email}
                                             onChange={e => setMemberForm(f => ({ ...f, email: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Phone (with country code)</label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Phone (with country code)</label>
                                         <input
                                             type="tel"
                                             placeholder="+91 9876543210"
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={memberForm.phone || ''}
                                             onChange={e => setMemberForm(f => ({ ...f, phone: e.target.value }))}
                                         />
@@ -2592,11 +2592,11 @@ const AdminPanel: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Designation</label>
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Designation</label>
                                     <input
                                         type="text"
                                         placeholder="Designation/Role"
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                         value={memberForm.designation}
                                         onChange={e => setMemberForm(f => ({ ...f, designation: e.target.value }))}
                                     />
@@ -2716,7 +2716,7 @@ const AdminPanel: React.FC = () => {
                 {/* Bulk Members Section */}
                 {activeTab === 'bulkmembers' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Bulk Members Upload</h2>
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Bulk Members Upload</h2>
                         <BulkMemberUpload />
                     </div>
                 )}
@@ -2724,39 +2724,39 @@ const AdminPanel: React.FC = () => {
                 {/* Testimonials Section */}
                 {activeTab === 'testimonials' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Student Testimonials</h2>
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Student Testimonials</h2>
                         <Card className="medical-card shadow-2xl max-w-3xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleTestimonialSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Add New Testimonial</h3>
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Quote <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Quote <span className="text-red-500">*</span></label>
                                     <textarea
                                         required
                                         placeholder="Student testimonial quote..."
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-24 resize-none"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-24 resize-none"
                                         value={testimonialForm.quote}
                                         onChange={e => setTestimonialForm(f => ({ ...f, quote: e.target.value }))}
                                     />
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Author Name <span className="text-red-500">*</span></label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Author Name <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
                                             placeholder="Student name"
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={testimonialForm.author}
                                             onChange={e => setTestimonialForm(f => ({ ...f, author: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Position <span className="text-red-500">*</span></label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Position <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             required
                                             placeholder="e.g., Pre-Med Student, Harvard University"
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={testimonialForm.position}
                                             onChange={e => setTestimonialForm(f => ({ ...f, position: e.target.value }))}
                                         />
@@ -2764,21 +2764,21 @@ const AdminPanel: React.FC = () => {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Avatar URL <span className="text-red-500">*</span></label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Avatar URL <span className="text-red-500">*</span></label>
                                         <input
                                             type="url"
                                             required
                                             placeholder="https://example.com/avatar.jpg"
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={testimonialForm.avatar}
                                             onChange={e => setTestimonialForm(f => ({ ...f, avatar: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Rating (1-5) <span className="text-red-500">*</span></label>
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Rating (1-5) <span className="text-red-500">*</span></label>
                                         <select
                                             required
-                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                             value={testimonialForm.rating}
                                             onChange={e => setTestimonialForm(f => ({ ...f, rating: parseInt(e.target.value) }))}
                                         >
@@ -2820,7 +2820,7 @@ const AdminPanel: React.FC = () => {
                                             <div className="text-sm text-slate-600 dark:text-blue-200">{t.position}</div>
                                         </div>
                                     </div>
-                                    <p className="text-slate-700 dark:text-blue-100 mb-4 italic line-clamp-3">"{t.quote}"</p>
+                                    <p className="text-gray-900 dark:text-blue-100 mb-4 italic line-clamp-3">"{t.quote}"</p>
                                     <div className="mb-4">
                                         {[...Array(t.rating)].map((_, i) => (
                                             <span key={i} className="text-yellow-400">★</span>
@@ -2851,28 +2851,28 @@ const AdminPanel: React.FC = () => {
                 {/* Partners Section */}
                 {activeTab === 'partners' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Partner Institutions</h2>
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Partner Institutions</h2>
                         <Card className="medical-card shadow-2xl max-w-2xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handlePartnerSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Add New Partner</h3>
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Institution Name <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Institution Name <span className="text-red-500">*</span></label>
                                     <input
                                         type="text"
                                         required
                                         placeholder="e.g., Harvard Medical School"
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                         value={partnerForm.name}
                                         onChange={e => setPartnerForm(f => ({ ...f, name: e.target.value }))}
                                     />
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Logo URL <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Logo URL <span className="text-red-500">*</span></label>
                                     <input
                                         type="url"
                                         required
                                         placeholder="https://logo.clearbit.com/harvard.edu"
-                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                         value={partnerForm.logo}
                                         onChange={e => setPartnerForm(f => ({ ...f, logo: e.target.value }))}
                                     />
@@ -2929,7 +2929,7 @@ const AdminPanel: React.FC = () => {
                 {/* Contact Information Section */}
                 {activeTab === 'contactinfo' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Contact Information</h2>
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">Manage Contact Information</h2>
                         <Card className="medical-card shadow-2xl max-w-3xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleContactInfoSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Update Contact Information</h3>
@@ -2939,23 +2939,23 @@ const AdminPanel: React.FC = () => {
                                         <h4 className="text-lg font-medium text-slate-900 dark:text-blue-100 mb-4">Email Addresses</h4>
                                         <div className="grid md:grid-cols-2 gap-6">
                                             <div className="space-y-4">
-                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">General Inquiries Email <span className="text-red-500">*</span></label>
+                                                <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">General Inquiries Email <span className="text-red-500">*</span></label>
                                                 <input
                                                     type="email"
                                                     required
                                                     placeholder="contact@smak.in.net"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                     value={contactInfoForm.generalEmail}
                                                     onChange={e => setContactInfoForm(f => ({ ...f, generalEmail: e.target.value }))}
                                                 />
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Research Collaborations Email <span className="text-red-500">*</span></label>
+                                                <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Research Collaborations Email <span className="text-red-500">*</span></label>
                                                 <input
                                                     type="email"
                                                     required
                                                     placeholder="research@smak.in.net"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                     value={contactInfoForm.researchEmail}
                                                     onChange={e => setContactInfoForm(f => ({ ...f, researchEmail: e.target.value }))}
                                                 />
@@ -2967,34 +2967,34 @@ const AdminPanel: React.FC = () => {
                                         <h4 className="text-lg font-medium text-slate-900 dark:text-blue-100 mb-4">Address</h4>
                                         <div className="space-y-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100 mb-2">Address Line 1 <span className="text-red-500">*</span></label>
+                                                <label className="block text-sm font-medium text-gray-900 dark:text-blue-100 mb-2">Address Line 1 <span className="text-red-500">*</span></label>
                                                 <input
                                                     type="text"
                                                     required
                                                     placeholder="SMAK Headquarters"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                     value={contactInfoForm.addressLine1}
                                                     onChange={e => setContactInfoForm(f => ({ ...f, addressLine1: e.target.value }))}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100 mb-2">Address Line 2 <span className="text-red-500">*</span></label>
+                                                <label className="block text-sm font-medium text-gray-900 dark:text-blue-100 mb-2">Address Line 2 <span className="text-red-500">*</span></label>
                                                 <input
                                                     type="text"
                                                     required
                                                     placeholder="Medical Education Complex"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                     value={contactInfoForm.addressLine2}
                                                     onChange={e => setContactInfoForm(f => ({ ...f, addressLine2: e.target.value }))}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100 mb-2">Address Line 3 (City, State, Pincode) <span className="text-red-500">*</span></label>
+                                                <label className="block text-sm font-medium text-gray-900 dark:text-blue-100 mb-2">Address Line 3 (City, State, Pincode) <span className="text-red-500">*</span></label>
                                                 <input
                                                     type="text"
                                                     required
                                                     placeholder="New Delhi, India - 110029"
-                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                     value={contactInfoForm.addressLine3}
                                                     onChange={e => setContactInfoForm(f => ({ ...f, addressLine3: e.target.value }))}
                                                 />
@@ -3005,12 +3005,12 @@ const AdminPanel: React.FC = () => {
                                     <div>
                                         <h4 className="text-lg font-medium text-slate-900 dark:text-blue-100 mb-4">Response Time</h4>
                                         <div className="space-y-4">
-                                            <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Expected Response Time <span className="text-red-500">*</span></label>
+                                            <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Expected Response Time <span className="text-red-500">*</span></label>
                                             <input
                                                 type="text"
                                                 required
                                                 placeholder="24-48 hours"
-                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={contactInfoForm.responseTime}
                                                 onChange={e => setContactInfoForm(f => ({ ...f, responseTime: e.target.value }))}
                                             />
@@ -3065,11 +3065,11 @@ const AdminPanel: React.FC = () => {
                 {/* SMAK AI Enquiries Section */}
                 {activeTab === 'smakaienquiries' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">SMAK AI Project Enquiries</h2>
+                        <h2 className="text-3xl font-bold text-amber-600 bg-clip-text text-transparent">SMAK AI Project Enquiries</h2>
                         {loadingSMakAI ? (
-                            <p className="text-gray-400">Loading enquiries...</p>
+                            <p className="text-gray-700 dark:text-gray-400">Loading enquiries...</p>
                         ) : smakAIEnquiries.length === 0 ? (
-                            <p className="text-gray-400">No enquiries received yet.</p>
+                            <p className="text-gray-700 dark:text-gray-400">No enquiries received yet.</p>
                         ) : (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 {smakAIEnquiries.map((enquiry) => (
