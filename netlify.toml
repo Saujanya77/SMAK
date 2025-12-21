@@ -12,6 +12,12 @@
   VITE_FIREBASE_PROJECT_ID="dummy"
   VITE_FIREBASE_STORAGE_BUCKET="dummy"
 
+# SPA redirect - this fixes 404 errors on page reload
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 [secrets]
   # Tell Netlify to ignore these keys
   omit_keys = [
