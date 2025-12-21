@@ -121,6 +121,16 @@ interface Partner {
     logo: string;
 }
 
+interface ContactInfo {
+    id?: string;
+    generalEmail: string;
+    researchEmail: string;
+    addressLine1: string;
+    addressLine2: string;
+    addressLine3: string;
+    responseTime: string;
+}
+
 const AdminPanel: React.FC = () => {
     const adminTabs = [
         { key: 'journals', label: 'Journals' },
@@ -135,6 +145,7 @@ const AdminPanel: React.FC = () => {
         { key: 'quizzes', label: 'Quizzes' },
         { key: 'testimonials', label: 'Testimonials' },
         { key: 'partners', label: 'Partner Institutions' },
+        { key: 'contactinfo', label: 'Contact Information' },
         { key: 'smakaienquiries', label: 'SMAK AI Enquiries' }
     ];
     
@@ -232,7 +243,7 @@ const AdminPanel: React.FC = () => {
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
     const [loadingVideos, setLoadingVideos] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes' | 'courses' | 'researchclubmembers' | 'researchclubmentors' | 'smakaienquiries' | 'testimonials' | 'partners'>('journals');
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes' | 'courses' | 'researchclubmembers' | 'researchclubmentors' | 'smakaienquiries' | 'testimonials' | 'partners' | 'contactinfo'>('journals');
 
     // Achievements state
     const defaultAchievements = [
@@ -281,6 +292,18 @@ const AdminPanel: React.FC = () => {
         logo: '',
     });
     const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
+
+    // Contact Info state
+    const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+    const [contactInfoId, setContactInfoId] = useState<string | null>(null);
+    const [contactInfoForm, setContactInfoForm] = useState({
+        generalEmail: '',
+        researchEmail: '',
+        addressLine1: '',
+        addressLine2: '',
+        addressLine3: '',
+        responseTime: ''
+    });
 
     // Static members array
     const [staticMembers, setStaticMembers] = useState([
@@ -424,6 +447,28 @@ const AdminPanel: React.FC = () => {
             }
         };
 
+        const fetchContactInfo = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "contactInfo"));
+                if (!querySnapshot.empty) {
+                    const doc = querySnapshot.docs[0];
+                    setContactInfoId(doc.id);
+                    const data = doc.data() as ContactInfo;
+                    setContactInfo(data);
+                    setContactInfoForm({
+                        generalEmail: data.generalEmail || '',
+                        researchEmail: data.researchEmail || '',
+                        addressLine1: data.addressLine1 || '',
+                        addressLine2: data.addressLine2 || '',
+                        addressLine3: data.addressLine3 || '',
+                        responseTime: data.responseTime || ''
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching contact info:", error);
+            }
+        };
+
         fetchQuizzes();
         fetchPendingJournals();
         fetchPendingVideos();
@@ -432,6 +477,7 @@ const AdminPanel: React.FC = () => {
         fetchAchievements();
         fetchTestimonials();
         fetchPartners();
+        fetchContactInfo();
         fetchSmakAIEnquiries();
     }, []);
 
@@ -785,6 +831,26 @@ const AdminPanel: React.FC = () => {
                 console.error("Error deleting partner:", error);
                 alert('Failed to delete partner.');
             }
+        }
+    };
+
+    // Contact Info handlers
+    const handleContactInfoSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (contactInfoId) {
+                // Update existing contact info
+                await updateDoc(doc(db, "contactInfo", contactInfoId), contactInfoForm);
+            } else {
+                // Add new contact info
+                const docRef = await addDoc(collection(db, "contactInfo"), contactInfoForm);
+                setContactInfoId(docRef.id);
+            }
+            setContactInfo(contactInfoForm as ContactInfo);
+            alert('Contact information updated successfully!');
+        } catch (error) {
+            console.error("Error saving contact info:", error);
+            alert('Failed to save contact information.');
         }
     };
 
@@ -2857,6 +2923,142 @@ const AdminPanel: React.FC = () => {
                                 </Card>
                             ))}
                         </div>
+                    </div>
+                )}
+
+                {/* Contact Information Section */}
+                {activeTab === 'contactinfo' && (
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Contact Information</h2>
+                        <Card className="medical-card shadow-2xl max-w-3xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
+                            <form className="p-6 sm:p-8 space-y-6" onSubmit={handleContactInfoSubmit}>
+                                <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Update Contact Information</h3>
+                                
+                                <div className="space-y-6">
+                                    <div className="border-b border-blue-500/30 pb-4">
+                                        <h4 className="text-lg font-medium text-slate-900 dark:text-blue-100 mb-4">Email Addresses</h4>
+                                        <div className="grid md:grid-cols-2 gap-6">
+                                            <div className="space-y-4">
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">General Inquiries Email <span className="text-red-500">*</span></label>
+                                                <input
+                                                    type="email"
+                                                    required
+                                                    placeholder="contact@smak.in.net"
+                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    value={contactInfoForm.generalEmail}
+                                                    onChange={e => setContactInfoForm(f => ({ ...f, generalEmail: e.target.value }))}
+                                                />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Research Collaborations Email <span className="text-red-500">*</span></label>
+                                                <input
+                                                    type="email"
+                                                    required
+                                                    placeholder="research@smak.in.net"
+                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    value={contactInfoForm.researchEmail}
+                                                    onChange={e => setContactInfoForm(f => ({ ...f, researchEmail: e.target.value }))}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-b border-blue-500/30 pb-4">
+                                        <h4 className="text-lg font-medium text-slate-900 dark:text-blue-100 mb-4">Address</h4>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100 mb-2">Address Line 1 <span className="text-red-500">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="SMAK Headquarters"
+                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    value={contactInfoForm.addressLine1}
+                                                    onChange={e => setContactInfoForm(f => ({ ...f, addressLine1: e.target.value }))}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100 mb-2">Address Line 2 <span className="text-red-500">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="Medical Education Complex"
+                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    value={contactInfoForm.addressLine2}
+                                                    onChange={e => setContactInfoForm(f => ({ ...f, addressLine2: e.target.value }))}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-blue-100 mb-2">Address Line 3 (City, State, Pincode) <span className="text-red-500">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="New Delhi, India - 110029"
+                                                    className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                    value={contactInfoForm.addressLine3}
+                                                    onChange={e => setContactInfoForm(f => ({ ...f, addressLine3: e.target.value }))}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-lg font-medium text-slate-900 dark:text-blue-100 mb-4">Response Time</h4>
+                                        <div className="space-y-4">
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Expected Response Time <span className="text-red-500">*</span></label>
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="24-48 hours"
+                                                className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                value={contactInfoForm.responseTime}
+                                                onChange={e => setContactInfoForm(f => ({ ...f, responseTime: e.target.value }))}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-4">
+                                    <Button
+                                        type="submit"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
+                                    >
+                                        <Plus size={20} />
+                                        Update Contact Information
+                                    </Button>
+                                </div>
+                            </form>
+                        </Card>
+
+                        {contactInfo && (
+                            <Card className="medical-card shadow-2xl max-w-3xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white p-6">
+                                <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-6">Current Contact Information</h3>
+                                <div className="space-y-4">
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-sm text-slate-600 dark:text-blue-200 mb-1">General Email:</p>
+                                            <p className="font-medium text-slate-900 dark:text-white">{contactInfo.generalEmail}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-slate-600 dark:text-blue-200 mb-1">Research Email:</p>
+                                            <p className="font-medium text-slate-900 dark:text-white">{contactInfo.researchEmail}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-600 dark:text-blue-200 mb-1">Address:</p>
+                                        <p className="font-medium text-slate-900 dark:text-white">
+                                            {contactInfo.addressLine1}<br />
+                                            {contactInfo.addressLine2}<br />
+                                            {contactInfo.addressLine3}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-600 dark:text-blue-200 mb-1">Response Time:</p>
+                                        <p className="font-medium text-slate-900 dark:text-white">{contactInfo.responseTime}</p>
+                                    </div>
+                                </div>
+                            </Card>
+                        )}
                     </div>
                 )}
 

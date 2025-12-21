@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,8 +8,46 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, MapPin, Phone, Clock } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
 const Contact = () => {
+  // Default contact information
+  const defaultContactInfo = {
+    generalEmail: 'contact@smak.in.net',
+    researchEmail: 'contact@smak.in.net',
+    addressLine1: 'SMAK Headquarters',
+    addressLine2: 'Medical Education Complex',
+    addressLine3: 'New Delhi, India - 110029',
+    responseTime: '24-48 hours'
+  };
+
+  const [contactInfo, setContactInfo] = useState(defaultContactInfo);
+
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'contactInfo'));
+        if (!querySnapshot.empty) {
+          // Get the first document (there should only be one)
+          const data = querySnapshot.docs[0].data();
+          setContactInfo({
+            generalEmail: data.generalEmail || defaultContactInfo.generalEmail,
+            researchEmail: data.researchEmail || defaultContactInfo.researchEmail,
+            addressLine1: data.addressLine1 || defaultContactInfo.addressLine1,
+            addressLine2: data.addressLine2 || defaultContactInfo.addressLine2,
+            addressLine3: data.addressLine3 || defaultContactInfo.addressLine3,
+            responseTime: data.responseTime || defaultContactInfo.responseTime
+          });
+        }
+      } catch (e) {
+        console.error("Error fetching contact info:", e);
+        setContactInfo(defaultContactInfo);
+      }
+    };
+    fetchContactInfo();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -42,9 +81,9 @@ const Contact = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-2">General Inquiries:</p>
-                  <p className="font-medium mb-3">contact@smak.in.net</p>
+                  <p className="font-medium mb-3">{contactInfo.generalEmail}</p>
                   <p className="text-muted-foreground mb-2">Research Collaborations:</p>
-                  <p className="font-medium">contact@smak.in.net</p>
+                  <p className="font-medium">{contactInfo.researchEmail}</p>
                 </CardContent>
               </Card>
 
@@ -57,9 +96,9 @@ const Contact = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    SMAK Headquarters<br />
-                    Medical Education Complex<br />
-                    New Delhi, India - 110029
+                    {contactInfo.addressLine1}<br />
+                    {contactInfo.addressLine2}<br />
+                    {contactInfo.addressLine3}
                   </p>
                 </CardContent>
               </Card>
@@ -74,7 +113,7 @@ const Contact = () => {
                 <CardContent>
                   <p className="text-muted-foreground">
                     We typically respond within<br />
-                    <span className="font-medium text-foreground">24-48 hours</span><br />
+                    <span className="font-medium text-foreground">{contactInfo.responseTime}</span><br />
                     during business days
                   </p>
                 </CardContent>
