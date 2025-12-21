@@ -69,6 +69,67 @@ const Index = () => {
   const [staticAch, setStaticAch] = useState(staticAchievements);
   const [firestoreAchievements, setFirestoreAchievements] = useState([]);
   const [achievements, setAchievements] = useState(staticAchievements);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [partners, setPartners] = useState<any[]>([]);
+
+  // Default testimonials
+  const defaultTestimonials = [
+    {
+      quote: "This platform transformed my MCAT preparation. The personalized study plans and AI-powered practice questions helped me achieve my target score.",
+      author: "Sarah Johnson",
+      position: "Pre-Med Student, Harvard University",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b742?w=150&h=150&fit=crop&crop=face",
+      rating: 5
+    },
+    {
+      quote: "The comprehensive resources and expert guidance made medical school applications so much easier. I got accepted to my dream school!",
+      author: "Michael Chen",
+      position: "Medical Student, Johns Hopkins",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      rating: 5
+    },
+    {
+      quote: "Outstanding support throughout my medical journey. The mentorship program connected me with amazing physicians who guided my career path.",
+      author: "Emily Rodriguez",
+      position: "Resident, Mayo Clinic",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      rating: 5
+    },
+    {
+      quote: "The clinical rotation resources were invaluable. I felt more prepared and confident during my hospital rotations thanks to this platform.",
+      author: "David Kumar",
+      position: "Medical Student, Stanford Medicine",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      rating: 5
+    },
+    {
+      quote: "From MCAT prep to residency matching, this platform supported me every step of the way. Couldn't have done it without them!",
+      author: "Jessica Park",
+      position: "Resident, Mass General Brigham",
+      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      rating: 5
+    },
+    {
+      quote: "The community aspect is incredible. Connecting with fellow pre-med students and sharing experiences made the journey less isolating.",
+      author: "Alex Thompson",
+      position: "Pre-Med Student, UCLA",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      rating: 5
+    }
+  ];
+
+  const defaultPartners = [
+    { name: "Harvard Medical School", logo: "https://logo.clearbit.com/harvard.edu" },
+    { name: "Johns Hopkins", logo: "https://logo.clearbit.com/jhu.edu" },
+    { name: "Stanford Medicine", logo: "https://logo.clearbit.com/stanford.edu" },
+    { name: "Mayo Clinic", logo: "https://logo.clearbit.com/mayoclinic.org" },
+    { name: "UCLA", logo: "https://logo.clearbit.com/ucla.edu" },
+    { name: "NYU Langone", logo: "https://logo.clearbit.com/nyu.edu" },
+    { name: "UCSF", logo: "https://logo.clearbit.com/ucsf.edu" },
+    { name: "Yale School of Medicine", logo: "https://logo.clearbit.com/yale.edu" },
+    { name: "Columbia Medicine", logo: "https://logo.clearbit.com/columbia.edu" },
+    { name: "University of Pennsylvania", logo: "https://logo.clearbit.com/upenn.edu" }
+  ];
 
   useEffect(() => {
     // Try to get static achievements from localStorage (if admin edited them)
@@ -92,6 +153,36 @@ const Index = () => {
       }
     };
     fetchAchievements();
+  }, []);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'testimonials'));
+        const testimonialsData = querySnapshot.docs
+          .map(doc => doc.data())
+          .filter(doc => doc.quote && doc.author && doc.position && doc.avatar);
+        setTestimonials(testimonialsData.length > 0 ? testimonialsData : defaultTestimonials);
+      } catch (e) {
+        setTestimonials(defaultTestimonials);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'partners'));
+        const partnersData = querySnapshot.docs
+          .map(doc => doc.data())
+          .filter(doc => doc.name && doc.logo);
+        setPartners(partnersData.length > 0 ? partnersData : defaultPartners);
+      } catch (e) {
+        setPartners(defaultPartners);
+      }
+    };
+    fetchPartners();
   }, []);
 
   // Updated pillars array with new items
@@ -240,66 +331,7 @@ const Index = () => {
     }
   ];
 
-  const partners = [
-    { name: "Harvard Medical School", logo: "https://logo.clearbit.com/harvard.edu" },
-    { name: "Johns Hopkins", logo: "https://logo.clearbit.com/jhu.edu" },
-    { name: "Stanford Medicine", logo: "https://logo.clearbit.com/stanford.edu" },
-    { name: "Mayo Clinic", logo: "https://logo.clearbit.com/mayoclinic.org" },
-    { name: "UCLA", logo: "https://logo.clearbit.com/ucla.edu" },
-    { name: "NYU Langone", logo: "https://logo.clearbit.com/nyu.edu" },
-    { name: "UCSF", logo: "https://logo.clearbit.com/ucsf.edu" },
-    { name: "Yale School of Medicine", logo: "https://logo.clearbit.com/yale.edu" },
-    { name: "Columbia Medicine", logo: "https://logo.clearbit.com/columbia.edu" },
-    { name: "University of Pennsylvania", logo: "https://logo.clearbit.com/upenn.edu" }
-  ];
-
   const duplicatedPartners = [...partners, ...partners];
-
-  // Sample testimonials data
-  const testimonials = [
-    {
-      quote: "This platform transformed my MCAT preparation. The personalized study plans and AI-powered practice questions helped me achieve my target score.",
-      author: "Sarah Johnson",
-      position: "Pre-Med Student, Harvard University",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b742?w=150&h=150&fit=crop&crop=face",
-      rating: 5
-    },
-    {
-      quote: "The comprehensive resources and expert guidance made medical school applications so much easier. I got accepted to my dream school!",
-      author: "Michael Chen",
-      position: "Medical Student, Johns Hopkins",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      rating: 5
-    },
-    {
-      quote: "Outstanding support throughout my medical journey. The mentorship program connected me with amazing physicians who guided my career path.",
-      author: "Emily Rodriguez",
-      position: "Resident, Mayo Clinic",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      rating: 5
-    },
-    {
-      quote: "The clinical rotation resources were invaluable. I felt more prepared and confident during my hospital rotations thanks to this platform.",
-      author: "David Kumar",
-      position: "Medical Student, Stanford Medicine",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      rating: 5
-    },
-    {
-      quote: "From MCAT prep to residency matching, this platform supported me every step of the way. Couldn't have done it without them!",
-      author: "Jessica Park",
-      position: "Resident, Mass General Brigham",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-      rating: 5
-    },
-    {
-      quote: "The community aspect is incredible. Connecting with fellow pre-med students and sharing experiences made the journey less isolating.",
-      author: "Alex Thompson",
-      position: "Pre-Med Student, UCLA",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-      rating: 5
-    }
-  ];
 
   // Duplicate testimonials for seamless loop
   const duplicatedTestimonials = [...testimonials, ...testimonials];

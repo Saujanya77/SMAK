@@ -106,6 +106,21 @@ interface SmakAIEnquiry {
     status: string;
 }
 
+interface Testimonial {
+    id?: string;
+    quote: string;
+    author: string;
+    position: string;
+    avatar: string;
+    rating: number;
+}
+
+interface Partner {
+    id?: string;
+    name: string;
+    logo: string;
+}
+
 const AdminPanel: React.FC = () => {
     const adminTabs = [
         { key: 'journals', label: 'Journals' },
@@ -118,6 +133,8 @@ const AdminPanel: React.FC = () => {
         { key: 'videos', label: 'Video Lectures' },
         { key: 'courses', label: 'Courses' },
         { key: 'quizzes', label: 'Quizzes' },
+        { key: 'testimonials', label: 'Testimonials' },
+        { key: 'partners', label: 'Partner Institutions' },
         { key: 'smakaienquiries', label: 'SMAK AI Enquiries' }
     ];
     
@@ -215,7 +232,7 @@ const AdminPanel: React.FC = () => {
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingBlogs, setLoadingBlogs] = useState(true);
     const [loadingVideos, setLoadingVideos] = useState(true);
-    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes' | 'courses' | 'researchclubmembers' | 'researchclubmentors' | 'smakaienquiries'>('journals');
+    const [activeTab, setActiveTab] = useState<'journals' | 'blogs' | 'members' | 'achievements' | 'videos' | 'bulkmembers' | 'quizzes' | 'courses' | 'researchclubmembers' | 'researchclubmentors' | 'smakaienquiries' | 'testimonials' | 'partners'>('journals');
 
     // Achievements state
     const defaultAchievements = [
@@ -245,6 +262,25 @@ const AdminPanel: React.FC = () => {
     const achievementIcons = [
         'Trophy', 'Users', 'BookOpen', 'Globe', 'Star', 'Award', 'Calendar', 'FileText', 'Heart', 'Activity', 'Shield', 'Microscope', 'Crown', 'Zap', 'Sparkles'
     ];
+
+    // Testimonials state
+    const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+    const [testimonialForm, setTestimonialForm] = useState({
+        quote: '',
+        author: '',
+        position: '',
+        avatar: '',
+        rating: 5,
+    });
+    const [editingTestimonialId, setEditingTestimonialId] = useState<string | null>(null);
+
+    // Partners state
+    const [partners, setPartners] = useState<Partner[]>([]);
+    const [partnerForm, setPartnerForm] = useState({
+        name: '',
+        logo: '',
+    });
+    const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
 
     // Static members array
     const [staticMembers, setStaticMembers] = useState([
@@ -368,12 +404,34 @@ const AdminPanel: React.FC = () => {
             setLoadingSMakAI(false);
         };
 
+        const fetchTestimonials = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "testimonials"));
+                const testimonialsList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Testimonial));
+                setTestimonials(testimonialsList);
+            } catch (error) {
+                console.error("Error fetching testimonials:", error);
+            }
+        };
+
+        const fetchPartners = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "partners"));
+                const partnersList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Partner));
+                setPartners(partnersList);
+            } catch (error) {
+                console.error("Error fetching partners:", error);
+            }
+        };
+
         fetchQuizzes();
         fetchPendingJournals();
         fetchPendingVideos();
         fetchPendingBlogs();
         fetchMembers();
         fetchAchievements();
+        fetchTestimonials();
+        fetchPartners();
         fetchSmakAIEnquiries();
     }, []);
 
@@ -637,6 +695,95 @@ const AdminPanel: React.FC = () => {
             if (window.confirm('Delete this achievement?')) {
                 await deleteDoc(doc(db, "achievements", id));
                 setAchievements(achievements.filter(a => a.id !== id));
+            }
+        }
+    };
+
+    // Testimonial handlers
+    const handleTestimonialSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (editingTestimonialId) {
+                // Update testimonial
+                await updateDoc(doc(db, "testimonials", editingTestimonialId), testimonialForm);
+                setEditingTestimonialId(null);
+            } else {
+                // Add testimonial
+                await addDoc(collection(db, "testimonials"), testimonialForm);
+            }
+            setTestimonialForm({ quote: '', author: '', position: '', avatar: '', rating: 5 });
+            
+            // Refresh testimonials
+            const querySnapshot = await getDocs(collection(db, "testimonials"));
+            setTestimonials(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Testimonial)));
+        } catch (error) {
+            console.error("Error saving testimonial:", error);
+            alert('Failed to save testimonial.');
+        }
+    };
+
+    const handleEditTestimonial = (testimonial: Testimonial) => {
+        setEditingTestimonialId(testimonial.id || '');
+        setTestimonialForm({
+            quote: testimonial.quote,
+            author: testimonial.author,
+            position: testimonial.position,
+            avatar: testimonial.avatar,
+            rating: testimonial.rating
+        });
+    };
+
+    const handleDeleteTestimonial = async (id: string) => {
+        if (window.confirm('Delete this testimonial?')) {
+            try {
+                await deleteDoc(doc(db, "testimonials", id));
+                setTestimonials(testimonials.filter(t => t.id !== id));
+            } catch (error) {
+                console.error("Error deleting testimonial:", error);
+                alert('Failed to delete testimonial.');
+            }
+        }
+    };
+
+    // Partner handlers
+    const handlePartnerSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (editingPartnerId) {
+                // Update partner
+                await updateDoc(doc(db, "partners", editingPartnerId), partnerForm);
+                setEditingPartnerId(null);
+            } else {
+                // Add partner
+                await addDoc(collection(db, "partners"), partnerForm);
+            }
+            setPartnerForm({ name: '', logo: '' });
+            
+            // Refresh partners
+            const querySnapshot = await getDocs(collection(db, "partners"));
+            setPartners(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Partner)));
+        } catch (error) {
+            console.error("Error saving partner:", error);
+            alert('Failed to save partner.');
+        }
+    };
+
+    const handleEditPartner = (partner: Partner) => {
+        setEditingPartnerId(partner.id || '');
+        setPartnerForm({
+            name: partner.name,
+            logo: partner.logo
+        });
+    };
+
+    const handleDeletePartner = async (id: string) => {
+        if (window.confirm('Delete this partner?')) {
+            try {
+                await deleteDoc(doc(db, "partners", id));
+                setPartners(partners.filter(p => p.id !== id));
+            } catch (error) {
+                console.error("Error deleting partner:", error);
+                alert('Failed to delete partner.');
             }
         }
     };
@@ -2505,6 +2652,211 @@ const AdminPanel: React.FC = () => {
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Bulk Members Upload</h2>
                         <BulkMemberUpload />
+                    </div>
+                )}
+
+                {/* Testimonials Section */}
+                {activeTab === 'testimonials' && (
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Student Testimonials</h2>
+                        <Card className="medical-card shadow-2xl max-w-3xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
+                            <form className="p-6 sm:p-8 space-y-6" onSubmit={handleTestimonialSubmit}>
+                                <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Add New Testimonial</h3>
+                                <div className="space-y-4">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Quote <span className="text-red-500">*</span></label>
+                                    <textarea
+                                        required
+                                        placeholder="Student testimonial quote..."
+                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-24 resize-none"
+                                        value={testimonialForm.quote}
+                                        onChange={e => setTestimonialForm(f => ({ ...f, quote: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Author Name <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Student name"
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={testimonialForm.author}
+                                            onChange={e => setTestimonialForm(f => ({ ...f, author: e.target.value }))}
+                                        />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Position <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="e.g., Pre-Med Student, Harvard University"
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={testimonialForm.position}
+                                            onChange={e => setTestimonialForm(f => ({ ...f, position: e.target.value }))}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Avatar URL <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="url"
+                                            required
+                                            placeholder="https://example.com/avatar.jpg"
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={testimonialForm.avatar}
+                                            onChange={e => setTestimonialForm(f => ({ ...f, avatar: e.target.value }))}
+                                        />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Rating (1-5) <span className="text-red-500">*</span></label>
+                                        <select
+                                            required
+                                            className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={testimonialForm.rating}
+                                            onChange={e => setTestimonialForm(f => ({ ...f, rating: parseInt(e.target.value) }))}
+                                        >
+                                            <option value={5} className="bg-slate-800">5 Stars</option>
+                                            <option value={4} className="bg-slate-800">4 Stars</option>
+                                            <option value={3} className="bg-slate-800">3 Stars</option>
+                                            <option value={2} className="bg-slate-800">2 Stars</option>
+                                            <option value={1} className="bg-slate-800">1 Star</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4 pt-4">
+                                    <Button
+                                        type="submit"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
+                                    >
+                                        <Plus size={20} />
+                                        {editingTestimonialId ? 'Update' : 'Add'} Testimonial
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="border-blue-500/50 text-blue-300 hover:bg-blue-500/20 hover:text-white transition-all duration-200 px-6 py-3 rounded-xl"
+                                        onClick={() => { setEditingTestimonialId(null); setTestimonialForm({ quote: '', author: '', position: '', avatar: '', rating: 5 }); }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </form>
+                        </Card>
+
+                        <div className="grid md:grid-cols-2 gap-6 mt-8">
+                            {testimonials.map((t) => (
+                                <Card key={t.id} className="medical-card text-slate-900 dark:text-white p-6 card-hover bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-200">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <img src={t.avatar} alt={t.author} className="w-12 h-12 rounded-full object-cover" />
+                                        <div>
+                                            <div className="font-semibold text-slate-900 dark:text-white">{t.author}</div>
+                                            <div className="text-sm text-slate-600 dark:text-blue-200">{t.position}</div>
+                                        </div>
+                                    </div>
+                                    <p className="text-slate-700 dark:text-blue-100 mb-4 italic line-clamp-3">"{t.quote}"</p>
+                                    <div className="mb-4">
+                                        {[...Array(t.rating)].map((_, i) => (
+                                            <span key={i} className="text-yellow-400">★</span>
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 flex items-center gap-2 flex-1"
+                                            onClick={() => handleEditTestimonial(t)}
+                                        >
+                                            <Edit size={16} />
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            className="bg-red-600 hover:bg-red-700 text-white transition-all duration-200 flex items-center gap-2 flex-1"
+                                            onClick={() => handleDeleteTestimonial(t.id || '')}
+                                        >
+                                            <Trash2 size={16} />
+                                            Delete
+                                        </Button>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Partners Section */}
+                {activeTab === 'partners' && (
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Manage Partner Institutions</h2>
+                        <Card className="medical-card shadow-2xl max-w-2xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
+                            <form className="p-6 sm:p-8 space-y-6" onSubmit={handlePartnerSubmit}>
+                                <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Add New Partner</h3>
+                                <div className="space-y-4">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Institution Name <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="e.g., Harvard Medical School"
+                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        value={partnerForm.name}
+                                        onChange={e => setPartnerForm(f => ({ ...f, name: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-blue-100">Logo URL <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="url"
+                                        required
+                                        placeholder="https://logo.clearbit.com/harvard.edu"
+                                        className="w-full bg-blue-800/30 border border-blue-600/50 rounded-xl px-4 py-3 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        value={partnerForm.logo}
+                                        onChange={e => setPartnerForm(f => ({ ...f, logo: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="flex gap-4 pt-4">
+                                    <Button
+                                        type="submit"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
+                                    >
+                                        <Plus size={20} />
+                                        {editingPartnerId ? 'Update' : 'Add'} Partner
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="border-blue-500/50 text-blue-300 hover:bg-blue-500/20 hover:text-white transition-all duration-200 px-6 py-3 rounded-xl"
+                                        onClick={() => { setEditingPartnerId(null); setPartnerForm({ name: '', logo: '' }); }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </form>
+                        </Card>
+
+                        <div className="grid md:grid-cols-3 gap-6 mt-8">
+                            {partners.map((p) => (
+                                <Card key={p.id} className="medical-card text-slate-900 dark:text-white p-6 flex flex-col items-center gap-4 card-hover bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-200">
+                                    <img src={p.logo} alt={p.name} className="w-24 h-16 object-contain" onError={e => { e.currentTarget.src = "https://via.placeholder.com/120x60/4F46E5/FFFFFF"; }} />
+                                    <div className="text-center">
+                                        <div className="font-semibold text-slate-900 dark:text-white">{p.name}</div>
+                                    </div>
+                                    <div className="flex gap-2 w-full">
+                                        <Button
+                                            className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 flex items-center gap-2 flex-1"
+                                            onClick={() => handleEditPartner(p)}
+                                        >
+                                            <Edit size={16} />
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            className="bg-red-600 hover:bg-red-700 text-white transition-all duration-200 flex items-center gap-2 flex-1"
+                                            onClick={() => handleDeletePartner(p.id || '')}
+                                        >
+                                            <Trash2 size={16} />
+                                            Delete
+                                        </Button>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
                     </div>
                 )}
 
