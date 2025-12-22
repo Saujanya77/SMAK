@@ -283,6 +283,7 @@ const AdminPanel: React.FC = () => {
         avatar: '',
         rating: 5,
     });
+    const [testimonialAvatarFile, setTestimonialAvatarFile] = useState<File | null>(null);
     const [editingTestimonialId, setEditingTestimonialId] = useState<string | null>(null);
 
     // Partners state
@@ -291,6 +292,7 @@ const AdminPanel: React.FC = () => {
         name: '',
         logo: '',
     });
+    const [partnerLogoFile, setPartnerLogoFile] = useState<File | null>(null);
     const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
 
     // Contact Info state
@@ -749,15 +751,25 @@ const AdminPanel: React.FC = () => {
     const handleTestimonialSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            let avatarUrl = testimonialForm.avatar;
+            if (testimonialAvatarFile) {
+                const fileRef = ref(storage, `testimonials/${Date.now()}_${testimonialAvatarFile.name}`);
+                await uploadBytes(fileRef, testimonialAvatarFile);
+                avatarUrl = await getDownloadURL(fileRef);
+            }
+            
+            const dataToSubmit = { ...testimonialForm, avatar: avatarUrl };
+            
             if (editingTestimonialId) {
                 // Update testimonial
-                await updateDoc(doc(db, "testimonials", editingTestimonialId), testimonialForm);
+                await updateDoc(doc(db, "testimonials", editingTestimonialId), dataToSubmit);
                 setEditingTestimonialId(null);
             } else {
                 // Add testimonial
-                await addDoc(collection(db, "testimonials"), testimonialForm);
+                await addDoc(collection(db, "testimonials"), dataToSubmit);
             }
             setTestimonialForm({ quote: '', author: '', position: '', avatar: '', rating: 5 });
+            setTestimonialAvatarFile(null);
             
             // Refresh testimonials
             const querySnapshot = await getDocs(collection(db, "testimonials"));
@@ -777,6 +789,7 @@ const AdminPanel: React.FC = () => {
             avatar: testimonial.avatar,
             rating: testimonial.rating
         });
+        setTestimonialAvatarFile(null);
     };
 
     const handleDeleteTestimonial = async (id: string) => {
@@ -795,15 +808,25 @@ const AdminPanel: React.FC = () => {
     const handlePartnerSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            let logoUrl = partnerForm.logo;
+            if (partnerLogoFile) {
+                const fileRef = ref(storage, `partners/${Date.now()}_${partnerLogoFile.name}`);
+                await uploadBytes(fileRef, partnerLogoFile);
+                logoUrl = await getDownloadURL(fileRef);
+            }
+            
+            const dataToSubmit = { ...partnerForm, logo: logoUrl };
+            
             if (editingPartnerId) {
                 // Update partner
-                await updateDoc(doc(db, "partners", editingPartnerId), partnerForm);
+                await updateDoc(doc(db, "partners", editingPartnerId), dataToSubmit);
                 setEditingPartnerId(null);
             } else {
                 // Add partner
-                await addDoc(collection(db, "partners"), partnerForm);
+                await addDoc(collection(db, "partners"), dataToSubmit);
             }
             setPartnerForm({ name: '', logo: '' });
+            setPartnerLogoFile(null);
             
             // Refresh partners
             const querySnapshot = await getDocs(collection(db, "partners"));
@@ -820,6 +843,7 @@ const AdminPanel: React.FC = () => {
             name: partner.name,
             logo: partner.logo
         });
+        setPartnerLogoFile(null);
     };
 
     const handleDeletePartner = async (id: string) => {
@@ -1214,7 +1238,7 @@ const AdminPanel: React.FC = () => {
                         
                         {/* Research Club Members List */}
                         <div className="mt-8">
-                            <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-6">
+                            <h3 className="text-2xl font-bold text-amber-600 mb-6">
                                 Research Club Members ({rcMembers.length})
                             </h3>
                             {rcMembers.length === 0 ? (
@@ -1230,11 +1254,11 @@ const AdminPanel: React.FC = () => {
                                                 alt={m.name} 
                                                 className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50" 
                                             />
-                                            <div className="font-bold text-lg mb-1 text-white">{m.name}</div>
-                                            <div className="text-blue-200 text-sm mb-1">{m.institution}</div>
-                                            <div className="text-blue-300 text-sm font-semibold mb-2">{m.designation}</div>
-                                            <div className="text-blue-400 text-xs mb-1">{m.email}</div>
-                                            {m.phone && <div className="text-blue-400 text-xs mb-4">{m.phone}</div>}
+                                            <div className="font-bold text-lg mb-1 text-amber-600">{m.name}</div>
+                                            <div className="text-amber-600 text-sm mb-1">{m.institution}</div>
+                                            <div className="text-amber-600 text-sm font-semibold mb-2">{m.designation}</div>
+                                            <div className="text-amber-600 text-xs mb-1">{m.email}</div>
+                                            {m.phone && <div className="text-amber-600 text-xs mb-4">{m.phone}</div>}
                                             <div className="flex gap-2 mt-2 w-full">
                                                 <Button 
                                                     size="sm" 
@@ -1416,7 +1440,7 @@ const AdminPanel: React.FC = () => {
                         
                         {/* Research Club Mentors List */}
                         <div className="mt-8">
-                            <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-6">
+                            <h3 className="text-2xl font-bold text-amber-600 mb-6">
                                 Research Club Mentors ({rcMentors.length})
                             </h3>
                             {rcMentors.length === 0 ? (
@@ -1432,10 +1456,10 @@ const AdminPanel: React.FC = () => {
                                                 alt={m.name} 
                                                 className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50" 
                                             />
-                                            <div className="font-bold text-lg mb-1 text-white">{m.name}</div>
-                                            <div className="text-blue-200 text-sm mb-1">{m.institution}</div>
-                                            <div className="text-blue-300 text-sm font-semibold mb-2">{m.designation}</div>
-                                            <div className="text-blue-400 text-xs mb-1">{m.email}</div>
+                                            <div className="font-bold text-lg mb-1 text-amber-600">{m.name}</div>
+                                            <div className="text-amber-600 text-sm mb-1">{m.institution}</div>
+                                            <div className="text-amber-600 text-sm font-semibold mb-2">{m.designation}</div>
+                                            <div className="text-amber-600 text-xs mb-1">{m.email}</div>
                                             {m.phone && <div className="text-blue-400 text-xs mb-4">{m.phone}</div>}
                                             <div className="flex gap-2 mt-2 w-full">
                                                 <Button 
@@ -2764,15 +2788,17 @@ const AdminPanel: React.FC = () => {
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Avatar URL <span className="text-red-500">*</span></label>
-                                        <input
-                                            type="url"
-                                            required
-                                            placeholder="https://example.com/avatar.jpg"
-                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            value={testimonialForm.avatar}
-                                            onChange={e => setTestimonialForm(f => ({ ...f, avatar: e.target.value }))}
-                                        />
+                                        <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Avatar Image <span className="text-red-500">*</span></label>
+                                        <div className="relative">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                required={!editingTestimonialId || (editingTestimonialId && testimonialAvatarFile !== null)}
+                                                onChange={e => setTestimonialAvatarFile(e.target.files?.[0] || null)}
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-medium"
+                                            />
+                                        </div>
+                                        {testimonialAvatarFile && <p className="text-sm text-green-600 dark:text-green-400">File selected: {testimonialAvatarFile.name}</p>}
                                     </div>
                                     <div className="space-y-4">
                                         <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Rating (1-5) <span className="text-red-500">*</span></label>
@@ -2802,7 +2828,7 @@ const AdminPanel: React.FC = () => {
                                         type="button"
                                         variant="outline"
                                         className="border-blue-500/50 text-blue-300 hover:bg-blue-500/20 hover:text-white transition-all duration-200 px-6 py-3 rounded-xl"
-                                        onClick={() => { setEditingTestimonialId(null); setTestimonialForm({ quote: '', author: '', position: '', avatar: '', rating: 5 }); }}
+                                        onClick={() => { setEditingTestimonialId(null); setTestimonialForm({ quote: '', author: '', position: '', avatar: '', rating: 5 }); setTestimonialAvatarFile(null); }}
                                     >
                                         Cancel
                                     </Button>
@@ -2867,15 +2893,15 @@ const AdminPanel: React.FC = () => {
                                     />
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Logo URL <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Logo Image <span className="text-red-500">*</span></label>
                                     <input
-                                        type="url"
-                                        required
-                                        placeholder="https://logo.clearbit.com/harvard.edu"
-                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                        value={partnerForm.logo}
-                                        onChange={e => setPartnerForm(f => ({ ...f, logo: e.target.value }))}
+                                        type="file"
+                                        accept="image/*"
+                                        required={!editingPartnerId || (editingPartnerId && partnerLogoFile !== null)}
+                                        onChange={e => setPartnerLogoFile(e.target.files?.[0] || null)}
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-medium"
                                     />
+                                    {partnerLogoFile && <p className="text-sm text-green-600 dark:text-green-400">File selected: {partnerLogoFile.name}</p>}
                                 </div>
                                 <div className="flex gap-4 pt-4">
                                     <Button
@@ -2889,7 +2915,7 @@ const AdminPanel: React.FC = () => {
                                         type="button"
                                         variant="outline"
                                         className="border-blue-500/50 text-blue-300 hover:bg-blue-500/20 hover:text-white transition-all duration-200 px-6 py-3 rounded-xl"
-                                        onClick={() => { setEditingPartnerId(null); setPartnerForm({ name: '', logo: '' }); }}
+                                        onClick={() => { setEditingPartnerId(null); setPartnerForm({ name: '', logo: '' }); setPartnerLogoFile(null); }}
                                     >
                                         Cancel
                                     </Button>

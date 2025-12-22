@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Clock, MapPin, Users, Plus, Upload, Image, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import { db, storage } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 
 const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'];
@@ -254,6 +255,13 @@ const Events = () => {
   const [localEvents, setLocalEvents] = useState(hardcodedEvents);
   const [editingEvent, setEditingEvent] = useState(null); // For edit modal (future)
   const [categoryFilter, setCategoryFilter] = useState('All');
+  const [pastEventFile, setPastEventFile] = useState<File | null>(null);
+
+  const uploadImageToStorage = async (file: File, folder: string) => {
+    const imageRef = ref(storage, `${folder}/${Date.now()}-${file.name}`);
+    await uploadBytes(imageRef, file);
+    return getDownloadURL(imageRef);
+  };
   
   // Load events from Firestore on mount
   useEffect(() => {
@@ -403,11 +411,20 @@ const Events = () => {
   const handleAddPastEvent = async (e) => {
     e.preventDefault();
     try {
+      if (!pastEventFile) {
+        alert('Please upload an image for the past event.');
+        return;
+      }
+
+      const imageUrl = await uploadImageToStorage(pastEventFile, 'pastEvents');
+      const payload = { ...pastEventForm, image: imageUrl };
+
       const pastCol = collection(db, 'pastEvents');
-      const docRef = await addDoc(pastCol, pastEventForm);
-      setPastEvents(prev => [{ id: docRef.id, ...pastEventForm }, ...prev]);
+      const docRef = await addDoc(pastCol, payload);
+      setPastEvents(prev => [{ id: docRef.id, ...payload }, ...prev]);
       setShowAddPastForm(false);
       setPastEventForm({ title: '', date: '', attendees: '', image: '' });
+      setPastEventFile(null);
     } catch (err) {
       console.error('Error adding past event:', err);
       alert('Failed to add past event.');
@@ -509,7 +526,7 @@ const Events = () => {
       {isAdmin && showAddPastForm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 w-full max-w-lg relative" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
-            <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-white" onClick={() => { setShowAddPastForm(false); }}>
+            <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-white" onClick={() => { setShowAddPastForm(false); setPastEventFile(null); }}>
               ✕
             </button>
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
@@ -519,7 +536,19 @@ const Events = () => {
               <Input name="title" value={pastEventForm.title} onChange={handlePastFormChange} placeholder="Event Title" required />
               <Input name="date" value={pastEventForm.date} onChange={handlePastFormChange} placeholder="Date (e.g., Nov 15, 2024)" required />
               <Input name="attendees" value={pastEventForm.attendees} onChange={handlePastFormChange} placeholder="Attendees (e.g., 2,500+)" required />
-              <Input name="image" value={pastEventForm.image} onChange={handlePastFormChange} placeholder="Image URL" required />
+              <div>
+                <label className="block text-sm font-medium mb-2">Upload Image</label>
+                <Input
+                  name="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setPastEventFile(file);
+                  }}
+                  required
+                />
+              </div>
               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">Add Past Event</Button>
             </form>
           </div>

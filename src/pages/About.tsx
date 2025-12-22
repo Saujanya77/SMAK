@@ -6,8 +6,9 @@ import { BookOpen, Microscope, Brain, Globe, Users, Award, Target, Heart, Stetho
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { db } from '@/firebase';
+import { db, storage } from '@/firebase';
 import { collection, addDoc, deleteDoc, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'];
 
@@ -15,18 +16,19 @@ const About = () => {
   const { user } = useAuth();
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || '');
   
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [currentPartner, setCurrentPartner] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   
   // Admin state for partners
   const [showPartnerModal, setShowPartnerModal] = useState(false);
   const [partnerForm, setPartnerForm] = useState({ name: '', image: '', gradient: 'from-blue-500 to-indigo-500' });
+  const [partnerImageFile, setPartnerImageFile] = useState<File | null>(null);
   const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
   
   // Admin state for leadership
   const [showLeaderModal, setShowLeaderModal] = useState(false);
   const [leaderForm, setLeaderForm] = useState({ name: '', role: '', college: '', image: '', objectPosition: '' });
+  const [leaderImageFile, setLeaderImageFile] = useState<File | null>(null);
   const [editingLeaderId, setEditingLeaderId] = useState<string | null>(null);
 
   const values = [
@@ -97,37 +99,6 @@ const About = () => {
     { number: "50+", label: "Cities Reached", icon: Globe }
   ];
 
-  const testimonials = [
-    {
-      quote: "SMAK has transformed how we approach medical education. The collaborative environment has helped our students excel beyond classroom boundaries.",
-      author: "Dr. Meera Gupta",
-      position: "Dean, Medical College",
-      institution: "Lady Hardinge Medical College",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face"
-    },
-    {
-      quote: "Being part of SMAK gave me opportunities to publish research and connect with peers nationwide. It's been invaluable for my academic growth.",
-      author: "Aditya Sharma",
-      position: "Final Year MBBS",
-      institution: "AIIMS Delhi",
-      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face"
-    },
-    {
-      quote: "The platform SMAK provides for research collaboration is unmatched. Our institution has benefited tremendously from this partnership.",
-      author: "Prof. Rajesh Kumar",
-      position: "Head of Research",
-      institution: "JIPMER Puducherry",
-      image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=100&h=100&fit=crop&crop=face"
-    },
-    {
-      quote: "SMAK's commitment to accessible medical education aligns perfectly with our institutional values. Together, we're shaping future doctors.",
-      author: "Dr. Kavita Patel",
-      position: "Principal",
-      institution: "Grant Medical College",
-      image: "https://images.unsplash.com/photo-1594824475871-2b2d28e2fb0e?w=100&h=100&fit=crop&crop=face"
-    }
-  ];
-
   const [partners, setPartners] = useState([
     { id: '1', name: "AIIMS Delhi", image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=200&h=200&fit=crop", gradient: "from-blue-500 to-indigo-500" },
     { id: '2', name: "JIPMER", image: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=200&h=200&fit=crop", gradient: "from-indigo-500 to-purple-500" },
@@ -174,6 +145,12 @@ const About = () => {
     }
   ]);
 
+  const uploadImageToStorage = async (file: File, folder: string) => {
+    const imageRef = ref(storage, `${folder}/${Date.now()}-${file.name}`);
+    await uploadBytes(imageRef, file);
+    return getDownloadURL(imageRef);
+  };
+
   // Fetch partners and leadership from Firestore
   useEffect(() => {
     const fetchData = async () => {
@@ -199,14 +176,6 @@ const About = () => {
     fetchData();
   }, []);
   
-  // Auto-advance testimonials (right to left)
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [testimonials.length]);
-
   // Auto-advance partners (continuous right to left)
   useEffect(() => {
     const timer = setInterval(() => {
@@ -219,15 +188,28 @@ const About = () => {
   const handleAddPartner = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!partnerImageFile && !partnerForm.image && !editingPartnerId) {
+        alert('Please select an image for the partner.');
+        return;
+      }
+
+      let imageUrl = partnerForm.image;
+      if (partnerImageFile) {
+        imageUrl = await uploadImageToStorage(partnerImageFile, 'partners');
+      }
+
+      const payload = { ...partnerForm, image: imageUrl };
+
       if (editingPartnerId) {
-        await updateDoc(doc(db, 'partners', editingPartnerId), partnerForm);
-        setPartners(prev => prev.map(p => p.id === editingPartnerId ? { ...p, ...partnerForm } : p));
+        await updateDoc(doc(db, 'partners', editingPartnerId), payload);
+        setPartners(prev => prev.map(p => p.id === editingPartnerId ? { ...p, ...payload } : p));
       } else {
-        const docRef = await addDoc(collection(db, 'partners'), partnerForm);
-        setPartners(prev => [...prev, { id: docRef.id, ...partnerForm }]);
+        const docRef = await addDoc(collection(db, 'partners'), payload);
+        setPartners(prev => [...prev, { id: docRef.id, ...payload }]);
       }
       setShowPartnerModal(false);
-      setPartnerForm({ name: '', logo: '🏥', gradient: 'from-blue-500 to-indigo-500' });
+      setPartnerForm({ name: '', image: '', gradient: 'from-blue-500 to-indigo-500' });
+      setPartnerImageFile(null);
       setEditingPartnerId(null);
     } catch (error) {
       console.error('Error saving partner:', error);
@@ -250,15 +232,28 @@ const About = () => {
   const handleAddLeader = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!leaderImageFile && !leaderForm.image && !editingLeaderId) {
+        alert('Please select an image for the leadership member.');
+        return;
+      }
+
+      let imageUrl = leaderForm.image;
+      if (leaderImageFile) {
+        imageUrl = await uploadImageToStorage(leaderImageFile, 'leadership');
+      }
+
+      const payload = { ...leaderForm, image: imageUrl };
+
       if (editingLeaderId) {
-        await updateDoc(doc(db, 'leadership', editingLeaderId), leaderForm);
-        setLeadershipTeam(prev => prev.map(l => l.id === editingLeaderId ? { ...l, ...leaderForm } : l));
+        await updateDoc(doc(db, 'leadership', editingLeaderId), payload);
+        setLeadershipTeam(prev => prev.map(l => l.id === editingLeaderId ? { ...l, ...payload } : l));
       } else {
-        const docRef = await addDoc(collection(db, 'leadership'), leaderForm);
-        setLeadershipTeam(prev => [...prev, { id: docRef.id, ...leaderForm }]);
+        const docRef = await addDoc(collection(db, 'leadership'), payload);
+        setLeadershipTeam(prev => [...prev, { id: docRef.id, ...payload }]);
       }
       setShowLeaderModal(false);
       setLeaderForm({ name: '', role: '', college: '', image: '', objectPosition: '' });
+      setLeaderImageFile(null);
       setEditingLeaderId(null);
     } catch (error) {
       console.error('Error saving leader:', error);
@@ -494,68 +489,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Automatic Testimonials Slider */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20 dark:from-gray-900/30 dark:via-gray-800 dark:to-indigo-900/20"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              What Our Community Says
-            </h2>
-            <p className="text-2xl text-gray-600 dark:text-gray-400">
-              Hear from students and faculty who are part of the SMAK family
-            </p>
-          </div>
-          
-          <div className="max-w-6xl mx-auto">
-            <div className="relative overflow-hidden">
-              <div 
-                className="flex transition-transform duration-1000 ease-in-out"
-                style={{ transform: `translateX(-${currentTestimonial * 100}%)` }}
-              >
-                {testimonials.map((testimonial, index) => (
-                  <div key={index} className="w-full flex-shrink-0 px-4">
-                    <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:shadow-3xl transition-all duration-700">
-                      <CardContent className="text-center p-12">
-                        <div className="mb-8">
-                          <img 
-                            src={testimonial.image} 
-                            alt={testimonial.author}
-                            className="w-20 h-20 rounded-full mx-auto mb-6 object-cover shadow-lg border-4 border-blue-100 dark:border-blue-400"
-                          />
-                          <blockquote className="text-2xl md:text-3xl italic mb-8 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            "{testimonial.quote}"
-                          </blockquote>
-                        </div>
-                        <div className="border-t border-blue-100 dark:border-blue-400 pt-6">
-                          <h4 className="font-semibold text-xl mb-2 text-blue-800 dark:text-blue-300">{testimonial.author}</h4>
-                          <p className="text-blue-600 dark:text-blue-400 font-medium text-lg mb-1">{testimonial.position}</p>
-                          <p className="text-gray-600 dark:text-gray-400">{testimonial.institution}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="flex justify-center mt-12 space-x-3">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentTestimonial(index)}
-                  className={`w-4 h-4 rounded-full transition-all duration-300 hover:scale-125 ${
-                    index === currentTestimonial 
-                      ? 'bg-blue-600 shadow-lg scale-110' 
-                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-blue-400 dark:hover:bg-blue-500'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Automatic Partner Logos Slider */}
       <section className="py-24 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/30 dark:from-gray-900/50 dark:via-gray-800 dark:to-indigo-900/30 relative overflow-hidden">
         <div className="container mx-auto px-4">
@@ -570,6 +503,7 @@ const About = () => {
                     setShowPartnerModal(true);
                     setEditingPartnerId(null);
                     setPartnerForm({ name: '', image: '', gradient: 'from-blue-500 to-indigo-500' });
+                    setPartnerImageFile(null);
                   }}
                   className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3"
                 >
@@ -598,6 +532,7 @@ const About = () => {
                             onClick={() => {
                               setEditingPartnerId(partner.id);
                               setPartnerForm({ name: partner.name, image: partner.image, gradient: partner.gradient });
+                              setPartnerImageFile(null);
                               setShowPartnerModal(true);
                             }}
                             className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg"
@@ -644,6 +579,7 @@ const About = () => {
                     setShowLeaderModal(true);
                     setEditingLeaderId(null);
                     setLeaderForm({ name: '', role: '', college: '', image: '', objectPosition: '' });
+                    setLeaderImageFile(null);
                   }}
                   className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3"
                 >
@@ -673,6 +609,7 @@ const About = () => {
                             image: member.image,
                             objectPosition: member.objectPosition || ''
                           });
+                          setLeaderImageFile(null);
                           setShowLeaderModal(true);
                         }}
                         className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg"
@@ -766,15 +703,20 @@ const About = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Image URL</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Upload Logo/Image</label>
                 <input
-                  type="text"
-                  required
-                  value={partnerForm.image}
-                  onChange={e => setPartnerForm(prev => ({ ...prev, image: e.target.value }))}
+                  type="file"
+                  accept="image/*"
+                  onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    setPartnerImageFile(file);
+                  }}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="https://..."
+                  required={!editingPartnerId}
                 />
+                {editingPartnerId && partnerForm.image && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Current image will stay unless you upload a new one.</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Gradient Colors</label>
@@ -857,15 +799,20 @@ const About = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Image URL</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Upload Image</label>
                 <input
-                  type="text"
-                  required
-                  value={leaderForm.image}
-                  onChange={e => setLeaderForm(prev => ({ ...prev, image: e.target.value }))}
+                  type="file"
+                  accept="image/*"
+                  onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    setLeaderImageFile(file);
+                  }}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="https://..."
+                  required={!editingLeaderId}
                 />
+                {editingLeaderId && leaderForm.image && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Current image will stay unless you upload a new one.</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Object Position (optional)</label>
