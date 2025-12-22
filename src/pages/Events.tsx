@@ -207,52 +207,10 @@ const Events = () => {
   });
   const [editMode, setEditMode] = useState(false);
   const [editEventId, setEditEventId] = useState(null);
-  const [editEventType, setEditEventType] = useState(null); // 'firestore' or 'local'
-  const [editLocalIndex, setEditLocalIndex] = useState(null);
+  
   const [uploadPreview, setUploadPreview] = useState('');
   
-  // FIXED: Added static data preservation
-  const hardcodedEvents = [
-    {
-      title: "Clinical Case Presentation Series",
-      date: "December 15, 2024",
-      time: "6:00 PM - 8:00 PM IST",
-      location: "Virtual Event",
-      type: "Webinar",
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=250&fit=crop&crop=center",
-      description: "Join us for an interactive session featuring complex clinical cases presented by senior residents and reviewed by expert clinicians."
-    },
-    {
-      title: "Research Methodology Workshop",
-      date: "December 20, 2024",
-      time: "10:00 AM - 4:00 PM IST",
-      location: "AIIMS Delhi",
-      type: "Workshop",
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=250&fit=crop&crop=center",
-      description: "Learn advanced research techniques, statistical analysis, and how to write compelling research papers."
-    },
-    {
-      title: "Annual Medical Quiz Championship",
-      date: "January 5, 2025",
-      time: "2:00 PM - 5:00 PM IST",
-      location: "Multiple Cities",
-      type: "Competition",
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=250&fit=crop&crop=center",
-      description: "Test your medical knowledge against peers from across the country in this comprehensive quiz competition."
-    },
-    {
-      title: "Surgical Skills Simulation Training",
-      date: "January 12, 2025",
-      time: "9:00 AM - 5:00 PM IST",
-      location: "PGIMER Chandigarh",
-      type: "Training",
-      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=250&fit=crop&crop=center",
-      description: "Hands-on surgical skills training using state-of-the-art simulation equipment and expert guidance."
-    }
-  ];
-
   const [firestoreEvents, setFirestoreEvents] = useState([]);
-  const [localEvents, setLocalEvents] = useState(hardcodedEvents);
   const [editingEvent, setEditingEvent] = useState(null); // For edit modal (future)
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [pastEventFile, setPastEventFile] = useState<File | null>(null);
@@ -297,27 +255,8 @@ const Events = () => {
     fetchPastEvents();
   }, []);
 
-  // Past events state (initial static data, replaced by Firestore if available)
-  const [pastEvents, setPastEvents] = useState([
-    {
-      title: "World Asthma Day",
-      date: "November 15, 2024",
-      attendees: "2,500+",
-      image: "/Images/IMG-20250613-WA0032.jpg"
-    },
-    {
-      title: "World Asthma Day",
-      date: "October 28, 2024",
-      attendees: "1,800+",
-      image: "/Images/IMG-20250613-WA0033.jpg"
-    },
-    {
-      title: "World Asthma Day",
-      date: "October 10-16, 2024",
-      attendees: "3,200+",
-      image: "/Images/IMG-20250613-WA0034.jpg"
-    }
-  ]);
+  // Past events state (Firestore-driven)
+  const [pastEvents, setPastEvents] = useState([]);
 
   // Admin: Add Past Event modal state
   const [showAddPastForm, setShowAddPastForm] = useState(false);
@@ -361,7 +300,7 @@ const Events = () => {
       image,
       description: eventForm.description
     };
-    if (editMode && editEventType === 'firestore') {
+    if (editMode && editEventId) {
       // Update Firestore event
       try {
         const eventsCol = collection(db, "events");
@@ -374,9 +313,6 @@ const Events = () => {
         console.error("Error updating event:", err);
         alert("Failed to update event.");
       }
-    } else if (editMode && editEventType === 'local') {
-      // Update local event
-      setLocalEvents(events => events.map((ev, idx) => idx === editLocalIndex ? eventData : ev));
     } else {
       // Add new event (Firestore only)
       try {
@@ -394,8 +330,6 @@ const Events = () => {
     setShowAddForm(false);
     setEditMode(false);
     setEditEventId(null);
-    setEditEventType(null);
-    setEditLocalIndex(null);
     setEventForm({
       name: '', date: '', time: '', venue: '', category: '', description: '', thumbnailType: 'upload', thumbnailFile: null, thumbnailUrl: ''
     });
@@ -443,12 +377,6 @@ const Events = () => {
     }
   };
 
-  // Past events: delete (local/static)
-  const handleDeletePastLocalEvent = (index) => {
-    if (!window.confirm('Delete this past event?')) return;
-    setPastEvents(prev => prev.filter((_, i) => i !== index));
-  };
-
   // Delete Firestore event
   const handleDeleteFirestoreEvent = async (id) => {
     if (!window.confirm('Delete this event?')) return;
@@ -462,17 +390,10 @@ const Events = () => {
     }
   };
 
-  // Delete hardcoded event (local only)
-  const handleDeleteLocalEvent = (index) => {
-    if (!window.confirm('Delete this event?')) return;
-    setLocalEvents(events => events.filter((_, i) => i !== index));
-  };
-
   // Edit Firestore event
   const handleEditFirestoreEvent = (event) => {
     setEditMode(true);
     setEditEventId(event.id);
-    setEditEventType('firestore');
     setShowAddForm(true);
     setEventForm({
       name: event.title || '',
@@ -488,25 +409,7 @@ const Events = () => {
     setUploadPreview(event.image || '');
   };
 
-  // Edit local event
-  const handleEditLocalEvent = (event, index) => {
-    setEditMode(true);
-    setEditEventType('local');
-    setEditLocalIndex(index);
-    setShowAddForm(true);
-    setEventForm({
-      name: event.title || '',
-      date: event.date || '',
-      time: event.time || '',
-      venue: event.location || '',
-      category: event.type || '',
-      description: event.description || '',
-      thumbnailType: event.image && event.image.startsWith('http') ? 'url' : 'upload',
-      thumbnailFile: null,
-      thumbnailUrl: event.image || ''
-    });
-    setUploadPreview(event.image || '');
-  };
+  
 
   return (
     <div className="min-h-screen bg-background">
@@ -650,7 +553,7 @@ const Events = () => {
           </div>
 
           {(() => {
-            const categories = Array.from(new Set([...firestoreEvents, ...localEvents].map(e => e.type).filter(Boolean)));
+            const categories = Array.from(new Set(firestoreEvents.map(e => e.type).filter(Boolean)));
             return (
               <div className="flex justify-center mb-8">
                 <select
@@ -668,9 +571,9 @@ const Events = () => {
           })()}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Combine and sort events: Firestore first, then hardcoded, sorted by date desc */}
+            {/* Events: Firestore only, sorted by date desc */}
             {(() => {
-              const combined = [...firestoreEvents, ...localEvents]
+              const combined = [...firestoreEvents]
                 .filter(e => categoryFilter === 'All' || (e.type || '') === categoryFilter)
                 .slice()
                 .sort((a, b) => {
@@ -679,9 +582,6 @@ const Events = () => {
                   return dateB - dateA;
                 });
               return combined.map((event, idx) => {
-                const isFirestore = !!event.id;
-                // For local events, get correct index for edit/delete
-                const localIndex = isFirestore ? null : idx - firestoreEvents.length;
                 // Defensive property access
                 const title = event.title || '';
                 const image = event.image || '';
@@ -691,7 +591,7 @@ const Events = () => {
                 const location = event.location || '';
                 const description = event.description || '';
                 return (
-                  <Card key={isFirestore ? event.id : idx} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+                  <Card key={event.id || idx} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
                     <div className="aspect-video">
                       <img
                         src={image}
@@ -725,31 +625,15 @@ const Events = () => {
                       <p className="text-sm text-muted-foreground mb-4">{description}</p>
                       {isAdmin && (
                         <div className="flex gap-2 mb-4 flex-wrap">
-                          {isFirestore ? (
-                            <>
-                              <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => handleEditFirestoreEvent(event)}>
-                                <Edit className="h-4 w-4" /> Edit
-                              </Button>
-                              <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => handleDeleteFirestoreEvent(event.id)}>
-                                <Trash2 className="h-4 w-4" /> Delete
-                              </Button>
-                              <Button variant="secondary" size="sm" className="flex items-center gap-1" onClick={() => { fetchRegistrationsForEvent(event); setRegisterEvent(event); setShowRegisterModal('admin'); }}>
-                                <Users className="h-4 w-4" /> View Registrations
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => handleEditLocalEvent(event, localIndex)}>
-                                <Edit className="h-4 w-4" /> Edit
-                              </Button>
-                              <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => handleDeleteLocalEvent(localIndex)}>
-                                <Trash2 className="h-4 w-4" /> Delete
-                              </Button>
-                              <Button variant="secondary" size="sm" className="flex items-center gap-1" onClick={() => { fetchRegistrationsForEvent(event); setRegisterEvent(event); setShowRegisterModal('admin'); }}>
-                                <Users className="h-4 w-4" /> View Registrations
-                              </Button>
-                            </>
-                          )}
+                          <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => handleEditFirestoreEvent(event)}>
+                            <Edit className="h-4 w-4" /> Edit
+                          </Button>
+                          <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => handleDeleteFirestoreEvent(event.id)}>
+                            <Trash2 className="h-4 w-4" /> Delete
+                          </Button>
+                          <Button variant="secondary" size="sm" className="flex items-center gap-1" onClick={() => { fetchRegistrationsForEvent(event); setRegisterEvent(event); setShowRegisterModal('admin'); }}>
+                            <Users className="h-4 w-4" /> View Registrations
+                          </Button>
                         </div>
                       )}
                       <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 mt-2" onClick={() => { setRegisterEvent(event); setShowRegisterModal('user'); setRegistrationSuccess(false); }}>
@@ -784,10 +668,9 @@ const Events = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {pastEvents.map((event, index) => {
-              const isFirestore = !!(event as any).id;
+            {pastEvents.map((event: any) => {
               return (
-              <Card key={isFirestore ? (event as any).id : index} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+              <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
                 <div className="aspect-video">
                   <img
                     src={event.image}
@@ -809,15 +692,9 @@ const Events = () => {
                   </div>
                   {isAdmin && (
                     <div className="mt-4">
-                      {isFirestore ? (
-                        <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => handleDeletePastFirestoreEvent((event as any).id)}>
-                          <Trash2 className="h-4 w-4" /> Delete
-                        </Button>
-                      ) : (
-                        <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => handleDeletePastLocalEvent(index)}>
-                          <Trash2 className="h-4 w-4" /> Delete
-                        </Button>
-                      )}
+                      <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => handleDeletePastFirestoreEvent(event.id)}>
+                        <Trash2 className="h-4 w-4" /> Delete
+                      </Button>
                     </div>
                   )}
                 </CardContent>

@@ -8,7 +8,6 @@ import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Input } from "../components/ui/input";
 import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
 import { MapPin, GraduationCap, X, Users } from "lucide-react";
 import membersData from '../data/members.json';
@@ -105,15 +104,15 @@ const Members = () => {
             {filteredMainMembers.length > 0 ? filteredMainMembers.map((member, index) => (
               <Card
                 key={member.id || index}
-                className="p-0 bg-white/80 dark:bg-background/80 border-0 shadow-[0_6px_32px_-8px_rgba(0,80,195,0.08)] hover:shadow-xl transition-shadow duration-300 rounded-3xl flex flex-col items-center"
+                className="group p-0 bg-white/80 dark:bg-background/80 border-0 shadow-[0_6px_32px_-8px_rgba(0,80,195,0.08)] hover:shadow-xl transition-shadow duration-300 rounded-3xl flex flex-col items-center transition-transform hover:scale-105 hover:-translate-y-2"
               >
                 <CardContent className="flex flex-col items-center px-6 pt-8 pb-6 w-full">
                   {member.pictureUrl && (
-                    <div className="relative w-32 h-32 mb-6 rounded-full bg-gradient-to-br from-blue-100 via-blue-300 to-blue-400 dark:from-blue-900 dark:via-blue-700 dark:to-blue-400 shadow-lg flex items-center justify-center mx-auto">
+                    <div className="relative w-32 h-32 mb-6 rounded-full bg-gradient-to-br from-blue-100 via-blue-300 to-blue-400 dark:from-blue-900 dark:via-blue-700 dark:to-blue-400 shadow-lg flex items-center justify-center mx-auto transition-transform duration-300 group-hover:scale-105">
                       <img
                         src={member.pictureUrl || ""}
                         alt={member.name}
-                        className="w-28 h-28 object-cover rounded-full border-4 border-white dark:border-background ring-2 ring-blue-400 dark:ring-blue-500 shadow-lg mx-auto"
+                        className="w-28 h-28 object-cover rounded-full border-4 border-white dark:border-background ring-2 ring-blue-400 dark:ring-blue-500 shadow-lg mx-auto transition-transform duration-300 group-hover:scale-105"
                         style={{ aspectRatio: "1/1", background: "#e8efff", objectPosition: "center", objectFit: "cover" }}
                       />
                     </div>
@@ -134,13 +133,6 @@ const Members = () => {
                         </div>
                       )}
                     </div>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full mt-2 font-semibold shadow focus:ring-2 focus:ring-blue-400"
-                    >
-                      Connect
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
