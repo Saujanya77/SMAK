@@ -79,6 +79,7 @@ interface Quiz {
     gformLink?: string;
     createdAt: any;
     duration?: number; // in minutes
+    quizDate?: string; // date of quiz
 }
 
 interface Achievement {
@@ -184,6 +185,7 @@ const AdminPanel: React.FC = () => {
         gformLink: '',
         type: 'manual',
         duration: 10,
+        quizDate: '',
     });
     const [showEditModal, setShowEditModal] = useState(false);
 
@@ -196,6 +198,7 @@ const AdminPanel: React.FC = () => {
         gformLink: '',
         questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
         duration: 10,
+        quizDate: '',
     });
     const [quizMode, setQuizMode] = useState<'manual' | 'gform'>('manual');
     const [uploadingQuiz, setUploadingQuiz] = useState(false);
@@ -547,6 +550,7 @@ const AdminPanel: React.FC = () => {
                 gformLink: quizMode === 'gform' ? quizForm.gformLink : '',
                 createdAt: new Date(),
                 duration: quizForm.duration || 10,
+                quizDate: quizForm.quizDate || '',
             };
             await addDoc(collection(db, "quizzes"), quizData);
             setQuizForm({
@@ -556,6 +560,7 @@ const AdminPanel: React.FC = () => {
                 gformLink: '',
                 questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
                 duration: 10,
+                quizDate: '',
             });
             setShowQuizModal(false);
 
@@ -581,6 +586,7 @@ const AdminPanel: React.FC = () => {
             gformLink: quiz.gformLink || '',
             type: quiz.type || 'manual',
             duration: quiz.duration || 10,
+            quizDate: quiz.quizDate || '',
         });
         setShowEditModal(true);
     };
@@ -643,6 +649,7 @@ const AdminPanel: React.FC = () => {
                 title: editQuizForm.title,
                 thumbnail: editQuizForm.thumbnail,
                 duration: editQuizForm.duration || 10,
+                quizDate: editQuizForm.quizDate || '',
             };
             if (editQuizForm.type === 'manual') {
                 updateData.questions = editQuizForm.questions;
@@ -1531,7 +1538,7 @@ const AdminPanel: React.FC = () => {
                                     >
                                         ×
                                     </button>
-                                    <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Create New Quiz</h3>
+                                    <h3 className="text-2xl font-bold mb-6 text-amber-600">Create New Quiz</h3>
                                     <form onSubmit={handleQuizSubmit} className="space-y-6">
                                         <div className="space-y-4">
                                             <label className="block font-semibold text-gray-900 dark:text-blue-100">Quiz Title</label>
@@ -1594,27 +1601,22 @@ const AdminPanel: React.FC = () => {
                                                 type="number"
                                                 min={1}
                                                 className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                value={editQuizForm.duration ?? 10}
-                                                onChange={e => {
-                                                    const val = parseInt(e.target.value, 10);
-                                                    handleEditQuizFormChange('duration', isNaN(val) ? 10 : Math.max(1, val));
-                                                }}
-                                                placeholder="e.g., 10"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Duration (minutes)</label>
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                 value={quizForm.duration ?? 10}
                                                 onChange={e => {
                                                     const val = parseInt(e.target.value, 10);
                                                     handleQuizFormChange('duration', isNaN(val) ? 10 : Math.max(1, val));
                                                 }}
                                                 placeholder="e.g., 10"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Quiz Date</label>
+                                            <input
+                                                type="date"
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                value={quizForm.quizDate || ''}
+                                                onChange={e => handleQuizFormChange('quizDate', e.target.value)}
                                             />
                                         </div>
 
@@ -1867,6 +1869,31 @@ const AdminPanel: React.FC = () => {
                                                 <option value="manual" className="bg-slate-800">Manual Creation</option>
                                                 <option value="gform" className="bg-slate-800">Google Form Link</option>
                                             </select>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Duration (minutes)</label>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                value={editQuizForm.duration ?? 10}
+                                                onChange={e => {
+                                                    const val = parseInt(e.target.value, 10);
+                                                    handleEditQuizFormChange('duration', isNaN(val) ? 10 : Math.max(1, val));
+                                                }}
+                                                placeholder="e.g., 10"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Quiz Date</label>
+                                            <input
+                                                type="date"
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                value={editQuizForm.quizDate || ''}
+                                                onChange={e => handleEditQuizFormChange('quizDate', e.target.value)}
+                                            />
                                         </div>
 
                                         {editQuizForm.type === 'gform' && (
