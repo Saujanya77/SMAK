@@ -10,10 +10,10 @@ service cloud.firestore {
         'smak.founder@gmail.com',
         'smak.researchclub@gmail.com',
         'smak.quizclub@gmail.com',
-        'Sjmsr.journal@gmail.com',
-        'Team.smak2025@gmail.com',
-        'Khushal.smak@gmail.com',
-        'Samudra.smak@gmail.com'
+        'sjmsr.journal@gmail.com',
+        'team.smak2025@gmail.com',
+        'khushal.smak@gmail.com',
+        'samudra.smak@gmail.com'
       ];
     }
     
@@ -64,6 +64,15 @@ service cloud.firestore {
     match /courses/{courseId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+    
+    // Users collection - users can create their own document during registration
+    // Users can read and update their own data, admins can read/write all
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
     }
     
     // Allow all reads for backward compatibility (temporary)

@@ -5,6 +5,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  sendPasswordResetEmail,
   User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -24,6 +25,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
+  resetPassword: (email: string) => Promise<boolean>;
   isAuthenticated: boolean;
   loading: boolean;
 }
@@ -216,6 +218,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (email: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      await sendPasswordResetEmail(auth, email);
+      setLoading(false);
+      return true;
+    } catch (error) {
+      console.error("Password reset error:", error);
+      setLoading(false);
+      return false;
+    }
+  };
+
   // Don't render children until auth is initialized
   if (!initialized) {
     return (
@@ -231,6 +246,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     logout,
+    resetPassword,
     isAuthenticated: !!user,
     loading
   };

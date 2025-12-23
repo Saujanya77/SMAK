@@ -21,6 +21,7 @@ import Collaborate from "./pages/Collaborate";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import Dashboard from "./pages/Dashboard";
@@ -69,6 +70,7 @@ const App = () => (
                 <Route path="/collaborate" element={<Collaborate />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/examination-skills" element={<ExaminationSkills />} />
                 <Route path="/videos" element={<Videos />} />

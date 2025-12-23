@@ -65,10 +65,25 @@ const Register = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      const errorCode = error?.code;
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      let errorTitle = "Error";
+
+      if (errorCode === "auth/email-already-in-use") {
+        errorTitle = "Email already registered";
+        errorMessage = "This email is already in use. Please sign in or use a different email.";
+      } else if (errorCode === "auth/invalid-email") {
+        errorTitle = "Invalid email";
+        errorMessage = "Please enter a valid email address.";
+      } else if (errorCode === "auth/weak-password") {
+        errorTitle = "Weak password";
+        errorMessage = "Password should be at least 6 characters long.";
+      }
+
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
