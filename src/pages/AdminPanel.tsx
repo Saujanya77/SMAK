@@ -30,7 +30,8 @@ import { Badge } from "../components/ui/badge";
 import BulkMemberUpload from "../components/BulkMemberUpload";
 
 // Example admin email list
-const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'Smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'];
+const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'Smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'].map(e=> e.toLowerCase());
+
 
 interface Blog {
     id: string;
@@ -1026,7 +1027,7 @@ const AdminPanel: React.FC = () => {
         }
     };
 
-    if (!user || !ADMIN_EMAILS.includes(user.email)) {
+    if (!user || !ADMIN_EMAILS.includes(user.email?.toLowerCase() || '')) {
         return (
             <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
                 <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
