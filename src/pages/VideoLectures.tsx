@@ -125,7 +125,14 @@ function isEmbedLink(url?: string): boolean {
   if (!url) {
     return false;
   }
-  return url.includes('youtube.com/embed') || url.includes('vimeo.com/video');
+  return (
+    url.includes('youtube.com/watch?v=') ||
+    url.includes('youtu.be/') ||
+    url.includes('youtube.com/embed') ||
+    url.includes('vimeo.com/') ||
+    url.includes('player.vimeo.com/video/') ||
+    url.includes('dailymotion.com/video/')
+  );
 }
 
 function VideoLectures() {
@@ -431,16 +438,31 @@ function VideoLectures() {
   const getEmbedUrl = (url?: string) => {
     if (!url) return '';
 
+    // YouTube - watch format
     if (url.includes('youtube.com/watch?v=')) {
       const videoId = url.split('v=')[1].split('&')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
-    } else if (url.includes('youtu.be/')) {
-      const videoId = url.split('youtu.be/')[1].split('?')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
-    } else if (url.includes('vimeo.com/')) {
-      const videoId = url.split('vimeo.com/')[1].split('/')[0];
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    } 
+    // YouTube - short format
+    else if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    } 
+    // YouTube - already embed format
+    else if (url.includes('youtube.com/embed/')) {
+      return url.includes('autoplay') ? url : `${url}?autoplay=1`;
+    }
+    // Vimeo
+    else if (url.includes('vimeo.com/')) {
+      const videoId = url.split('vimeo.com/')[1].split('/')[0].split('?')[0];
       return `https://player.vimeo.com/video/${videoId}`;
-    } else if (url.includes('dailymotion.com/video/')) {
+    } 
+    // Vimeo - already player format
+    else if (url.includes('player.vimeo.com/video/')) {
+      return url;
+    }
+    // Dailymotion
+    else if (url.includes('dailymotion.com/video/')) {
       const videoId = url.split('video/')[1].split('_')[0];
       return `https://www.dailymotion.com/embed/video/${videoId}`;
     }
@@ -456,6 +478,7 @@ const renderVideoPlayer = (video: VideoLecture) => {
     return (
       <video
         controls
+        autoPlay
         className="w-full h-full rounded-lg"
         poster={video.thumbnail}
         onTimeUpdate={e => {
@@ -476,12 +499,15 @@ const renderVideoPlayer = (video: VideoLecture) => {
 
   // Embedded external players (YouTube, Vimeo, etc.)
   if (video.isLink && video.videoUrl && isEmbedLink(video.videoUrl)) {
+    const embedUrl = getEmbedUrl(video.videoUrl);
     return (
       <iframe
-        src={getEmbedUrl(video.videoUrl)}
+        src={embedUrl}
         className="w-full h-full rounded-lg"
         allowFullScreen
+        allow="autoplay; encrypted-media"
         title={video.title}
+        style={{ border: 'none' }}
       />
     );
   }
@@ -489,7 +515,7 @@ const renderVideoPlayer = (video: VideoLecture) => {
   // Fallback for direct remote video URL
   if (video.videoUrl) {
     return (
-      <video controls className="w-full h-full rounded-lg" poster={video.thumbnail}>
+      <video controls autoPlay className="w-full h-full rounded-lg" poster={video.thumbnail}>
         <source src={video.videoUrl} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
@@ -1404,32 +1430,36 @@ return (
     {/* Video Popup Modal */}
     {showVideoModal && (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-70">
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full relative p-8 flex flex-col items-center">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full relative p-8">
           <button
             className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-red-600"
             onClick={() => { setShowVideoModal(false); setActiveVideo(null); }}
           >
             <X className="h-6 w-6" />
           </button>
-          {activeVideo ? (
-            isEmbedLink(activeVideo?.videoUrl)
-              ? (
-                <iframe
-                  src={getEmbedUrl(activeVideo?.videoUrl)}
-                  className="w-full h-96 rounded-lg shadow-lg"
-                  allowFullScreen
-                  title="Course Video"
-                />
-              )
-              : (
-                <video controls autoPlay className="w-full h-96 rounded-lg shadow-lg">
-                  <source src={activeVideo?.videoUrl} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              )
-          ) : (
-            <div className="text-gray-500">No video link available.</div>
-          )}
+          <div className="w-full">
+            {activeVideo ? (
+              isEmbedLink(activeVideo?.videoUrl)
+                ? (
+                  <iframe
+                    src={getEmbedUrl(activeVideo?.videoUrl)}
+                    className="w-full h-96 rounded-lg shadow-lg"
+                    allowFullScreen
+                    allow="autoplay; encrypted-media"
+                    title="Course Video"
+                    style={{ border: 'none' }}
+                  />
+                )
+                : (
+                  <video controls autoPlay className="w-full h-96 rounded-lg shadow-lg">
+                    <source src={activeVideo?.videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                )
+            ) : (
+              <div className="text-gray-500 text-center py-20">No video link available.</div>
+            )}
+          </div>
         </div>
       </div>
     )}

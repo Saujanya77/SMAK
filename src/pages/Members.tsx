@@ -18,14 +18,23 @@ const Members = () => {
   const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'];
   // Firestore members state
   const [firestoreMembers, setFirestoreMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   useEffect(() => {
     const fetchMembers = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const querySnapshot = await getDocs(collection(db, "members"));
         const membersList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setFirestoreMembers(membersList);
+        console.log('Successfully fetched members:', membersList.length);
       } catch (err) {
-        // Optionally handle error
+        console.error('Error fetching members:', err);
+        setError(err.message || 'Failed to load members');
+      } finally {
+        setLoading(false);
       }
     };
     fetchMembers();
@@ -100,7 +109,21 @@ const Members = () => {
             <p className="text-muted-foreground mb-8">Connect with fellow medical students and professionals from across the country</p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {error && (
+            <div className="max-w-2xl mx-auto mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
+              <p className="font-semibold mb-2">Error loading members:</p>
+              <p className="text-sm">{error}</p>
+              <p className="text-xs mt-2 text-red-600 dark:text-red-400">Please refresh the page or contact support if the issue persists.</p>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+              <p className="mt-4 text-muted-foreground">Loading members...</p>
+            </div>
+          ) : (
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredMainMembers.length > 0 ? filteredMainMembers.map((member, index) => (
               <Card
                 key={member.id || index}
@@ -141,7 +164,8 @@ const Members = () => {
                 No members found.
               </div>
             )}
-          </div>
+            </div>
+          )}
         </div>
       </section>
 
