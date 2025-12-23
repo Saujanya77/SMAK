@@ -30,7 +30,7 @@ import { Badge } from "../components/ui/badge";
 import BulkMemberUpload from "../components/BulkMemberUpload";
 
 // Example admin email list
-const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'Smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'].map(e=> e.toLowerCase());
+const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'Smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'sjmsr.journal@gmail.com', 'team.smak2025@gmail.com', 'khushal.smak@gmail.com', 'samudra.smak@gmail.com'].map(e=> e.toLowerCase());
 
 
 interface Blog {
