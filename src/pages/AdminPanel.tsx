@@ -30,7 +30,7 @@ import { Badge } from "../components/ui/badge";
 import BulkMemberUpload from "../components/BulkMemberUpload";
 
 // Example admin email list
-const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'Smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'sjmsr.journal@gmail.com', 'team.smak2025@gmail.com', 'khushal.smak@gmail.com', 'samudra.smak@gmail.com'].map(e=> e.toLowerCase());
+const ADMIN_EMAILS = ['admin@example.com', 'anotheradmin@example.com', 'Smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'sjmsr.journal@gmail.com', 'team.smak2025@gmail.com', 'khushal.smak@gmail.com', 'samudra.smak@gmail.com'].map(e => e.toLowerCase());
 
 
 interface Blog {
@@ -149,7 +149,7 @@ const AdminPanel: React.FC = () => {
         { key: 'contactinfo', label: 'Contact Information' },
         { key: 'smakaienquiries', label: 'SMAK AI Enquiries' }
     ];
-    
+
     // Research Club Members state
     const [rcMembers, setRCMembers] = useState<RCMember[]>([]);
     const [rcMemberForm, setRCMemberForm] = useState({
@@ -324,7 +324,7 @@ const AdminPanel: React.FC = () => {
         { name: "Pratik Gupta", institution: "IMS and SUM campus 2", designation: "Head - Campus outreach and coordination Committee", pictureUrl: "https://i.postimg.cc/B6rSQ6Zr/Whats-App-Image-2025-08-13-at-13-01-49-eeb0d546.jpg", phone: "" },
         { name: "Madhav Tripathi", institution: "Virendra Kumar Sakhlecha Government Medical College, Neemuch (MP)", designation: "Coordinator - Outreach & Collaboration Committee", pictureUrl: "https://i.postimg.cc/50cTXFvS/Whats-App-Image-2025-08-13-at-13-01-49-7c1ed6e6.jpg", phone: "" },
     ]);
-    
+
     // Members state
     const [members, setMembers] = useState<any[]>([]);
     const [memberForm, setMemberForm] = useState({
@@ -498,16 +498,16 @@ const AdminPanel: React.FC = () => {
     };
 
     const handleAddQuizQuestion = () => {
-        setQuizForm(prev => ({ 
-            ...prev, 
-            questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }] 
+        setQuizForm(prev => ({
+            ...prev,
+            questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }]
         }));
     };
 
     const handleRemoveQuizQuestion = (idx: number) => {
-        setQuizForm(prev => ({ 
-            ...prev, 
-            questions: prev.questions.filter((_, i) => i !== idx) 
+        setQuizForm(prev => ({
+            ...prev,
+            questions: prev.questions.filter((_, i) => i !== idx)
         }));
     };
 
@@ -549,16 +549,16 @@ const AdminPanel: React.FC = () => {
                 duration: quizForm.duration || 10,
             };
             await addDoc(collection(db, "quizzes"), quizData);
-            setQuizForm({ 
-                title: '', 
-                thumbnail: '', 
-                thumbnailType: 'url', 
-                gformLink: '', 
+            setQuizForm({
+                title: '',
+                thumbnail: '',
+                thumbnailType: 'url',
+                gformLink: '',
                 questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
                 duration: 10,
             });
             setShowQuizModal(false);
-            
+
             // Refresh quizzes
             const querySnapshot = await getDocs(collection(db, "quizzes"));
             setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Quiz)));
@@ -598,16 +598,16 @@ const AdminPanel: React.FC = () => {
     };
 
     const handleEditAddQuizQuestion = () => {
-        setEditQuizForm(prev => ({ 
-            ...prev, 
-            questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }] 
+        setEditQuizForm(prev => ({
+            ...prev,
+            questions: [...prev.questions, { question: '', options: ['', ''], correctAnswer: 0 }]
         }));
     };
 
     const handleEditRemoveQuizQuestion = (idx: number) => {
-        setEditQuizForm(prev => ({ 
-            ...prev, 
-            questions: prev.questions.filter((_, i) => i !== idx) 
+        setEditQuizForm(prev => ({
+            ...prev,
+            questions: prev.questions.filter((_, i) => i !== idx)
         }));
     };
 
@@ -652,7 +652,7 @@ const AdminPanel: React.FC = () => {
             await updateDoc(doc(db, 'quizzes', editingQuiz.id), updateData);
             setShowEditModal(false);
             setEditingQuiz(null);
-            
+
             // Refresh quizzes
             const querySnapshot = await getDocs(collection(db, "quizzes"));
             setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Quiz)));
@@ -703,7 +703,7 @@ const AdminPanel: React.FC = () => {
             });
         }
         setAchievementForm({ icon: '', value: '', label: '', isStatic: false, staticIndex: null });
-        
+
         // Refresh Firestore achievements
         const querySnapshot = await getDocs(collection(db, "achievements"));
         setAchievements(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Achievement)));
@@ -711,22 +711,22 @@ const AdminPanel: React.FC = () => {
 
     const handleEditAchievement = (ach: any, idx: number | null = null, isStatic: boolean = false) => {
         if (isStatic && idx !== null) {
-            setAchievementForm({ 
-                icon: ach.icon, 
-                value: ach.value, 
-                label: ach.label, 
-                isStatic: true, 
-                staticIndex: idx 
+            setAchievementForm({
+                icon: ach.icon,
+                value: ach.value,
+                label: ach.label,
+                isStatic: true,
+                staticIndex: idx
             });
             setEditingAchievementId(null);
         } else {
             setEditingAchievementId(ach.id);
-            setAchievementForm({ 
-                icon: ach.icon, 
-                value: ach.value, 
-                label: ach.label, 
-                isStatic: false, 
-                staticIndex: null 
+            setAchievementForm({
+                icon: ach.icon,
+                value: ach.value,
+                label: ach.label,
+                isStatic: false,
+                staticIndex: null
             });
         }
     };
@@ -758,9 +758,9 @@ const AdminPanel: React.FC = () => {
                 await uploadBytes(fileRef, testimonialAvatarFile);
                 avatarUrl = await getDownloadURL(fileRef);
             }
-            
+
             const dataToSubmit = { ...testimonialForm, avatar: avatarUrl };
-            
+
             if (editingTestimonialId) {
                 // Update testimonial
                 await updateDoc(doc(db, "testimonials", editingTestimonialId), dataToSubmit);
@@ -771,7 +771,7 @@ const AdminPanel: React.FC = () => {
             }
             setTestimonialForm({ quote: '', author: '', position: '', avatar: '', rating: 5 });
             setTestimonialAvatarFile(null);
-            
+
             // Refresh testimonials
             const querySnapshot = await getDocs(collection(db, "testimonials"));
             setTestimonials(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Testimonial)));
@@ -815,9 +815,9 @@ const AdminPanel: React.FC = () => {
                 await uploadBytes(fileRef, partnerLogoFile);
                 logoUrl = await getDownloadURL(fileRef);
             }
-            
+
             const dataToSubmit = { ...partnerForm, logo: logoUrl };
-            
+
             if (editingPartnerId) {
                 // Update partner
                 await updateDoc(doc(db, "partners", editingPartnerId), dataToSubmit);
@@ -828,7 +828,7 @@ const AdminPanel: React.FC = () => {
             }
             setPartnerForm({ name: '', logo: '' });
             setPartnerLogoFile(null);
-            
+
             // Refresh partners
             const querySnapshot = await getDocs(collection(db, "partners"));
             setPartners(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Partner)));
@@ -923,7 +923,7 @@ const AdminPanel: React.FC = () => {
             } else if (courseThumbnailType === 'url' && courseThumbnail) {
                 thumbnailUrl = courseThumbnail;
             }
-            
+
             const courseData = {
                 name: courseName,
                 description: courseDescription,
@@ -931,9 +931,9 @@ const AdminPanel: React.FC = () => {
                 sections: courseSections,
                 createdAt: new Date()
             };
-            
+
             await addDoc(collection(db, 'courses'), courseData);
-            
+
             // Reset form
             setCourseName('');
             setCourseDescription('');
@@ -949,7 +949,7 @@ const AdminPanel: React.FC = () => {
                 videoLink: '',
                 gformLink: ''
             }]);
-            
+
             alert('Course created successfully!');
         } catch (error) {
             console.error("Error creating course:", error);
@@ -969,7 +969,7 @@ const AdminPanel: React.FC = () => {
                 await uploadBytes(fileRef, memberForm.picture);
                 pictureUrl = await getDownloadURL(fileRef);
             }
-            
+
             if (memberForm.isStatic && memberForm.staticIndex !== null) {
                 // Update static member
                 setStaticMembers(prev => prev.map((m, idx) => idx === memberForm.staticIndex ? {
@@ -1005,18 +1005,18 @@ const AdminPanel: React.FC = () => {
                 };
                 await addDoc(membersCol, newMember);
             }
-            
-            setMemberForm({ 
-                name: '', 
-                institution: '', 
-                email: '', 
-                designation: '', 
-                phone: '', 
-                picture: null, 
-                isStatic: false, 
-                staticIndex: null 
+
+            setMemberForm({
+                name: '',
+                institution: '',
+                email: '',
+                designation: '',
+                phone: '',
+                picture: null,
+                isStatic: false,
+                staticIndex: null
             });
-            
+
             // Refresh members list
             const membersCol = collection(db, "members");
             const querySnapshot = await getDocs(membersCol);
@@ -1027,7 +1027,10 @@ const AdminPanel: React.FC = () => {
         }
     };
 
-    if (!user || !ADMIN_EMAILS.includes(user.email?.toLowerCase() || '')) {
+    const normalizedAdminEmails = ADMIN_EMAILS.map(e => e.toLowerCase().trim());
+    const normalizedUserEmail = (user?.email || '').toLowerCase().trim();
+    console.log('User email:', user?.email, 'Normalized:', normalizedUserEmail, 'Admin list:', normalizedAdminEmails);
+    if (!user || !normalizedAdminEmails.includes(normalizedUserEmail)) {
         return (
             <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
                 <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
@@ -1144,90 +1147,90 @@ const AdminPanel: React.FC = () => {
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Name *</label>
-                                        <input 
-                                            type="text" 
-                                            
-                                            placeholder="Full Name" 
-                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                            value={rcMemberForm.name} 
-                                            onChange={e => setRCMemberForm(f => ({ ...f, name: e.target.value }))} 
+                                        <input
+                                            type="text"
+
+                                            placeholder="Full Name"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={rcMemberForm.name}
+                                            onChange={e => setRCMemberForm(f => ({ ...f, name: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Institution </label>
-                                        <input 
-                                            type="text" 
-                                            
-                                            placeholder="Institution/College" 
-                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                            value={rcMemberForm.institution} 
-                                            onChange={e => setRCMemberForm(f => ({ ...f, institution: e.target.value }))} 
+                                        <input
+                                            type="text"
+
+                                            placeholder="Institution/College"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={rcMemberForm.institution}
+                                            onChange={e => setRCMemberForm(f => ({ ...f, institution: e.target.value }))}
                                         />
                                     </div>
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Email </label>
-                                        <input 
-                                            type="email" 
-                                            
-                                            placeholder="Email Address" 
-                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                            value={rcMemberForm.email} 
-                                            onChange={e => setRCMemberForm(f => ({ ...f, email: e.target.value }))} 
+                                        <input
+                                            type="email"
+
+                                            placeholder="Email Address"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={rcMemberForm.email}
+                                            onChange={e => setRCMemberForm(f => ({ ...f, email: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Phone</label>
-                                        <input 
-                                            type="text" 
-                                            placeholder="Phone Number" 
-                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                            value={rcMemberForm.phone} 
-                                            onChange={e => setRCMemberForm(f => ({ ...f, phone: e.target.value }))} 
+                                        <input
+                                            type="text"
+                                            placeholder="Phone Number"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={rcMemberForm.phone}
+                                            onChange={e => setRCMemberForm(f => ({ ...f, phone: e.target.value }))}
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Designation/Role </label>
-                                    <input 
-                                        type="text" 
-                                        
-                                        placeholder="Designation/Role" 
-                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                        value={rcMemberForm.designation} 
-                                        onChange={e => setRCMemberForm(f => ({ ...f, designation: e.target.value }))} 
+                                    <input
+                                        type="text"
+
+                                        placeholder="Designation/Role"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        value={rcMemberForm.designation}
+                                        onChange={e => setRCMemberForm(f => ({ ...f, designation: e.target.value }))}
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">
                                         Profile Picture {!editingRCMemberId && '*'}
                                     </label>
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
-                                        onChange={e => setRCMemberForm(f => ({ ...f, picture: e.target.files?.[0] || null }))} 
-                                        
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                        onChange={e => setRCMemberForm(f => ({ ...f, picture: e.target.files?.[0] || null }))}
+
                                     />
                                     {editingRCMemberId && (
                                         <p className="text-blue-300 text-sm mt-1">Leave empty to keep current picture</p>
                                     )}
                                 </div>
                                 <div className="flex gap-4 pt-4">
-                                    <Button 
-                                        type="submit" 
+                                    <Button
+                                        type="submit"
                                         className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
                                     >
                                         {editingRCMemberId ? 'Update' : 'Add'} Member
                                     </Button>
                                     {editingRCMemberId && (
-                                        <Button 
-                                            type="button" 
-                                            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl transition-all duration-200" 
-                                            onClick={() => { 
-                                                setEditingRCMemberId(null); 
-                                                setRCMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null }); 
+                                        <Button
+                                            type="button"
+                                            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl transition-all duration-200"
+                                            onClick={() => {
+                                                setEditingRCMemberId(null);
+                                                setRCMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null });
                                             }}
                                         >
                                             Cancel
@@ -1236,7 +1239,7 @@ const AdminPanel: React.FC = () => {
                                 </div>
                             </form>
                         </Card>
-                        
+
                         {/* Research Club Members List */}
                         <div className="mt-8">
                             <h3 className="text-2xl font-bold text-amber-600 mb-6">
@@ -1250,10 +1253,10 @@ const AdminPanel: React.FC = () => {
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {rcMembers.map((m) => (
                                         <Card key={m.id} className="medical-card text-white p-6 flex flex-col items-center text-center card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
-                                            <img 
-                                                src={m.pictureUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face"} 
-                                                alt={m.name} 
-                                                className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50" 
+                                            <img
+                                                src={m.pictureUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face"}
+                                                alt={m.name}
+                                                className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50"
                                             />
                                             <div className="font-bold text-lg mb-1 text-amber-600">{m.name}</div>
                                             <div className="text-amber-600 text-sm mb-1">{m.institution}</div>
@@ -1261,32 +1264,32 @@ const AdminPanel: React.FC = () => {
                                             <div className="text-amber-600 text-xs mb-1">{m.email}</div>
                                             {m.phone && <div className="text-amber-600 text-xs mb-4">{m.phone}</div>}
                                             <div className="flex gap-2 mt-2 w-full">
-                                                <Button 
-                                                    size="sm" 
-                                                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1" 
-                                                    onClick={() => { 
-                                                        setEditingRCMemberId(m.id); 
-                                                        setRCMemberForm({ 
-                                                            name: m.name, 
-                                                            institution: m.institution, 
-                                                            email: m.email, 
-                                                            designation: m.designation, 
-                                                            phone: m.phone, 
-                                                            picture: null 
-                                                        }); 
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1"
+                                                    onClick={() => {
+                                                        setEditingRCMemberId(m.id);
+                                                        setRCMemberForm({
+                                                            name: m.name,
+                                                            institution: m.institution,
+                                                            email: m.email,
+                                                            designation: m.designation,
+                                                            phone: m.phone,
+                                                            picture: null
+                                                        });
                                                     }}
                                                 >
                                                     <Edit size={14} />
                                                     Edit
                                                 </Button>
-                                                <Button 
-                                                    size="sm" 
-                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1" 
-                                                    onClick={async () => { 
-                                                        if (window.confirm('Are you sure you want to delete this member?')) { 
-                                                            await deleteDoc(doc(db, "researchClubMembers", m.id)); 
-                                                            setRCMembers(rcMembers.filter(mem => mem.id !== m.id)); 
-                                                        } 
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1"
+                                                    onClick={async () => {
+                                                        if (window.confirm('Are you sure you want to delete this member?')) {
+                                                            await deleteDoc(doc(db, "researchClubMembers", m.id));
+                                                            setRCMembers(rcMembers.filter(mem => mem.id !== m.id));
+                                                        }
                                                     }}
                                                 >
                                                     <Trash2 size={14} />
@@ -1346,90 +1349,90 @@ const AdminPanel: React.FC = () => {
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Name *</label>
-                                        <input 
-                                            type="text" 
-                                            
-                                            placeholder="Full Name" 
-                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                            value={rcMentorForm.name} 
-                                            onChange={e => setRCMentorForm(f => ({ ...f, name: e.target.value }))} 
+                                        <input
+                                            type="text"
+
+                                            placeholder="Full Name"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={rcMentorForm.name}
+                                            onChange={e => setRCMentorForm(f => ({ ...f, name: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Institution </label>
-                                        <input 
-                                            type="text" 
-                                            
-                                            placeholder="Institution/College" 
-                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                            value={rcMentorForm.institution} 
-                                            onChange={e => setRCMentorForm(f => ({ ...f, institution: e.target.value }))} 
+                                        <input
+                                            type="text"
+
+                                            placeholder="Institution/College"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={rcMentorForm.institution}
+                                            onChange={e => setRCMentorForm(f => ({ ...f, institution: e.target.value }))}
                                         />
                                     </div>
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Email </label>
-                                        <input 
-                                            type="email" 
-                                            
-                                            placeholder="Email Address" 
-                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                            value={rcMentorForm.email} 
-                                            onChange={e => setRCMentorForm(f => ({ ...f, email: e.target.value }))} 
+                                        <input
+                                            type="email"
+
+                                            placeholder="Email Address"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={rcMentorForm.email}
+                                            onChange={e => setRCMentorForm(f => ({ ...f, email: e.target.value }))}
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Phone</label>
-                                        <input 
-                                            type="text" 
-                                            placeholder="Phone Number" 
-                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                            value={rcMentorForm.phone} 
-                                            onChange={e => setRCMentorForm(f => ({ ...f, phone: e.target.value }))} 
+                                        <input
+                                            type="text"
+                                            placeholder="Phone Number"
+                                            className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                            value={rcMentorForm.phone}
+                                            onChange={e => setRCMentorForm(f => ({ ...f, phone: e.target.value }))}
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">Designation/Role </label>
-                                    <input 
-                                        type="text" 
-                                        
-                                        placeholder="Designation/Role" 
-                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                                        value={rcMentorForm.designation} 
-                                        onChange={e => setRCMentorForm(f => ({ ...f, designation: e.target.value }))} 
+                                    <input
+                                        type="text"
+
+                                        placeholder="Designation/Role"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        value={rcMentorForm.designation}
+                                        onChange={e => setRCMentorForm(f => ({ ...f, designation: e.target.value }))}
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-gray-900 dark:text-blue-100">
                                         Profile Picture {!editingRCMentorId && '*'}
                                     </label>
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200" 
-                                        onChange={e => setRCMentorForm(f => ({ ...f, picture: e.target.files?.[0] || null }))} 
-                                        
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                        onChange={e => setRCMentorForm(f => ({ ...f, picture: e.target.files?.[0] || null }))}
+
                                     />
                                     {editingRCMentorId && (
                                         <p className="text-blue-300 text-sm mt-1">Leave empty to keep current picture</p>
                                     )}
                                 </div>
                                 <div className="flex gap-4 pt-4">
-                                    <Button 
-                                        type="submit" 
+                                    <Button
+                                        type="submit"
                                         className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg"
                                     >
                                         {editingRCMentorId ? 'Update' : 'Add'} Mentor
                                     </Button>
                                     {editingRCMentorId && (
-                                        <Button 
-                                            type="button" 
-                                            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl transition-all duration-200" 
-                                            onClick={() => { 
-                                                setEditingRCMentorId(null); 
-                                                setRCMentorForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null }); 
+                                        <Button
+                                            type="button"
+                                            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl transition-all duration-200"
+                                            onClick={() => {
+                                                setEditingRCMentorId(null);
+                                                setRCMentorForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null });
                                             }}
                                         >
                                             Cancel
@@ -1438,7 +1441,7 @@ const AdminPanel: React.FC = () => {
                                 </div>
                             </form>
                         </Card>
-                        
+
                         {/* Research Club Mentors List */}
                         <div className="mt-8">
                             <h3 className="text-2xl font-bold text-amber-600 mb-6">
@@ -1452,10 +1455,10 @@ const AdminPanel: React.FC = () => {
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {rcMentors.map((m) => (
                                         <Card key={m.id} className="medical-card text-white p-6 flex flex-col items-center text-center card-hover bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-sm border border-blue-600/30 rounded-2xl hover:border-blue-500/50 transition-all duration-200">
-                                            <img 
-                                                src={m.pictureUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face"} 
-                                                alt={m.name} 
-                                                className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50" 
+                                            <img
+                                                src={m.pictureUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face"}
+                                                alt={m.name}
+                                                className="h-24 w-24 rounded-full object-cover mb-4 shadow-lg border-2 border-blue-500/50"
                                             />
                                             <div className="font-bold text-lg mb-1 text-amber-600">{m.name}</div>
                                             <div className="text-amber-600 text-sm mb-1">{m.institution}</div>
@@ -1463,32 +1466,32 @@ const AdminPanel: React.FC = () => {
                                             <div className="text-amber-600 text-xs mb-1">{m.email}</div>
                                             {m.phone && <div className="text-blue-400 text-xs mb-4">{m.phone}</div>}
                                             <div className="flex gap-2 mt-2 w-full">
-                                                <Button 
-                                                    size="sm" 
-                                                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1" 
-                                                    onClick={() => { 
-                                                        setEditingRCMentorId(m.id); 
-                                                        setRCMentorForm({ 
-                                                            name: m.name, 
-                                                            institution: m.institution, 
-                                                            email: m.email, 
-                                                            designation: m.designation, 
-                                                            phone: m.phone, 
-                                                            picture: null 
-                                                        }); 
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1"
+                                                    onClick={() => {
+                                                        setEditingRCMentorId(m.id);
+                                                        setRCMentorForm({
+                                                            name: m.name,
+                                                            institution: m.institution,
+                                                            email: m.email,
+                                                            designation: m.designation,
+                                                            phone: m.phone,
+                                                            picture: null
+                                                        });
                                                     }}
                                                 >
                                                     <Edit size={14} />
                                                     Edit
                                                 </Button>
-                                                <Button 
-                                                    size="sm" 
-                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1" 
-                                                    onClick={async () => { 
-                                                        if (window.confirm('Are you sure you want to delete this mentor?')) { 
-                                                            await deleteDoc(doc(db, "researchClubMentors", m.id)); 
-                                                            setRCMentors(rcMentors.filter(mentor => mentor.id !== m.id)); 
-                                                        } 
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex-1 transition-all duration-200 flex items-center gap-1"
+                                                    onClick={async () => {
+                                                        if (window.confirm('Are you sure you want to delete this mentor?')) {
+                                                            await deleteDoc(doc(db, "researchClubMentors", m.id));
+                                                            setRCMentors(rcMentors.filter(mentor => mentor.id !== m.id));
+                                                        }
                                                     }}
                                                 >
                                                     <Trash2 size={14} />
@@ -2960,7 +2963,7 @@ const AdminPanel: React.FC = () => {
                         <Card className="medical-card shadow-2xl max-w-3xl w-full bg-white/90 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={handleContactInfoSubmit}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">Update Contact Information</h3>
-                                
+
                                 <div className="space-y-6">
                                     <div className="border-b border-blue-500/30 pb-4">
                                         <h4 className="text-lg font-medium text-slate-900 dark:text-blue-100 mb-4">Email Addresses</h4>

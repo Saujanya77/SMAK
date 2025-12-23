@@ -283,15 +283,30 @@ const MedicalDashboard = () => {
                   </p>
                 </div>
                 {/* Admin Panel link for admin users only */}
-                {['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'].includes(user?.email) && (
-                  <button
-                    className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
-                    onClick={() => { setProfileDropdownOpen(false); navigate('/adminpanel'); }}
-                  >
-                    <User className="h-4 w-4" />
-                    <span>Admin Panel</span>
-                  </button>
-                )}
+                {(() => {
+                  const ADMIN_EMAILS = [
+                    'admin@example.com',
+                    'anotheradmin@example.com',
+                    'smak.founder@gmail.com',
+                    'smak.researchclub@gmail.com',
+                    'smak.quizclub@gmail.com',
+                    'sjmsr.journal@gmail.com',
+                    'team.smak2025@gmail.com',
+                    'khushal.smak@gmail.com',
+                    'samudra.smak@gmail.com'
+                  ];
+                  const normalizedAdminEmails = ADMIN_EMAILS.map(e => e.toLowerCase().trim());
+                  const normalizedUserEmail = (user?.email || '').toLowerCase().trim();
+                  return normalizedAdminEmails.includes(normalizedUserEmail);
+                })() && (
+                    <button
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200"
+                      onClick={() => { setProfileDropdownOpen(false); navigate('/adminpanel'); }}
+                    >
+                      <User className="h-4 w-4" />
+                      <span>Admin Panel</span>
+                    </button>
+                  )}
                 {/* <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-200">
                   <User className="h-4 w-4" />
                   <span>View Profile</span>
@@ -557,16 +572,16 @@ const MedicalDashboard = () => {
             </div>
             <div className="w-full lg:w-auto flex justify-center lg:justify-end">
               <div className="relative hidden lg:block">
-              <div className="relative">
-                <img
-                  src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=220&h=160&fit=crop&crop=center"
-                  alt="Medical illustration"
-                  className="w-52 h-40 object-cover rounded-2xl shadow-2xl border-4 border-white/20"
-                />
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <CheckCircle className="h-4 w-4 text-blue-600" />
+                <div className="relative">
+                  <img
+                    src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=220&h=160&fit=crop&crop=center"
+                    alt="Medical illustration"
+                    className="w-52 h-40 object-cover rounded-2xl shadow-2xl border-4 border-white/20"
+                  />
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
+                    <CheckCircle className="h-4 w-4 text-blue-600" />
+                  </div>
                 </div>
-              </div>
               </div>
             </div>
           </div>

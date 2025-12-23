@@ -240,7 +240,7 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
       // Reload journals
       await loadJournals();
 
-      alert('Journal uploaded successfully!Wait for the journal to get approved by admin.' );
+      alert('Journal uploaded successfully!Wait for the journal to get approved by admin.');
     } catch (error) {
       console.error('Error uploading journal:', error);
       alert('Error uploading journal. Please try again.');
@@ -448,7 +448,22 @@ const Journals: React.FC<JournalsProps> = ({ onBack }) => {
                     <p className="text-xs text-gray-500 dark:text-gray-400">{user?.college}</p>
                   </div>
                   {/* Only show admin panel link for admin users */}
-                  {['admin@example.com', 'anotheradmin@example.com'].includes(user?.email) ? (
+                  {(() => {
+                    const ADMIN_EMAILS = [
+                      'admin@example.com',
+                      'anotheradmin@example.com',
+                      'smak.founder@gmail.com',
+                      'smak.researchclub@gmail.com',
+                      'smak.quizclub@gmail.com',
+                      'sjmsr.journal@gmail.com',
+                      'team.smak2025@gmail.com',
+                      'khushal.smak@gmail.com',
+                      'samudra.smak@gmail.com'
+                    ];
+                    const normalizedAdminEmails = ADMIN_EMAILS.map(e => e.toLowerCase().trim());
+                    const normalizedUserEmail = (user?.email || '').toLowerCase().trim();
+                    return normalizedAdminEmails.includes(normalizedUserEmail);
+                  })() ? (
                     <Button
                       variant="ghost"
                       size="sm"

@@ -90,8 +90,8 @@ const Navigation = () => {
                   variant={isActive(item.path) ? "default" : "ghost"}
                   size="sm"
                   className={`flex items-center gap-1 whitespace-nowrap text-xs lg:text-sm font-medium px-2 lg:px-3 py-1.5 flex-shrink-0 ${isActive(item.path)
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "text-muted-foreground hover:text-foreground hover:bg-blue-50 dark:hover:bg-blue-950/20"
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "text-muted-foreground hover:text-foreground hover:bg-blue-50 dark:hover:bg-blue-950/20"
                     }`}
                   asChild
                 >
@@ -135,11 +135,26 @@ const Navigation = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {/* Show Admin Panel link only for admin users */}
-                  {['admin@example.com', 'anotheradmin@example.com', 'smak.founder@gmail.com', 'smak.researchclub@gmail.com', 'smak.quizclub@gmail.com', 'Sjmsr.journal@gmail.com', 'Team.smak2025@gmail.com', 'Khushal.smak@gmail.com', 'Samudra.smak@gmail.com'].includes(user?.email) && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/adminpanel">Admin Panel</Link>
-                    </DropdownMenuItem>
-                  )}
+                  {(() => {
+                    const ADMIN_EMAILS = [
+                      'admin@example.com',
+                      'anotheradmin@example.com',
+                      'smak.founder@gmail.com',
+                      'smak.researchclub@gmail.com',
+                      'smak.quizclub@gmail.com',
+                      'sjmsr.journal@gmail.com',
+                      'team.smak2025@gmail.com',
+                      'khushal.smak@gmail.com',
+                      'samudra.smak@gmail.com'
+                    ];
+                    const normalizedAdminEmails = ADMIN_EMAILS.map(e => e.toLowerCase().trim());
+                    const normalizedUserEmail = (user?.email || '').toLowerCase().trim();
+                    return normalizedAdminEmails.includes(normalizedUserEmail);
+                  })() && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/adminpanel">Admin Panel</Link>
+                      </DropdownMenuItem>
+                    )}
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard">Dashboard</Link>
                   </DropdownMenuItem>
@@ -183,8 +198,8 @@ const Navigation = () => {
                     variant={isActive(item.path) ? "default" : "ghost"}
                     size="sm"
                     className={`w-full justify-start gap-2 text-sm ${isActive(item.path)
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "text-muted-foreground hover:text-foreground hover:bg-blue-50 dark:hover:bg-blue-950/20"
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "text-muted-foreground hover:text-foreground hover:bg-blue-50 dark:hover:bg-blue-950/20"
                       }`}
                     asChild
                     onClick={() => setIsOpen(false)}
