@@ -544,8 +544,18 @@ const AdminPanel: React.FC = () => {
         try {
             let thumbnailUrl = '';
             
-            // Handle thumbnail upload
-            if (quizForm.thumbnailType === 'upload' && quizForm.thumbnail instanceof File) {
+                        // Handle thumbnail upload
+                        const isFile = (f: any): f is File => {
+                            return (
+                                typeof File !== 'undefined' &&
+                                f instanceof File
+                            ) ||
+                                (f && typeof f === 'object' && typeof f.name === 'string' && typeof f.size === 'number');
+                        };
+                        if (
+                            quizForm.thumbnailType === 'upload' &&
+                            isFile(quizForm.thumbnail)
+                        ) {
                 const storageRef = ref(storage, `quizThumbnails/${Date.now()}_${quizForm.thumbnail.name}`);
                 await uploadBytes(storageRef, quizForm.thumbnail);
                 thumbnailUrl = await getDownloadURL(storageRef);
