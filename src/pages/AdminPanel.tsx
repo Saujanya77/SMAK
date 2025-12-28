@@ -180,7 +180,6 @@ const AdminPanel: React.FC = () => {
     const [editQuizForm, setEditQuizForm] = useState({
         title: '',
         thumbnail: '',
-        thumbnailType: 'url',
         questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
         gformLink: '',
         type: 'manual',
@@ -193,8 +192,7 @@ const AdminPanel: React.FC = () => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [quizForm, setQuizForm] = useState({
         title: '',
-        thumbnail: '',
-        thumbnailType: 'url',
+        thumbnail: null as File | null,
         gformLink: '',
         questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
         duration: 10,
@@ -544,23 +542,17 @@ const AdminPanel: React.FC = () => {
         try {
             let thumbnailUrl = '';
             
-                        // Handle thumbnail upload
-                        const isFile = (f: any): f is File => {
-                            return (
-                                typeof File !== 'undefined' &&
-                                f instanceof File
-                            ) ||
-                                (f && typeof f === 'object' && typeof f.name === 'string' && typeof f.size === 'number');
-                        };
-                        if (
-                            quizForm.thumbnailType === 'upload' &&
-                            isFile(quizForm.thumbnail)
-                        ) {
+            // Handle thumbnail upload - required for all quizzes
+            if (!quizForm.thumbnail) {
+                alert('Please upload a thumbnail image');
+                setUploadingQuiz(false);
+                return;
+            }
+
+            if (quizForm.thumbnail instanceof File) {
                 const storageRef = ref(storage, `quizThumbnails/${Date.now()}_${quizForm.thumbnail.name}`);
                 await uploadBytes(storageRef, quizForm.thumbnail);
                 thumbnailUrl = await getDownloadURL(storageRef);
-            } else if (quizForm.thumbnailType === 'url' && typeof quizForm.thumbnail === 'string') {
-                thumbnailUrl = quizForm.thumbnail;
             }
 
             const quizData = {
@@ -576,8 +568,7 @@ const AdminPanel: React.FC = () => {
             await addDoc(collection(db, "quizzes"), quizData);
             setQuizForm({
                 title: '',
-                thumbnail: '',
-                thumbnailType: 'url',
+                thumbnail: null,
                 gformLink: '',
                 questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
                 duration: 10,
@@ -603,7 +594,6 @@ const AdminPanel: React.FC = () => {
         setEditQuizForm({
             title: quiz.title || '',
             thumbnail: quiz.thumbnail || '',
-            thumbnailType: quiz.thumbnail ? 'url' : 'upload',
             questions: quiz.questions || [{ question: '', options: ['', ''], correctAnswer: 0 }],
             gformLink: quiz.gformLink || '',
             type: quiz.type || 'manual',
@@ -1589,33 +1579,16 @@ const AdminPanel: React.FC = () => {
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Thumbnail</label>
-                                            <div className="flex gap-4 mb-3">
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input type="radio" name="thumbnailType" value="url" checked={quizForm.thumbnailType === 'url'} onChange={() => handleQuizFormChange('thumbnailType', 'url')} className="text-blue-500" />
-                                                    <span>URL</span>
-                                                </label>
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input type="radio" name="thumbnailType" value="upload" checked={quizForm.thumbnailType === 'upload'} onChange={() => handleQuizFormChange('thumbnailType', 'upload')} className="text-blue-500" />
-                                                    <span>Upload</span>
-                                                </label>
-                                            </div>
-                                            {quizForm.thumbnailType === 'url' && (
-                                                <input
-                                                    type="text"
-                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                    value={quizForm.thumbnail}
-                                                    onChange={e => handleQuizFormChange('thumbnail', e.target.value)}
-                                                    placeholder="Enter thumbnail URL..."
-                                                />
-                                            )}
-                                            {quizForm.thumbnailType === 'upload' && (
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
-                                                    onChange={e => handleQuizFormChange('thumbnail', e.target.files?.[0])}
-                                                />
+                                            <label className="block font-semibold text-gray-900 dark:text-blue-100">Thumbnail <span className="text-red-500">*</span></label>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                required
+                                                className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                                onChange={e => handleQuizFormChange('thumbnail', e.target.files?.[0])}
+                                            />
+                                            {quizForm.thumbnail && (
+                                                <p className="text-sm text-green-600 dark:text-green-400">Selected: {(quizForm.thumbnail as File).name}</p>
                                             )}
                                         </div>
 
@@ -1626,8 +1599,8 @@ const AdminPanel: React.FC = () => {
                                                 value={quizMode}
                                                 onChange={e => setQuizMode(e.target.value as 'manual' | 'gform')}
                                             >
-                                                <option value="manual" className="bg-slate-800">Manual Creation</option>
-                                                <option value="gform" className="bg-slate-800">Google Form Link</option>
+                                                <option value="manual" style={{ backgroundColor: '#ffffff', color: '#111827' }}>Manual Creation</option>
+                                                <option value="gform" style={{ backgroundColor: '#ffffff', color: '#111827' }}>Google Form Link</option>
                                             </select>
                                         </div>
 
@@ -1866,33 +1839,8 @@ const AdminPanel: React.FC = () => {
 
                                         <div className="space-y-4">
                                             <label className="block font-semibold text-gray-900 dark:text-blue-100">Thumbnail</label>
-                                            <div className="flex gap-4 mb-3">
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input type="radio" name="editThumbnailType" value="url" checked={editQuizForm.thumbnailType === 'url'} onChange={() => handleEditQuizFormChange('thumbnailType', 'url')} className="text-blue-500" />
-                                                    <span>URL</span>
-                                                </label>
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input type="radio" name="editThumbnailType" value="upload" checked={editQuizForm.thumbnailType === 'upload'} onChange={() => handleEditQuizFormChange('thumbnailType', 'upload')} className="text-blue-500" />
-                                                    <span>Upload</span>
-                                                </label>
-                                            </div>
-                                            {editQuizForm.thumbnailType === 'url' && (
-                                                <input
-                                                    type="text"
-                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                    value={editQuizForm.thumbnail}
-                                                    onChange={e => handleEditQuizFormChange('thumbnail', e.target.value)}
-                                                    placeholder="Enter thumbnail URL..."
-                                                />
-                                            )}
-                                            {editQuizForm.thumbnailType === 'upload' && (
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
-                                                    onChange={e => handleEditQuizFormChange('thumbnail', e.target.files?.[0])}
-                                                />
-                                            )}
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Current: <span className="text-blue-600 dark:text-blue-300">{editQuizForm.thumbnail ? 'Uploaded' : 'Not set'}</span></p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">To update the thumbnail, edit the quiz details (thumbnail URL cannot be changed after creation)</p>
                                         </div>
 
                                         <div className="space-y-4">
@@ -1902,8 +1850,8 @@ const AdminPanel: React.FC = () => {
                                                 value={editQuizForm.type}
                                                 onChange={e => handleEditQuizFormChange('type', e.target.value)}
                                             >
-                                                <option value="manual" className="bg-slate-800">Manual Creation</option>
-                                                <option value="gform" className="bg-slate-800">Google Form Link</option>
+                                                <option value="manual" style={{ backgroundColor: '#ffffff', color: '#111827' }}>Manual Creation</option>
+                                                <option value="gform" style={{ backgroundColor: '#ffffff', color: '#111827' }}>Google Form Link</option>
                                             </select>
                                         </div>
 
@@ -2506,9 +2454,9 @@ const AdminPanel: React.FC = () => {
                                             value={achievementForm.icon}
                                             onChange={e => setAchievementForm(f => ({ ...f, icon: e.target.value }))}
                                         >
-                                            <option value="" className="bg-slate-800">Select Icon</option>
+                                            <option value="" style={{ backgroundColor: '#ffffff', color: '#111827' }}>Select Icon</option>
                                             {achievementIcons.map(icon => (
-                                                <option key={icon} value={icon} className="bg-slate-800">{icon}</option>
+                                                <option key={icon} value={icon} style={{ backgroundColor: '#ffffff', color: '#111827' }}>{icon}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -2875,11 +2823,11 @@ const AdminPanel: React.FC = () => {
                                             value={testimonialForm.rating}
                                             onChange={e => setTestimonialForm(f => ({ ...f, rating: parseInt(e.target.value) }))}
                                         >
-                                            <option value={5} className="bg-slate-800">5 Stars</option>
-                                            <option value={4} className="bg-slate-800">4 Stars</option>
-                                            <option value={3} className="bg-slate-800">3 Stars</option>
-                                            <option value={2} className="bg-slate-800">2 Stars</option>
-                                            <option value={1} className="bg-slate-800">1 Star</option>
+                                            <option value={5} style={{ backgroundColor: '#ffffff', color: '#111827' }}>5 Stars</option>
+                                            <option value={4} style={{ backgroundColor: '#ffffff', color: '#111827' }}>4 Stars</option>
+                                            <option value={3} style={{ backgroundColor: '#ffffff', color: '#111827' }}>3 Stars</option>
+                                            <option value={2} style={{ backgroundColor: '#ffffff', color: '#111827' }}>2 Stars</option>
+                                            <option value={1} style={{ backgroundColor: '#ffffff', color: '#111827' }}>1 Star</option>
                                         </select>
                                     </div>
                                 </div>
