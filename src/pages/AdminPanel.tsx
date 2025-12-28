@@ -82,6 +82,16 @@ interface Quiz {
     quizDate?: string; // date of quiz
 }
 
+interface CourseSection {
+    sectionType: 'video' | 'quiz';
+    quizType: 'manual' | 'gform';
+    quizTitle: string;
+    quizThumbnail: string | File | null;
+    questions: { question: string; options: string[]; correctAnswer: number }[];
+    videoLink: string;
+    gformLink: string;
+}
+
 interface Achievement {
     id: string;
     icon: string;
@@ -203,12 +213,12 @@ const AdminPanel: React.FC = () => {
     const [showQuizModal, setShowQuizModal] = useState(false);
 
     // Dynamic course sections state
-    const [courseSections, setCourseSections] = useState([
+    const [courseSections, setCourseSections] = useState<CourseSection[]>([
         {
             sectionType: 'video',
             quizType: 'manual',
             quizTitle: '',
-            quizThumbnail: '',
+            quizThumbnail: null,
             questions: [{ question: '', options: ['', ''], correctAnswer: 0 }],
             videoLink: '',
             gformLink: ''
@@ -2149,14 +2159,19 @@ const AdminPanel: React.FC = () => {
                                                         required
                                                         placeholder="Enter quiz title..."
                                                     />
-                                                    <label className="block font-semibold text-gray-900 dark:text-blue-100">Thumbnail</label>
+                                                    <label className="block font-semibold text-gray-900 dark:text-blue-100">Thumbnail <span className="text-red-500">*</span></label>
                                                     <input
-                                                        type="text"
-                                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                        value={section.quizThumbnail || ''}
-                                                        onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizThumbnail: e.target.value } : s))}
-                                                        placeholder="Enter thumbnail URL..."
+                                                        type="file"
+                                                        accept="image/*"
+                                                        required
+                                                        className="w-full bg-white dark:bg-blue-800/30 border border-gray-300 dark:border-blue-600/50 rounded-xl px-4 py-3 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-all duration-200"
+                                                        onChange={e => setCourseSections(sections => sections.map((s, i) => i === idx ? { ...s, quizThumbnail: e.target.files?.[0] || '' } : s))}
                                                     />
+                                                    {section.quizThumbnail && (
+                                                        <p className="text-sm text-green-600 dark:text-green-400">
+                                                            Selected: {section.quizThumbnail instanceof File ? section.quizThumbnail.name : section.quizThumbnail}
+                                                        </p>
+                                                    )}
                                                     <label className="block font-semibold text-gray-900 dark:text-blue-100">Questions</label>
                                                     <DragDropContext onDragEnd={result => {
                                                         if (!result.destination) return;
