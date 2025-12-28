@@ -2,19 +2,21 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if user is admin
+    // Helper function to check if user is admin (case-insensitive)
     function isAdmin() {
-      return request.auth != null && request.auth.token.email in [
-        'admin@example.com',
-        'anotheradmin@example.com',
-        'smak.founder@gmail.com',
-        'smak.researchclub@gmail.com',
-        'smak.quizclub@gmail.com',
-        'sjmsr.journal@gmail.com',
-        'team.smak2025@gmail.com',
-        'khushal.smak@gmail.com',
-        'samudra.smak@gmail.com'
-      ];
+      return request.auth != null && 
+             request.auth.token.email_verified == true &&
+             (
+               request.auth.token.email == 'admin@example.com' ||
+               request.auth.token.email == 'anotheradmin@example.com' ||
+               request.auth.token.email == 'smak.founder@gmail.com' ||
+               request.auth.token.email == 'smak.researchclub@gmail.com' ||
+               request.auth.token.email == 'smak.quizclub@gmail.com' ||
+               request.auth.token.email == 'sjmsr.journal@gmail.com' ||
+               request.auth.token.email == 'team.smak2025@gmail.com' ||
+               request.auth.token.email == 'khushal.smak@gmail.com' ||
+               request.auth.token.email == 'samudra.smak@gmail.com'
+             );
     }
     
     // Members collection - public read, admin write
@@ -64,6 +66,50 @@ service cloud.firestore {
     match /courses/{courseId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // Research Club Members collection - public read, admin write
+    match /researchClubMembers/{memberId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Research Club Mentors collection - public read, admin write
+    match /researchClubMentors/{mentorId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Quizzes collection - public read, admin write
+    match /quizzes/{quizId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Achievements collection - public read, admin write
+    match /achievements/{achievementId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Testimonials collection - public read, admin write
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Contact Info collection - public read, admin write
+    match /contactInfo/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // SMAK AI Enquiries collection - anyone can write, admin can read
+    match /smakAIEnquiries/{enquiryId} {
+      allow read: if isAdmin();
+      allow create: if true;  // Allow anyone to submit enquiries
+      allow update: if false;
+      allow delete: if isAdmin();
     }
     
     // Users collection - users can create their own document during registration

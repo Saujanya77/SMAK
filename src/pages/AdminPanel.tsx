@@ -542,9 +542,20 @@ const AdminPanel: React.FC = () => {
         e.preventDefault();
         setUploadingQuiz(true);
         try {
+            let thumbnailUrl = '';
+            
+            // Handle thumbnail upload
+            if (quizForm.thumbnailType === 'upload' && quizForm.thumbnail instanceof File) {
+                const storageRef = ref(storage, `quizThumbnails/${Date.now()}_${quizForm.thumbnail.name}`);
+                await uploadBytes(storageRef, quizForm.thumbnail);
+                thumbnailUrl = await getDownloadURL(storageRef);
+            } else if (quizForm.thumbnailType === 'url' && typeof quizForm.thumbnail === 'string') {
+                thumbnailUrl = quizForm.thumbnail;
+            }
+
             const quizData = {
                 title: quizForm.title,
-                thumbnail: quizForm.thumbnail,
+                thumbnail: thumbnailUrl,
                 type: quizMode,
                 questions: quizMode === 'manual' ? quizForm.questions : [],
                 gformLink: quizMode === 'gform' ? quizForm.gformLink : '',
@@ -567,9 +578,10 @@ const AdminPanel: React.FC = () => {
             // Refresh quizzes
             const querySnapshot = await getDocs(collection(db, "quizzes"));
             setQuizzes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Quiz)));
+            alert('Quiz created successfully!');
         } catch (error) {
             console.error("Error creating quiz:", error);
-            alert('Failed to create quiz.');
+            alert(`Failed to create quiz: ${error instanceof Error ? error.message : 'Unknown error'}`);
         } finally {
             setUploadingQuiz(false);
         }
@@ -1116,37 +1128,44 @@ const AdminPanel: React.FC = () => {
                         <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
-                                let pictureUrl = '';
-                                if (rcMemberForm.picture) {
-                                    const storageRef = ref(storage, `rcMemberPictures/${Date.now()}_${rcMemberForm.picture.name}`);
-                                    await uploadBytes(storageRef, rcMemberForm.picture);
-                                    pictureUrl = await getDownloadURL(storageRef);
+                                try {
+                                    let pictureUrl = '';
+                                    if (rcMemberForm.picture) {
+                                        const storageRef = ref(storage, `rcMemberPictures/${Date.now()}_${rcMemberForm.picture.name}`);
+                                        await uploadBytes(storageRef, rcMemberForm.picture);
+                                        pictureUrl = await getDownloadURL(storageRef);
+                                    }
+                                    if (editingRCMemberId) {
+                                        const memberDoc = doc(db, "researchClubMembers", editingRCMemberId);
+                                        await updateDoc(memberDoc, {
+                                            name: rcMemberForm.name,
+                                            institution: rcMemberForm.institution,
+                                            email: rcMemberForm.email,
+                                            designation: rcMemberForm.designation,
+                                            phone: rcMemberForm.phone,
+                                            ...(pictureUrl ? { pictureUrl } : {})
+                                        });
+                                        setEditingRCMemberId(null);
+                                        alert('Research Club Member updated successfully!');
+                                    } else {
+                                        await addDoc(collection(db, "researchClubMembers"), {
+                                            name: rcMemberForm.name,
+                                            institution: rcMemberForm.institution,
+                                            email: rcMemberForm.email,
+                                            designation: rcMemberForm.designation,
+                                            phone: rcMemberForm.phone,
+                                            pictureUrl
+                                        });
+                                        alert('Research Club Member added successfully!');
+                                    }
+                                    setRCMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null });
+                                    // Refresh list
+                                    const querySnapshot = await getDocs(collection(db, "researchClubMembers"));
+                                    setRCMembers(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember)));
+                                } catch (error) {
+                                    console.error("Error saving RC member:", error);
+                                    alert(`Failed to save RC member: ${error instanceof Error ? error.message : 'Unknown error'}`);
                                 }
-                                if (editingRCMemberId) {
-                                    const memberDoc = doc(db, "researchClubMembers", editingRCMemberId);
-                                    await updateDoc(memberDoc, {
-                                        name: rcMemberForm.name,
-                                        institution: rcMemberForm.institution,
-                                        email: rcMemberForm.email,
-                                        designation: rcMemberForm.designation,
-                                        phone: rcMemberForm.phone,
-                                        ...(pictureUrl ? { pictureUrl } : {})
-                                    });
-                                    setEditingRCMemberId(null);
-                                } else {
-                                    await addDoc(collection(db, "researchClubMembers"), {
-                                        name: rcMemberForm.name,
-                                        institution: rcMemberForm.institution,
-                                        email: rcMemberForm.email,
-                                        designation: rcMemberForm.designation,
-                                        phone: rcMemberForm.phone,
-                                        pictureUrl
-                                    });
-                                }
-                                setRCMemberForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null });
-                                // Refresh list
-                                const querySnapshot = await getDocs(collection(db, "researchClubMembers"));
-                                setRCMembers(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember)));
                             }}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">
                                     {editingRCMemberId ? 'Edit Research Club Member' : 'Add New Research Club Member'}
@@ -1318,37 +1337,44 @@ const AdminPanel: React.FC = () => {
                         <Card className="medical-card shadow-2xl max-w-4xl w-full bg-white/85 dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-blue-900/50 backdrop-blur-sm border border-slate-200 dark:border-blue-600/30 text-slate-900 dark:text-white">
                             <form className="p-6 sm:p-8 space-y-6" onSubmit={async e => {
                                 e.preventDefault();
-                                let pictureUrl = '';
-                                if (rcMentorForm.picture) {
-                                    const storageRef = ref(storage, `rcMentorPictures/${Date.now()}_${rcMentorForm.picture.name}`);
-                                    await uploadBytes(storageRef, rcMentorForm.picture);
-                                    pictureUrl = await getDownloadURL(storageRef);
+                                try {
+                                    let pictureUrl = '';
+                                    if (rcMentorForm.picture) {
+                                        const storageRef = ref(storage, `rcMentorPictures/${Date.now()}_${rcMentorForm.picture.name}`);
+                                        await uploadBytes(storageRef, rcMentorForm.picture);
+                                        pictureUrl = await getDownloadURL(storageRef);
+                                    }
+                                    if (editingRCMentorId) {
+                                        const mentorDoc = doc(db, "researchClubMentors", editingRCMentorId);
+                                        await updateDoc(mentorDoc, {
+                                            name: rcMentorForm.name,
+                                            institution: rcMentorForm.institution,
+                                            email: rcMentorForm.email,
+                                            designation: rcMentorForm.designation,
+                                            phone: rcMentorForm.phone,
+                                            ...(pictureUrl ? { pictureUrl } : {})
+                                        });
+                                        setEditingRCMentorId(null);
+                                        alert('Research Club Mentor updated successfully!');
+                                    } else {
+                                        await addDoc(collection(db, "researchClubMentors"), {
+                                            name: rcMentorForm.name,
+                                            institution: rcMentorForm.institution,
+                                            email: rcMentorForm.email,
+                                            designation: rcMentorForm.designation,
+                                            phone: rcMentorForm.phone,
+                                            pictureUrl
+                                        });
+                                        alert('Research Club Mentor added successfully!');
+                                    }
+                                    setRCMentorForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null });
+                                    // Refresh list
+                                    const querySnapshot = await getDocs(collection(db, "researchClubMentors"));
+                                    setRCMentors(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember)));
+                                } catch (error) {
+                                    console.error("Error saving RC mentor:", error);
+                                    alert(`Failed to save RC mentor: ${error instanceof Error ? error.message : 'Unknown error'}`);
                                 }
-                                if (editingRCMentorId) {
-                                    const mentorDoc = doc(db, "researchClubMentors", editingRCMentorId);
-                                    await updateDoc(mentorDoc, {
-                                        name: rcMentorForm.name,
-                                        institution: rcMentorForm.institution,
-                                        email: rcMentorForm.email,
-                                        designation: rcMentorForm.designation,
-                                        phone: rcMentorForm.phone,
-                                        ...(pictureUrl ? { pictureUrl } : {})
-                                    });
-                                    setEditingRCMentorId(null);
-                                } else {
-                                    await addDoc(collection(db, "researchClubMentors"), {
-                                        name: rcMentorForm.name,
-                                        institution: rcMentorForm.institution,
-                                        email: rcMentorForm.email,
-                                        designation: rcMentorForm.designation,
-                                        phone: rcMentorForm.phone,
-                                        pictureUrl
-                                    });
-                                }
-                                setRCMentorForm({ name: '', institution: '', email: '', designation: '', phone: '', picture: null });
-                                // Refresh list
-                                const querySnapshot = await getDocs(collection(db, "researchClubMentors"));
-                                setRCMentors(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RCMember)));
                             }}>
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-blue-100 mb-4">
                                     {editingRCMentorId ? 'Edit Research Club Mentor' : 'Add New Research Club Mentor'}
