@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, MapPin, Users, Plus, Upload, Image, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { db, storage } from '../firebase';
@@ -194,16 +194,24 @@ const Events = () => {
 
   // Add Event form state
   const [showAddForm, setShowAddForm] = useState(false);
-  const [eventForm, setEventForm] = useState({
+  const [eventForm, setEventForm] = useState<{
+    name: string;
+    date: string;
+    time: string;
+    venue: string;
+    category: string;
+    description: string;
+    thumbnailFile: File | null;
+    currentImage: string;
+  }>({
     name: '',
     date: '',
     time: '',
     venue: '',
     category: '',
     description: '',
-    thumbnailType: 'upload', // 'upload' or 'url'
     thumbnailFile: null,
-    thumbnailUrl: ''
+    currentImage: ''
   });
   const [editMode, setEditMode] = useState(false);
   const [editEventId, setEditEventId] = useState(null);
@@ -268,29 +276,38 @@ const Events = () => {
   });
 
   // Handle form changes
-  const handleFormChange = (e) => {
-    const { name, value, type, files } = e.target;
-    if (type === 'file') {
-      setEventForm((prev) => ({ ...prev, thumbnailFile: files[0] }));
-      if (files[0]) {
-        setUploadPreview(URL.createObjectURL(files[0]));
-      } else {
-        setUploadPreview('');
-      }
-    } else {
-      setEventForm((prev) => ({ ...prev, [name]: value }));
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    if (type === 'file' && 'files' in e.target) {
+      const file = e.target.files?.[0] ?? null;
+      setEventForm((prev) => ({ ...prev, thumbnailFile: file }));
+      setUploadPreview(file ? URL.createObjectURL(file) : '');
+      return;
     }
+    setEventForm((prev) => ({ ...prev, [name]: value }));
   };
 
   // Handle form submit (stub, add Firestore logic as needed)
   const handleAddOrEditEvent = async (e) => {
     e.preventDefault();
-    let image = '';
-    if (eventForm.thumbnailType === 'upload' && uploadPreview) {
-      image = uploadPreview;
-    } else if (eventForm.thumbnailType === 'url' && eventForm.thumbnailUrl) {
-      image = eventForm.thumbnailUrl;
+    let image = eventForm.currentImage;
+
+    // Upload to Firebase Storage so the image persists after reloads.
+    if (eventForm.thumbnailFile) {
+      try {
+        image = await uploadImageToStorage(eventForm.thumbnailFile, 'events');
+      } catch (err) {
+        console.error('Error uploading event image:', err);
+        alert('Failed to upload event image.');
+        return;
+      }
     }
+
+    if (!image) {
+      alert('Please upload an event image.');
+      return;
+    }
+
     const eventData = {
       title: eventForm.name,
       date: eventForm.date,
@@ -331,7 +348,14 @@ const Events = () => {
     setEditMode(false);
     setEditEventId(null);
     setEventForm({
-      name: '', date: '', time: '', venue: '', category: '', description: '', thumbnailType: 'upload', thumbnailFile: null, thumbnailUrl: ''
+      name: '',
+      date: '',
+      time: '',
+      venue: '',
+      category: '',
+      description: '',
+      thumbnailFile: null,
+      currentImage: ''
     });
     setUploadPreview('');
   };
@@ -402,11 +426,10 @@ const Events = () => {
       venue: event.location || '',
       category: event.type || '',
       description: event.description || '',
-      thumbnailType: event.image && event.image.startsWith('http') ? 'url' : 'upload',
       thumbnailFile: null,
-      thumbnailUrl: event.image || ''
+      currentImage: event.image || ''
     });
-    setUploadPreview(event.image || '');
+    setUploadPreview('');
   };
 
   
@@ -477,26 +500,15 @@ const Events = () => {
               <Textarea name="description" value={eventForm.description} onChange={handleFormChange} placeholder="Description" required />
               <div>
                 <label className="font-semibold mb-2 block">Thumbnail</label>
-                <div className="flex gap-4 mb-2">
-                  <Button type="button" variant={eventForm.thumbnailType === 'upload' ? 'default' : 'outline'} onClick={() => setEventForm((prev) => ({ ...prev, thumbnailType: 'upload' }))}>
-                    <Upload className="h-4 w-4 mr-1" /> Upload
-                  </Button>
-                  <Button type="button" variant={eventForm.thumbnailType === 'url' ? 'default' : 'outline'} onClick={() => setEventForm((prev) => ({ ...prev, thumbnailType: 'url', thumbnailFile: null, thumbnailUrl: '' }))}>
-                    <Image className="h-4 w-4 mr-1" /> URL
-                  </Button>
-                </div>
-                {eventForm.thumbnailType === 'upload' ? (
-                  <Input name="thumbnailFile" type="file" accept="image/*" onChange={handleFormChange} />
-                ) : (
-                  <Input name="thumbnailUrl" value={eventForm.thumbnailUrl} onChange={handleFormChange} placeholder="Image URL" />
+                <Input name="thumbnailFile" type="file" accept="image/*" onChange={handleFormChange} />
+                {(uploadPreview || eventForm.currentImage) && (
+                  <img
+                    src={uploadPreview || eventForm.currentImage}
+                    alt="Preview"
+                    className="mt-2 rounded w-full max-h-40 object-cover"
+                  />
                 )}
-                {/* Preview */}
-                {(eventForm.thumbnailType === 'upload' && uploadPreview) && (
-                  <img src={uploadPreview} alt="Preview" className="mt-2 rounded w-full max-h-40 object-cover" />
-                )}
-                {(eventForm.thumbnailType === 'url' && eventForm.thumbnailUrl) && (
-                  <img src={eventForm.thumbnailUrl} alt="Preview" className="mt-2 rounded w-full max-h-40 object-cover" />
-                )}
+                <p className="text-xs text-muted-foreground mt-2">Leave empty to keep the existing image.</p>
               </div>
               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">{editMode ? 'Update Event' : 'Create Event'}</Button>
             </form>

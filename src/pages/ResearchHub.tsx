@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, BookOpen, Network, Calendar, Microscope, FileText, User } from 'lucide-react';
+import { Users, BookOpen, Network, Calendar, Microscope, FileText, User, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
-  // State for blog popup
-  const [showBlogPopup, setShowBlogPopup] = useState(false);
+  const navigate = useNavigate();
   // State for Research Club Members and Mentors
   const [researchClubMembers, setResearchClubMembers] = useState([]);
   const [mentors, setMentors] = useState([]);
+  // State for events from Firebase
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
     // Fetch Research Club Members
@@ -27,42 +29,20 @@ const Index = () => {
       setMentors(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     };
     fetchMentors();
+    // Fetch Events
+    const fetchEvents = async () => {
+      try {
+        const eventsCol = collection(db, "events");
+        const q = query(eventsCol, orderBy("date", "desc"), limit(3));
+        const snapshot = await getDocs(q);
+        const eventsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setEvents(eventsData);
+      } catch (err) {
+        console.error("Error loading events:", err);
+      }
+    };
+    fetchEvents();
   }, []);
-  const handleBlogPopupOpen = () => setShowBlogPopup(true);
-  const handleBlogPopupClose = () => setShowBlogPopup(false);
-  const handleStartBlog = () => {
-    window.location.href = "/login";
-  };
-  // Demo data for events/research activities
-  const activities = [
-    {
-      title: "National Research Symposium 2025",
-      description: "A pan-India symposium for medical students to present research papers and network with experts.",
-      details: "Join us for the largest student-led medical research symposium in India. Present your work, attend keynote lectures by renowned clinicians, and participate in interactive workshops. Network with peers and experts from top medical institutions.",
-      date: "Sep 15, 2025",
-      type: "Event",
-      image: "https://images.unsplash.com/photo-1503676382389-4809596d5290?w=800&q=80",
-      link: "#symposium"
-    },
-    {
-      title: "Student-Led COVID-19 Outcomes Study",
-      description: "Collaborative research project analyzing post-COVID outcomes in young adults across India.",
-      details: "This ongoing multicenter study investigates the long-term effects of COVID-19 in young adults. Collaborate with students and faculty, contribute to data collection, and co-author publications in leading journals.",
-      date: "Ongoing",
-      type: "Research Project",
-      image: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      link: "#covidstudy"
-    },
-    {
-      title: "Medical Innovation Hackathon",
-      description: "48-hour hackathon for medical and engineering students to develop digital health solutions.",
-      details: "Form teams, brainstorm, and build innovative digital health solutions in a high-energy hackathon. Compete for prizes, mentorship, and the chance to pilot your project in real clinical settings.",
-      date: "Aug 30, 2025",
-      type: "Event",
-      image: "https://images.unsplash.com/photo-1733222765056-b0790217baa9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      link: "#hackathon"
-    }
-  ];
 
   // State for popup/modal
   const [selectedActivity, setSelectedActivity] = React.useState(null);
@@ -78,6 +58,10 @@ const Index = () => {
   };
   const handleRegister = () => {
     window.open("/register", "_blank");
+  };
+
+  const handleViewAllEvents = () => {
+    navigate('/events');
   };
   const TeamMemberCard = ({ name, position, institution, batch, imageUrl }: {
     name: string;
@@ -145,28 +129,49 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between mb-6">
             <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg mb-4 md:mb-0">
-              Ongoing Events & Research Activities
+              Ongoing Events
             </h2>
-            <span className="text-blue-100 text-sm">Click 'See Details' to view more and join</span>
+            <div className="flex items-center gap-4">
+              <span className="text-blue-100 text-sm">Click 'See Details' to view more and join</span>
+              <Button 
+                onClick={handleViewAllEvents}
+                className="bg-white text-blue-600 hover:bg-blue-50 font-semibold flex items-center gap-2"
+              >
+                View All Events
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {activities.map((activity, idx) => (
-              <div key={idx} className="bg-white dark:bg-blue-950/80 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform duration-300 group relative">
-                <img src={activity.image} alt={activity.title} className="w-full h-40 object-cover" />
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 font-semibold">{activity.type}</span>
-                    <span className="text-xs text-blue-400">{activity.date}</span>
+          {events.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-white text-lg">No events available at the moment. Check back soon!</p>
+              <Button 
+                onClick={handleViewAllEvents}
+                className="mt-4 bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+              >
+                Go to Events Page
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {events.map((activity) => (
+                <div key={activity.id} className="bg-white dark:bg-blue-950/80 rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform duration-300 group relative">
+                  <img src={activity.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80"} alt={activity.title} className="w-full h-40 object-cover" />
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 font-semibold">{activity.type || 'Event'}</span>
+                      <span className="text-xs text-blue-400">{activity.date || 'TBA'}</span>
+                    </div>
+                    <h3 className="font-bold text-lg text-blue-700 group-hover:text-blue-900 mb-1">{activity.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{activity.description}</p>
+                    <Button size="sm" className="w-full bg-blue-600 text-white font-semibold hover:bg-blue-700" onClick={e => { e.stopPropagation(); handleCardClick(activity); }}>
+                      See Details
+                    </Button>
                   </div>
-                  <h3 className="font-bold text-lg text-blue-700 group-hover:text-blue-900 mb-1">{activity.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{activity.description}</p>
-                  <Button size="sm" className="w-full bg-blue-600 text-white font-semibold hover:bg-blue-700" onClick={e => { e.stopPropagation(); handleCardClick(activity); }}>
-                    See Details
-                  </Button>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Modal/Popup for activity details */}
@@ -182,14 +187,22 @@ const Index = () => {
                   <div>
                     <h3 className="font-bold text-2xl text-blue-700 dark:text-blue-200 mb-2">{selectedActivity.title}</h3>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 font-semibold">{selectedActivity.type}</span>
-                      <span className="text-xs text-blue-400">{selectedActivity.date}</span>
-                    </div>
-                    <p className="text-base text-muted-foreground mb-2 font-semibold">{selectedActivity.description}</p>
+                    <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 font-semibold">{selectedActivity.type || 'Event'}</span>
+                    <span className="text-xs text-blue-400">{selectedActivity.date || 'TBA'}</span>
+                  </div>
+                  <p className="text-base text-muted-foreground mb-2 font-semibold">{selectedActivity.description}</p>
+                  {selectedActivity.details && (
                     <div className="mb-4">
                       <h4 className="text-blue-600 dark:text-blue-300 font-bold mb-1 text-lg">Details</h4>
                       <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">{selectedActivity.details}</p>
                     </div>
+                  )}
+                  {selectedActivity.time && (
+                    <p className="text-sm text-muted-foreground mb-1"><strong>Time:</strong> {selectedActivity.time}</p>
+                  )}
+                  {selectedActivity.location && (
+                    <p className="text-sm text-muted-foreground mb-1"><strong>Location:</strong> {selectedActivity.location}</p>
+                  )}
                   </div>
                   <Button size="lg" className="w-full bg-blue-600 text-white font-semibold hover:bg-blue-700 mt-2" onClick={handleRegister}>
                     Register / Join
@@ -299,82 +312,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section id="join" className="py-16 bg-gradient-to-br from-blue-600 to-blue-400">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Join the SMAK Research Club
-            </h2>
-            <p className="text-xl text-blue-100 mb-8">
-              Be part of a nationwide community dedicated to advancing medical research and fostering academic excellence
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                size="lg"
-                variant="secondary"
-                className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8"
-              >
-                <Microscope className="mr-2 h-5 w-5" />
-                Membership Form
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-semibold px-8"
-              >
-                <BookOpen className="mr-2 h-5 w-5 text-blue-600" />
-                Become a Mentor
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <Footer />
-      {/* Floating Write Blog Button */}
-      <div className="fixed bottom-8 right-8 z-50">
-        <Button
-          onClick={handleBlogPopupOpen}
-          size="lg"
-          className="bg-blue-600 text-white shadow-lg hover:bg-blue-700 rounded-full px-6 py-3 font-semibold flex items-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 mr-2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 3.487a2.25 2.25 0 1 1 3.182 3.182l-9.193 9.193a2.25 2.25 0 0 1-.878.547l-3.25 1.083a.375.375 0 0 1-.474-.474l1.083-3.25a2.25 2.25 0 0 1 .547-.878l9.193-9.193z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 6.75l-1.5-1.5" />
-          </svg>
-          Write Blog
-        </Button>
-      </div>
-
-      {/* Blog Popup Modal */}
-      {showBlogPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white dark:bg-blue-950 rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
-            <button className="absolute top-3 right-3 text-blue-600 dark:text-blue-200 text-2xl font-bold" onClick={handleBlogPopupClose}>&times;</button>
-            <div className="text-center">
-              <div className="flex justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-12 h-12 text-blue-600">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 3.487a2.25 2.25 0 1 1 3.182 3.182l-9.193 9.193a2.25 2.25 0 0 1-.878.547l-3.25 1.083a.375.375 0 0 1-.474-.474l1.083-3.25a2.25 2.25 0 0 1 .547-.878l9.193-9.193z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 6.75l-1.5-1.5" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-blue-700 dark:text-blue-200 mb-2">Share Your Blog</h2>
-              <p className="text-base text-muted-foreground mb-4">How will your blog add value to SMAK and other sections? How will your blog help medical studies and inspire others?</p>
-              <ul className="text-left text-sm text-gray-700 dark:text-gray-200 mb-6 list-disc list-inside">
-                <li>Contribute unique insights, case studies, or experiences.</li>
-                <li>Help peers learn new concepts, exam strategies, or clinical skills.</li>
-                <li>Promote research, innovation, and collaboration in the medical field.</li>
-                <li>Inspire students and professionals to share knowledge and grow together.</li>
-              </ul>
-              <Button size="lg" className="w-full bg-blue-600 text-white font-semibold hover:bg-blue-700 mt-2" onClick={handleStartBlog}>
-                Start Blog Writing
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
