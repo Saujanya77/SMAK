@@ -28,6 +28,7 @@ const Events = () => {
   });
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registrations, setRegistrations] = useState([]);
+  const [allRegistrations, setAllRegistrations] = useState([]); // Track all registrations for checking duplicates
 
   // Handle registration form changes - FIXED: Added useCallback to prevent re-renders
   const handleRegistrationChange = React.useCallback((e) => {
@@ -40,6 +41,17 @@ const Events = () => {
   const handleRegistrationSubmit = async (e) => {
     e.preventDefault();
     if (!registerEvent) return;
+    
+    // Check if user is already registered for this event
+    const alreadyRegistered = allRegistrations.some(
+      r => r.email === registrationForm.email && r.eventName === (registerEvent.title || '')
+    );
+    
+    if (alreadyRegistered) {
+      alert('You have already registered for this event.');
+      return;
+    }
+    
     try {
       const regCol = collection(db, 'registrations');
       await addDoc(regCol, {
@@ -50,6 +62,11 @@ const Events = () => {
       });
       setRegistrationSuccess(true);
       setRegistrationForm({ name: '', email: '', institute: '', year: '' });
+      // Update allRegistrations after successful submission
+      setAllRegistrations(prev => [...prev, {
+        email: registrationForm.email,
+        eventName: registerEvent.title || ''
+      }]);
     } catch (err) {
       alert('Failed to register.');
     }
@@ -180,9 +197,20 @@ const Events = () => {
                 className="w-full"
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2">
-              Submit Registration
-            </Button>
+            {(() => {
+              const alreadyRegistered = allRegistrations.some(
+                r => r.email === registrationForm.email && r.eventName === (registerEvent.title || '') && registrationForm.email !== ''
+              );
+              return (
+                <Button 
+                  type="submit" 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+                  disabled={alreadyRegistered}
+                >
+                  {alreadyRegistered ? 'Already Registered' : 'Submit Registration'}
+                </Button>
+              );
+            })()}
           </form>
         </div>
       </div>
@@ -243,6 +271,26 @@ const Events = () => {
       }
     };
     fetchEvents();
+  }, []);
+
+  // Load all registrations on mount to check duplicates
+  useEffect(() => {
+    const fetchAllRegistrations = async () => {
+      try {
+        const regCol = collection(db, 'registrations');
+        const q = query(regCol, orderBy('timestamp', 'desc'));
+        const snapshot = await getDocs(q);
+        const regs = snapshot.docs.map(doc => ({
+          id: doc.id,
+          email: (doc.data() as any).email || '',
+          eventName: (doc.data() as any).eventName || ''
+        }));
+        setAllRegistrations(regs);
+      } catch (err) {
+        console.error('Error loading registrations:', err);
+      }
+    };
+    fetchAllRegistrations();
   }, []);
 
   // Load past events from Firestore on mount
@@ -648,9 +696,18 @@ const Events = () => {
                           </Button>
                         </div>
                       )}
-                      <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 mt-2" onClick={() => { setRegisterEvent(event); setShowRegisterModal('user'); setRegistrationSuccess(false); }}>
-                        Register Now
-                      </Button>
+                      {(() => {
+                        const hasRegistered = user && allRegistrations.some(r => r.email === user.email && r.eventName === title);
+                        return hasRegistered ? (
+                          <Button className="w-full bg-green-600 hover:bg-green-700 mt-2 cursor-not-allowed" disabled>
+                            ✓ Already Registered
+                          </Button>
+                        ) : (
+                          <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 mt-2" onClick={() => { setRegisterEvent(event); setShowRegisterModal('user'); setRegistrationSuccess(false); }}>
+                            Register Now
+                          </Button>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 );
